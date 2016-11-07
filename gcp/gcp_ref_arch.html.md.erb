@@ -23,7 +23,7 @@ The following table lists the components that are part of a reference architectu
 |--------------------|------------|
 |**Domains & DNS** | CF Domain Zones in use by the reference architecture include: *.apps and *.system (required), opsman (required), doppler (required), loggregator (required), ssh (optional) and tcp (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
 |**Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or via an optional Jumpbox. |
-|**Ops Director** | Deployed on the infrastructure subnet. |
+|**Bosh Director** | Deployed on the infrastructure subnet. |
 |**GoRouter(s)**| Accessed via the HTTP and TCP WebSockets load balancers. Deployed on the ERT subnet, one job per availability zone. | 
 |**Diego Brain(s)**| Accessed via the SSH TCP load balancer. Deployed on the ERT subnet, one job per availability zone. |
 |**TCP Router(s)** | Optional feature. Deployed on the ERT subnet, one job per availability zone.|
