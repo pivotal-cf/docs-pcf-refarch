@@ -21,7 +21,7 @@ The following table lists the components that are part of a reference architectu
 
 |**Component**| **Reference Architecture Notes**|
 |--------------------|------------|
-|**Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: *.apps and *.system (required), opsman (required), doppler (required), loggregator (required), ssh (optional) and tcp (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
+|**Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for Ops Manager (required), a route for doppler (required), a route for loggregator (required), a route for ssh access to app containers (optional) and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
 |**Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or via an optional Jumpbox. |
 |**Bosh Director** | Deployed on the infrastructure subnet. |
 |**GoRouter(s)**| Accessed via the HTTP and TCP WebSockets load balancers. Deployed on the ERT subnet, one job per availability zone. | 
