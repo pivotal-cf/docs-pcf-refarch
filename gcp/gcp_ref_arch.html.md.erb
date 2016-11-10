@@ -5,11 +5,11 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This guide presents the reference architecture for Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP).
+This guide presents a validated reference architecture for Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP). This architecture is slightly different from the recommended architecture outlined in the main documentation, and allows for different requirements that you may need as part of your PCF deployment.
 
 ## <a id="arch_diagram"></a> Base Reference Architecture 
 
-The following diagram illustrates a base reference architecture deployment of PCF on GCP.
+The following diagram illustrates the reference architecture deployment of PCF on GCP that this document discusses.
 
 <%= image_tag('gcp-overview-arch.png') %>
 
@@ -31,21 +31,20 @@ The following table lists the components that are part of a reference architectu
 |**Storage buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage. |
 |**Services**|Deployed on the PCF managed services subnet. Each service is deployed to each availability zone. |
 
-
-## <a id="common_network"></a> Common PCF on GCP Network Layouts ##
+## <a id="common_network"></a> Alternative GCP Network Layouts for PCF ##
 
 This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on GCP. All reference architectures described here are production configuration deployments with multiple (3+) AZs.
 
-At a high level, there are currently two possible network layout options as described by the reference architecture:
+At a high level, there are currently two possible ways of granting public internet access to PCF as described by the reference architecture:
 
 1. NATs provide public access to PCF internals, or
 2. Every PCF VM receives its own public IP address (no NAT).
 
+The latter situation is currently outlined in our main docs.
+
 ### <a id="nat_network_diagram"></a> NAT-based Solution
 
-This type of deployment covers the case where you want to expose only a minimal number of public IPs.
-
-The following diagram illustrates the network topology for this solution:
+This diagram illustrates the case where you want to expose only a minimal number of public IPs.
 
 <%= image_tag('gcp-net-topology-base.png') %>
 
