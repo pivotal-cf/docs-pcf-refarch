@@ -5,15 +5,15 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This guide presents a validated reference architecture for Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP). This architecture is slightly different from the recommended architecture outlined in the main documentation, and allows for different requirements that you may need as part of your PCF deployment.
+This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP). This document also outlines multiple networking solutions. All these architectures are validated for production-grade PCF deployments using multiple (3+) AZs. 
 
 ## <a id="arch_diagram"></a> Base Reference Architecture 
 
-The following diagram illustrates the reference architecture deployment of PCF on GCP that this document discusses.
+The following diagram provides an overview of a reference architecture deployment of PCF on GCP.
 
 <%= image_tag('gcp-overview-arch.png') %>
 
-To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/c0-ops/landingpage/master/static/gcp/images/PCF-GCP-RefArch-Overview/overview-arch.png).
+To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/gcp-overview-arch.png).
 
 ### <a id="base_components"></a> Base Reference Architecture Components
 
@@ -25,24 +25,24 @@ The following table lists the components that are part of a reference architectu
 |**Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or via an optional Jumpbox. |
 |**Bosh Director** | Deployed on the infrastructure subnet. |
 |**GoRouter(s)**| Accessed via the HTTP and TCP WebSockets load balancers. Deployed on the ERT subnet, one job per availability zone. | 
-|**Diego Brain(s)**| Accessed via the SSH TCP load balancer. Deployed on the ERT subnet, one job per availability zone. |
-|**TCP Router(s)** | Optional feature. Deployed on the ERT subnet, one job per availability zone.|
-|**CF Blob Storage and Database**| Reference architecture uses GCP Cloud SQL rather than internal MySQL. |
-|**Storage buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage. |
+|**Diego Brain(s)**| This component is required, however the SSH container access functionality is optional and enabled via the SSH Proxy load balancer. Deployed on the ERT subnet, one job per availability zone. |
+|**TCP Router(s)** | Optional feature for TCP routing. Deployed on the ERT subnet, one job per availability zone.|
+|**CF Database**| Reference architecture uses GCP Cloud SQL rather than internal databases. |
+|**CF Blob Storage and Buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
 |**Services**|Deployed on the PCF managed services subnet. Each service is deployed to each availability zone. |
 
 ## <a id="common_network"></a> Alternative GCP Network Layouts for PCF ##
 
-This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on GCP. All reference architectures described here are production configuration deployments with multiple (3+) AZs.
+This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on GCP. 
 
 At a high level, there are currently two possible ways of granting public internet access to PCF as described by the reference architecture:
 
 1. NATs provide public access to PCF internals, or
 2. Every PCF VM receives its own public IP address (no NAT).
 
-The latter situation is currently outlined in the main instructions for GCP deployments of PCF. This is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with bosh. 
+The latter scenario is currently outlined in the [existing installation documentation](../../customizing/gcp.html) for GCP deployments of PCF. Providing each PCF VM with a public IP is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
 
-However, if you require NATs, you may refer below.
+However, if you require NATs, you may refer to the following section.
 
 ### <a id="nat_network_diagram"></a> NAT-based Solution
 
@@ -50,7 +50,7 @@ This diagram illustrates the case where you want to expose only a minimal number
 
 <%= image_tag('gcp-net-topology-base.png') %>
 
-To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/c0-ops/landingpage/master/static/gcp/images/PCF-GCP-RefArch-Overview/net-topology-base.png).
+To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/gcp-net-topology-base.png).
 
 ### <a id="no_nat"></a> Public IPs Solution
 
@@ -73,6 +73,8 @@ The following table lists the network objects expected for each type of referenc
 
 ### <a id="network_comm"></a> Network Communication in GCP Deployments
 
+This section provides more background on the reasons behind certain network configuration decisions, specifically for the GoRouter.
+
 #### Load Balancer to GoRouter Communications and TLS Termination
 
 In a PCF on GCP deployment, the GoRouter receives two types of traffic: 
@@ -82,6 +84,8 @@ In a PCF on GCP deployment, the GoRouter receives two types of traffic:
 2. Encrypted secure web socket traffic on port 443 that is passed through the TCP WebSockets load balancer.
 
 TLS is terminated for HTTPS traffic on the HTTP load balancer and is terminated for WebSockets (WSS) traffic on the GoRouter.
+
+PCF deployments on GCP use two load balancers to handle GoRouter traffic because HTTP load balancers currently do not support WebSockets.
 
 #### ICMP
 
