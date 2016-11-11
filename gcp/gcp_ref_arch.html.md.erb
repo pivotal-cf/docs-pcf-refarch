@@ -40,7 +40,9 @@ At a high level, there are currently two possible ways of granting public intern
 1. NATs provide public access to PCF internals, or
 2. Every PCF VM receives its own public IP address (no NAT).
 
-The latter situation is currently outlined in our main docs.
+The latter situation is currently outlined in the main instructions for GCP deployments of PCF. This is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with bosh. 
+
+However, if you require NATs, you may refer below.
 
 ### <a id="nat_network_diagram"></a> NAT-based Solution
 
@@ -56,7 +58,7 @@ If you prefer not to use a NAT solution, you can configure PCF on GCP to assign 
 
 ### <a id="network_components"></a> Network Objects
 
-The following table lists the network objects expected for each type of reference architecture deployment with three availability zones.
+The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NATs).
 
 |**Network Object**| **Notes**| **Minimum Number: NAT-based** | **Minimum Number: Public IPs**|
 |--------------------|------------|----------------------|---------------------------|
