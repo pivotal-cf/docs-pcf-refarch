@@ -101,6 +101,9 @@ The following table lists the network objects in this reference architecture.
   <th><strong>Notes</strong></th>
   <th><strong>Estimated Number</strong></th>
   <tr>
+  <td><strong>External Public IPs</strong></td>
+  <td>One per deployment, assigned to Ops Manager.</td>
+  <td>1</td> 
   <td><strong>Virtual Private Network (VPC)</strong></td>
   <td>One per deployment. A PCF deployment exists within a single VPC and a single AWS region, but should distribute PCF jobs and instances across 3 AWS AZs to ensure a high degree of availability.</td>
   <td>1</td>
@@ -120,15 +123,16 @@ The following table lists the network objects in this reference architecture.
   <td>13</td>
   </tr>
   <tr>
-  <td><strong>Routes</strong></td>
-  <td>Routes are created by Terraform scripts for each subnet. For more information, see the Terraform <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_tables.tf">route tables</a> and the <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_table_associations.tf">route table association</a>. The Terraform scripts create the following route tables:<br><br>
+  <td><strong>Route Tables</strong></td>
+  <td>This reference architecture requires 4 route tables: one for the public subnet, and one each for all 3 private subnets across 3 AZs. Consult the following list:<br><br>
   	<ul>
   	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for OpsManager and the NAT Gateway.</li>
   	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and ERT.</li>
   	</ul>
+    For more information, see the Terraform <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_table_associations.tf">script</a> that performs the route table association. 
   	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP, it is accessible from the Internet through the public IP; for example, Ops Manager. ERT needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
   </td>
-  <td>3+</td>
+  <td>4</td>
   </tr>
   <tr>
   <td><strong>Security Groups</strong></td>
