@@ -100,7 +100,7 @@ Each PCF installation consumes three (or more) networks from the NSX Edge, align
 - **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as jumpbox VM.
 - **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Diego cell VMs that Elastic Runtime deploys apps into, and it also hosts Elastic Runtime support components. 
 - **Services**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH.  
-PCF services are either pre-provisioned or [on-demand](../on-demand-service-broker/about.html#on-demand). The on-demand services require their own dedicated network, so an installation offering both types of services needs at least two services networks. A more involved approach would be to deploy multiple "Services-#" networks, one for each tile or each category of service function, for example databases, message buses, and so on.
+PCF services are either pre-provisioned or [on-demand](/on-demand-service-broker/about.html#on-demand). The on-demand services require their own dedicated network, so an installation offering both types of services needs at least two services networks. A more involved approach would be to deploy multiple "Services-#" networks, one for each tile or each category of service function, for example databases, message buses, and so on.
 
 All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
 
@@ -180,7 +180,7 @@ To avoid downtime, some PCF customer scenarios demand a multi-datacenter archite
 
 One interesting strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components (such as consul) in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this would call for five consul VMs, so each site has at least two if not the third. DRS anti-affinity rules can be used here (set at the IaaS level) to force like VMs apart for best effect.
 
-The two main ways of designing a multi-datacenter PCF architecture is with [stretched clusters](#multi-datacenter-stretched), in which single logical clusters combine components in multiple physical locations, and [East/West clusters](multi-datacenter-east-west), in which locally self-contained clusters are mirrored across multiple locations.
+The two main ways of designing a multi-datacenter PCF architecture is with [stretched clusters](#multi-datacenter-stretched), in which single logical clusters combine components in multiple physical locations, and [East/West clusters](#multi-datacenter-east-west), in which locally self-contained clusters are mirrored across multiple locations.
 
 Both of these approaches have their own caveats, and you can combine either with the the [without-NSX](#no-nsx) and [single-cluster](#single-cluster) architectures described above.
 
