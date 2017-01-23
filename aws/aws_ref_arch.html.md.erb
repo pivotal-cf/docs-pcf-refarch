@@ -114,11 +114,11 @@ The following table lists the network objects in this reference architecture.
   <td><strong>Subnets</strong></td>
   <td>The reference architecture requires the following subnets:
    <ul>
-     <li>1 infrastructure (BOSH Director) subnet</li>
-     <li>3 public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
-     <li>3 ERT subnets (GoRouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
-     <li>3 services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
-     <li>3 RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
+     <li>1 x (/24) infrastructure (BOSH Director) subnet</li>
+     <li>3 x (/24) public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
+     <li>3 x (/20) ERT subnets (GoRouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
+     <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
+     <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
    </ul>
    For more information, see the Terraform subnets <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/subnets.tf">script</a>.
    </td>
