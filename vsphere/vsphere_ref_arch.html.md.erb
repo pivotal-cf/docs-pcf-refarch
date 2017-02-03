@@ -61,7 +61,7 @@ In this architecture, multiple PCF installations share host resources. You can u
 
 You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_. The approach you follow should reflect how your data center arranges its storage and host blocks in its physical layout:
 
-* **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, wth 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`. Installation #1 will use `ds01` until it is full, then `ds02`, and so on.
+* **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`. Installation #1 will use `ds01` until it is full, then `ds02`, and so on.
 
 * **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03` and `ds05`, and installation #2 to use `ds02`, `ds04` and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
