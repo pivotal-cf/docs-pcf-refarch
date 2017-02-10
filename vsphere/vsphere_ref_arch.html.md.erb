@@ -85,14 +85,6 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
   * Automatic HA pairing of NSX Edges, managed by NSX Manager
   * Support for PCF Go Router IP membership in the NSX Edge virtual load balancer pool by the BOSH CPI (not an Ops Manager feature)
 
-This architecture does not use the following products:
-
-* **NSX DLR** (Distributed Logical Router): DLR only provides routing services, not load balancing and firewalling.
-
-* **NSX DLF** (Distributed Logical Firewall): NSX SDN already provides networking and firewall capability where it is most needed, in front of the PCF installation, not in the network(s) that the installation uses. It also eliminates the need for micro-segmentation, because NSX Edge with SDN eliminates the need to place firewall rules horizontally on a network used by PCF.
-
-* **NSX DLB** (Distributed Load Balancing): DLB is not considered production-quality and is not intended for use with L7 balancing (which is PCF's primary need) or for North/South flows.
-
 #### <a id="network-design"></a> Networking Design
 
 Each PCF installation consumes three (or more) networks from the NSX Edge, aligned to specific job types:
