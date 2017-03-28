@@ -226,7 +226,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter ALL the IP addresses reserved for Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere-refarch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
 1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the NSX Edge load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
 1. Set the **Algorithim** to `ROUND-ROBIN`.
 1. Set **Monitors** to `http-routers`.
@@ -236,7 +236,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter ALL the IP addresses reserved for TCP Routers into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere-refarch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
 1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 80.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set the **Monitors** to `tcp-routers`.
@@ -245,7 +245,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter ALL the IP addresses reserved for Diego Brains into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer will just ignore the missing resources as “down”.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere-refarch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
 1. Set the **Port** to 2222 and the **Monitor Port** to 2222.
 1. Set the Algorithm to `ROUND-ROBIN`.
 1. Set the Monitors to `diego-brains`.
@@ -254,7 +254,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter the two IP addresses reserved for MySQL-proxy into this pool.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere-refarch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
 1. Set the **Port** to 3306 and the **Monitor Port** to 1936.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set the **Monitors** to `ert-mysql-proxies`.
