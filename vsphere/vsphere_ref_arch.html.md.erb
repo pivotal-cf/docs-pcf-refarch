@@ -1,5 +1,5 @@
 ---
-title: Reference Architectures for Pivotal Cloud Foundry on vSphere
+title: Reference Architecture for Pivotal Cloud Foundry on vSphere
 owner: Customer0
 ---
 
@@ -7,20 +7,26 @@ owner: Customer0
 
 This guide presents reference architectures for Pivotal Cloud Foundry (PCF) on vSphere.
 
+## <a id="overview"></a> Overview
+
 Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios. These test deployments host up to 1500 app instances and use PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services.
 
-This document does not replace the [basic installation documentation] (http://docs.pivotal.io/pivotalcf/1-8/customizing/vsphere.html), but gives proven examples of how to apply those instructions to real-world production environments.
+This document does not replace the [basic installation documentation] (../../customizing/vsphere.html), but gives proven examples of how to apply those instructions to real-world production environments.
 
 | PCF Products Validated        | Version                   |
 | ----------------------------- |:-------------------------:|
-| PCF Ops Manager               | 1.8.latest                |
-| Elastic Runtime               | 1.8.latest                |
+| PCF Ops Manager               | 1.9.latest                |
+| Elastic Runtime               | 1.9.latest                |
 
 ## <a id="base-arch"></a> Base Reference Architecture 
 
-This recommended architecture relies on VMware NSX Edge, a software-defined services gateway that runs on VMware ESX/ESXi virtual hosts and combines a firewall, load balancer, and NAT/SNAT. See below for architectures that do not rely on NSX Edge.
+This recommended architecture relies on VMware NSX Edge, a software-defined services gateway that runs on VMware ESX/ESXi virtual hosts and combines a firewall, load balancer, and NAT/SNAT. However, see below for architectures that do not rely on NSX Edge.
 
-The diagram below shows an architecture for two PCF installations sharing the same vSphere server clusters, yet segmented from each other with VMware Resource Pools. This design supports long term use, capacity growth at the vSphere level, and maximum installation security through the NSX Edge firewall. It allocates 3+ servers to each cluster, as recommended for vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
+For more information on installing and configuring NSX Edge for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere</a>.
+
+The diagram below shows an architecture for two PCF installations sharing the same vSphere server clusters, yet segmented from each other with VMware Resource Pools. 
+
+This design supports long term use, capacity growth at the vSphere level, and maximum installation security through the NSX Edge firewall. It allocates 3+ servers to each cluster, as recommended for vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
 
 <%= image_tag('vsphere-overview-arch.png') %>
 
@@ -30,7 +36,10 @@ To view a larger version of this diagram, click [here](../images/vsphere-overvie
 
 To create a system following this architecture, do the following:
 
-1. From vCenter, create three clusters. Pivotal recommends vSphere DVS (distributed virtual switching) for all clusters used by PCF.
+1. From vCenter, create three clusters.<br/><br/>
+
+    Pivotal recommends NSX Logical Switches for all clusters used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
+    Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
 
 1. Populate each cluster with two VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
 
@@ -45,7 +54,8 @@ To create a system following this architecture, do the following:
 1. Supply core networking for each deployment by configuring an NSX Edge with the following subnets. See [below](#networking-design) for details:
   - Infrastructure
   - Elastic Runtime (ERT)
-  - Services
+  - Service tiles (one or more)
+  - Dynamic service tiles (a network managed entirely by BOSH Director)
 
 ### <a id="scale"></a> Scaling
 
@@ -69,17 +79,19 @@ You can allocate networked storage to the host clusters following one of two com
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
-* **Capacity**: Pivotal recommends allocating at least 16TB of data storage for a typical PCF installation, either as two 8TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4TB volumes is reasonable.
+* **Capacity**: Pivotal recommends allocating at least 16TB of data storage for a typical PCF installation, either as two 8TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4TB volumes is reasonable. The primary consumer of storage is the NFS/WebDAV blobstore.
 
-* **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 6G FC or 10GigE. Redundant storage is highly recommended for any persistent data, but you can use DASD or JBOD for ephemeral data.
+<p class="note"><strong>Note</strong>: At time of publication for the [latest PCF validated versions](#overview), PCF does not support the use of vSphere Storage Clusters. Datastores should be listed individually in the vSphere tile.</p>
+
+* **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for any persistent data, but you can use DASD or JBOD for ephemeral data.
 
 ### <a id="networking"></a> Networking
 
 Using VMware NSX SDN (software-defined networking) provides the following benefits:
 
-  * Firewall capability per-installation through the built-in Edge firewall
-  * High capacity, resilient load balancing per-installation through the NSX Load Balancer
-  * Installation obfuscation through the use of non-routed RFC networks behind the NSX Edge and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
+  * Distributed firewall capability per-installation through the built-in Edge Firewall
+  * High capacity, resilient, distributed load balancing per-installation through the NSX Load Balancer
+  * Installation obfuscation through the use of non-routed RFC-1918 networks behind the NSX Edge and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
   * High repeatability of installations through the repeat use of all network and addressing conventions on the right hand side of the diagram (the Tenant Side)
   * Automatic rule and ACL sharing via NSX Manager Global Ruleset
   * Automatic HA pairing of NSX Edges, managed by NSX Manager
@@ -87,40 +99,56 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 #### <a id="network-design"></a> Networking Design
 
-Each PCF installation consumes three (or more) networks from the NSX Edge, aligned to specific job types:
+Each PCF installation consumes four (or more) networks with the NSX Edge, aligned to specific job types:
 
 - **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as jumpbox VM.
 - **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Diego cell VMs that Elastic Runtime deploys apps into, and it also hosts Elastic Runtime support components. 
-- **Services**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH.  
-PCF services are either pre-provisioned or [on-demand](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand). The on-demand services require their own dedicated network, so an installation offering both types of services needs at least two services networks. A more involved approach would be to deploy multiple "Services-#" networks, one for each tile or each category of service function, for example databases, message buses, and so on.
+- **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
+- **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
+docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
 
-All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
+All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
 
 Provision each NSX Edge with at least four routable IP addresses from the service provider:
 
 1. A static IP by which NSX Manager manages the NSX Edge
 2. A static IP for use as egress SNAT (traffic from the tenant side exits the Edge on this IP)
 3. A static IP for DNATs to Ops Manager
-4. A static IP for the load balancer VIP that balances to a pool of PCF Gorouters
+4. A static IP for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
 
-In addition to these four, there are many more uses for IPs on the routed side of the NSX Edge. Pivotal recommends reserving ten contiguous, static IPs per NSX Edge for future needs and flexibility.
+In addition to these four, there are many more uses for IPs on the routed side of the NSX Edge. Pivotal recommends reserving a total of ten contiguous, static IPs per NSX Edge for future needs and flexibility.
 
 On the tenant side, each interface defined on the NSX Edge acts as the IP gateway for the network used on that port group. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `.1` for each:
 
-- **Infra** (infrastructure) network: 192.168.10.0/26
+- **Infra** (infrastructure) network: 192.168.10.0/26 
 - **Deployment** network: 192.168.20.0/22
-- **Services** network: 192.168.24.0/22
-- **Services-B** network(s): 192.168.28.0/22, and so on..._
+- **CF Tiles** network: 192.168.24.0/22
+- **Dynamic Services** network: 192.168.28.0/22
+- **Services-B** (future use) network(s): 192.168.32.0/22, and so on..._
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
 To view a larger version of this diagram, click [here](../images/vsphere-exploded-edge.png).
 
-For each network interface provisioned on the NSX Edge, NSX creates a DPG (distributed port group).
+##### <a name="dist-port-group"> </a> Distributed Port Groups
+
+vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (distributed port group) for each interface provisioned on the NSX Edge. 
+
+Alternatively, NSX Logical Switches can be used on the Tenant Side of this design, which leverages vWires, reducing the dependency on VLAN address space.
 
 <%= image_tag('vsphere-port-groups.png') %>
 
 To view a larger version of this diagram, click [here](../images/vsphere-port-groups.png).
+
+### <a id="highperf"></a> High Performance Variants
+
+#### <a id="one_arm_lb"></a> One Armed Load Balancing
+
+The NSX Edge can act as a stand-alone, one-armed load balancer. 
+
+This variant can improve performance and separate the dependence on the Edge that acts as NAT/SNAT/Firewall/Router by separating the load balancing function to a separate Edge deployed exclusively for use per installation. 
+
+In short, you divide the jobs between two Edges per install rather than one. To implement this architecture, you place a single interface (internal) of a new Edge on the Deployment network, enable the load balancing function, and DNAT to it through the boundary Edge.
 
 ## <a id="no-nsx"></a> Reference Architecture Without VMware NSX
 
@@ -135,7 +163,7 @@ The reference architecture for deploying production PCF on vSphere without VMwar
 
 ### <a id="no-nsx-design"></a> Networking Design
 
-The more traditional approach without SDN would be to deploy a single VLAN for use with all of PCF, or possibly a pair of VLANs, one for infrastructure and one for PCF.
+The more traditional approach without SDN would be to deploy a single VLAN for use with all of PCF, or possibly a pair of VLANs, one for infrastructure and one for PCF. As VLAN capacity is frequently limited and scarce, this design seeks to limit the need for VLANs to a functional minimum.
 
 <%= image_tag('vsphere-no-nsx.png') %>
 
@@ -147,6 +175,8 @@ In this example, the firewall and load balancer functions run outside of vSphere
   2. **PCF**: the deployment network for all tiles, including ERT
 
 In a typical installation, you assign each of these port groups to a VLAN out of the datacenter pool, and a routable IP address segment. Routing functions are handled by switching layers outside of vSphere, such as a top-of-rack (TOR) or end-of-row (EOR) switch/router appliance.
+
+It is still valid to deploy all the networks shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
 
 ## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
 
