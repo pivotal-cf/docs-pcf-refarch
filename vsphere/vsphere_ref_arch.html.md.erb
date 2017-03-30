@@ -81,7 +81,7 @@ You can allocate networked storage to the host clusters following one of two com
 
 * **Capacity**: Pivotal recommends allocating at least 16TB of data storage for a typical PCF installation, either as two 8TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4TB volumes is reasonable. The primary consumer of storage is the NFS/WebDAV blobstore.
 
-<p class="note"><strong>Note</strong>: At time of publication for the [latest PCF validated versions](#overview), PCF does not support the use of vSphere Storage Clusters. Datastores should be listed individually in the vSphere tile.</p>
+<p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed individually in the vSphere tile.</p>
 
 * **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for any persistent data, but you can use DASD or JBOD for ephemeral data.
 
