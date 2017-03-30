@@ -228,7 +228,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 1. Enter ALL the IP addresses reserved for Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
     <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
 1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the NSX Edge load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
-1. Set the **Algorithim** to `ROUND-ROBIN`.
+1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set **Monitors** to `http-routers`.
     <%= image_tag('vsphere-router-pool.png') %>
 
@@ -261,7 +261,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 
 ### <a id="create_virtual_servers"></a> Step 2.7: Create Virtual Servers
 
-This is the Virtual IP (VIP() that the load balancer uses to represent the pool of Gorouters to the outside world. This also links the Application Policy, Application Rules, and backend pools to provide PCF load balancing services.  This is the interface that the load balancer balances /*__FROM__/*. You create three Virtual Servers.
+This is the Virtual IP (VIP() that the load balancer uses to represent the pool of Gorouters to the outside world. This also links the Application Policy, Application Rules, and backend pools to provide PCF load balancing services.  This is the interface that the load balancer balances **from**. You create three Virtual Servers.
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Virtual Servers**.
 1. Select an IP address from the available routable address space allocated to the NSX Edge. For information about reserved IPs, see <a href="#overview">General Overview</a>.

@@ -101,7 +101,7 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 Each PCF installation consumes four (or more) networks with the NSX Edge, aligned to specific job types:
 
-- **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as jumpbox VM.
+- **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM.
 - **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Diego cell VMs that Elastic Runtime deploys apps into, and it also hosts Elastic Runtime support components. 
 - **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
