@@ -205,6 +205,8 @@ To create monitors for pools, access the NSX Edges UI and perform the following 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Service Monitoring**.
 1. Create a new monitor for `http-routers`, and keep the defaults.
 1. Set the Type to `HTTP`.
+1. Set the Method to `GET`.
+1. Set the URL to `/health`.
 1. Create a new monitor for `tcp-routers`, and keep the defaults.
 1. Set the type to `HTTP`.
 1. Set the Method to `GET`.
@@ -230,14 +232,14 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the NSX Edge load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set **Monitors** to `http-routers`.
-    <%= image_tag('vsphere-router-pool.png') %>
+    <%= image_tag('vsphere-edit-pool.png') %>
 
 #### <a id="tcp_router_pools"></a> Step 2.6b: Create Pool for `tcp-routers`
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter ALL the IP addresses reserved for TCP Routers into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
     <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
-1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 80.
+1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 8080.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set the **Monitors** to `tcp-routers`.
 
