@@ -232,7 +232,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the NSX Edge load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
 1. Set the **Algorithim** to `ROUND-ROBIN`.
 1. Set **Monitors** to `http-routers`.
-    <%= image_tag('vsphere-edit-pool.png') %>
+    <%= image_tag('vsphere-edit-pool-bordered.png') %>
 
 #### <a id="tcp_router_pools"></a> Step 2.6b: Create Pool for `tcp-routers`
 
