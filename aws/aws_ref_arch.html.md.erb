@@ -30,8 +30,8 @@ The following table lists the components that are part of a base reference archi
    <ul>
      <li>domains for *.apps and *.sys (required)</li>
      <li>a route for Ops Manager (required)</li>
-     <li>a route for doppler (required)</li>
-     <li>a route for loggregator (required)</li>
+     <li>a route for Doppler (required)</li>
+     <li>a route for Loggregator (required)</li>
      <li>a route for ssh access to app containers (optional)</li>
    </ul>
    Using Route 53 to manage domains is optional.
@@ -39,7 +39,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Ops Manager</strong></td>  
- <td>Deployed on one of the three public subnets and accessible by FQDN or via an optional Jumpbox.</td>
+ <td>Deployed on one of the three public subnets and accessible by FQDN or through an optional Jumpbox.</td>
 </tr> 
 <tr>
  <td><strong>BOSH Director</strong></td>  
@@ -55,11 +55,11 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Gorouters</strong></td>  
- <td>Accessed via the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
+ <td>Accessed through the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
 </tr> 
 <tr>
  <td><strong>Diego Brains</strong></td>  
- <td>This component is required. However, the SSH container access functionality is optional and enabled via the SSH Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
+ <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
 </tr> 
 <tr>
  <td><strong>TCP Routers</strong></td>  
@@ -82,7 +82,7 @@ The following table lists the components that are part of a base reference archi
 	<td>Two service accounts are recommended: one for Terraform, and the other for Ops Manager and BOSH. Consult the following list:<br><br>
 		<ul>
 		<li>Admin Account: Terraform will use this account to provision required AWS resources as well as an IAM service account.</li>
-		<li>IAM Service Account: This service account will be automatically provisioned with restrict access only to resources needed by PCF. See the AWS IAM Terraform <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/iam.tf">script</a> for more information.</li>
+		<li>IAM Service Account: This service account will be automatically provisioned with restrict access only to resources needed by PCF. See the AWS IAM Terraform <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/iam.tf">script</a> for more information.</li>
 		</ul>
 	</td>
 </tr>
@@ -120,7 +120,7 @@ The following table lists the network objects in this reference architecture.
      <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
      <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
    </ul>
-   For more information, see the Terraform subnets <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/subnets.tf">script</a>.
+   For more information, see the Terraform subnets <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/subnets.tf">script</a>.
    </td>
   <td>13</td>
   </tr>
@@ -131,14 +131,14 @@ The following table lists the network objects in this reference architecture.
   	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for OpsManager and the NAT Gateway.</li>
   	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and ERT.</li>
   	</ul>
-    For more information, see the Terraform <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/route_table_associations.tf">script</a> that performs the route table association. 
+    For more information, see the Terraform <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/route_table_associations.tf">script</a> that performs the route table association. 
   	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP, it is accessible from the Internet through the public IP; for example, Ops Manager. ERT needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
   </td>
   <td>4</td>
   </tr>
   <tr>
   <td><strong>Security Groups</strong></td>
-  <td>The reference architecture requires 5 Security Groups. For more information, see the Terraform Security Group rules <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/security_group.tf">script</a>. The following table describes the Security Group ingress rules:
+  <td>The reference architecture requires 5 Security Groups. For more information, see the Terraform Security Group rules <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/security_group.tf">script</a>. The following table describes the Security Group ingress rules:
   	<table>
   	<tr>
   		<th>Security Group</th>
@@ -211,7 +211,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Load Balancers</strong></td>
-  <td>PCF on AWS requires the Elastic Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Elastic Load Balancers are recommended: one to forward the traffic to the Gorouters (<code>PcfElb</code>), the other to forward the traffic to the Diego Brain SSH proxy (<code>PcfSshElb</code>). For more information, see the Terraform load balancers <a href="https://github.com/c0-ops/aws-concourse/blob/master/terraform/c0-aws-base/load_balancers.tf">script</a>
+  <td>PCF on AWS requires the Elastic Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Elastic Load Balancers are recommended: one to forward the traffic to the Gorouters, <code>PcfElb</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>PcfSshElb</code>. For more information, see the Terraform load balancers <a href="https://github.com/pivotal-cf/aws-concourse/blob/master/terraform/load_balancers.tf">script</a>
   	<br><br>
   	The following table describes the required listeners for each load balancer:
   	<table>
@@ -263,7 +263,7 @@ The following table lists the network objects in this reference architecture.
 </tr>
 <tr>
 <td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component via the Jumpbox. 
+<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
 </td>
 <td>1</td>
 </tr>

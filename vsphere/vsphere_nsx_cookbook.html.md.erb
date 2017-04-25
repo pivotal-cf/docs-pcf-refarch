@@ -1,0 +1,320 @@
+---
+title: NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere
+owner: Customer0
+---
+
+<strong><%= modified_date %></strong>
+<html class="list-style-none"></html>
+
+This cookbook provides guidance on how to configure the NSX firewall, load balancing and NAT/SNAT services for Pivotal Cloud Foundry (PCF) on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in PCF. 
+
+This document presents the reader with fundamental configuration options of an NSX Edge with PCF. Its purpose is not to dictate the settings required on every deployment, but instead to empower the NSX Administrator with the ability to establish a known good "base" configuration and apply specific security configurations as required.
+
+## <a id="assumptions"></a> Assumptions
+
+This document assumes that the reader has the level of skill required to install and configure the following products:
+
+-	VMware vSphere 5.5 or greater
+-	NSX 6.1.x or greater
+-	PCF 1.6 or greater
+
+For detailed installation and configuration information on these products, refer to the following documents:
+
+-	[vSphere Documentation](https://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html)
+-	[NSX Installation and Upgrade Guide](https://pubs.vmware.com/NSX-6/topic/com.vmware.ICbase/PDF/nsx_6_install.pdf)
+-	[Reference Design: VMware NSX for vSphere (NSX) Network Virtualization Design Guide)](https://www.vmware.com/files/pdf/products/nsx/vmw-nsx-network-virtualization-design-guide.pdf)
+-	[Pivotal Cloud Foundry Documentation](http://docs.pivotal.io/pivotalcf/getstarted/pcf-docs.html)
+
+## <a id="overview"></a> General Overview
+
+This cookbook follows a three-step recipe to deploy PCF behind an NSX Edge: 
+
+   1. Configure Firewall
+   1. Configure Load Balancer
+   1. Configure NAT/SNAT 
+
+The NSX Edge can scale to accommodate very large PCF deployments as needed.
+
+This cookbook focuses on a single-site deployment and makes the following design assumptions:
+
+-	There are four non-routable networks on the tenant (inside) side of the NSX Edge.
+   - The **Infra** network is used to deploy Ops Manager and BOSH Director.
+   - The **Deployment** network is used exclusively by Elastic Runtime to deploy DEAs/Cells that host apps and related elements.
+   - The **CF Tiles** network is used for all other deployed tiles in a PCF installation.
+   - The **Services** network is used by BOSH Director for service tiles.
+-	There is a single service provider (outside) interface on the NSX Edge that provides Firewall, Load Balancing and NAT/SNAT services.
+- The service provider (outside) interface is connected appropriately to the network backbone of the environment, as either routed or non-routed depending on the design. This cookbook does not cover provisioning of the uplink interface.
+-	Routable IPs should be applied to the service provider (outside) interface of the NSX Edge. It is recommended that 10 consecutive routable IPs be applied to each NSX Edge.
+  -	One reserved for NSX use (Controller to Edge I/F)
+  -	One for NSX Load Balancer to GoRouters
+  - One for NSX Load Balancer to Diego Brains for SSH to apps
+  -	One routable IP for used to access the Ops Manager frontend 
+  -	One routable IP for use with SNAT egress
+  -	Five for future use
+
+Pivotal recommends that operators deploy the NSX Edges as high availability (HA) pairs in vSphere. Also, Pivotal recommends that they be sized “large” or greater for any pre-production or production use. The deployed size of the NSX Edge impacts its overall performance, including how many SSL tunnels it can terminate.
+
+The NSX Edges have an interface in each port group used by PCF as well as a port group on the service provider (outside), often called the “transit network.” Each PCF installation has a set of port groups in a vSphere DVS to support connectivity, so that the NSX Edge arrangement is repeated for every PCF install. It is not necessary to build a DVS for each NSX Edge/PCF install. You do not re-use an NSX Edge amongst PCF deployments. NSX Logical Switches (VXLAN vWires) are ideal candidates for use with this architecture.
+
+The following diagram provides an example of port groups used with an NSX Edge:
+
+<%= image_tag('vsphere-nsx-v4-portgroups.png') %>
+
+To view a larger version of this diagram, click [here](../images/vsphere-nsx-v4-portgroups.png).
+
+The following is an example of a network architecture deployment.
+
+<%= image_tag('vsphere-overview-arch.png') %>
+
+To view a larger version of this diagram, click [here](../images/vsphere-overview-arch.png).
+
+## <a id="prereq"></a>Prep Step: Configure DNS and Network Prerequisites
+
+As a prerequisite, create wildcard DNS entries for system and apps domains in PCF. Map these domains to the selected IP on the uplink (outside) interface of the NSX Edge in your DNS server. 
+
+The wildcard DNS `A` record must resolve to an IP associated with the outside interface of the NSX Edge for it to function as a load balancer. You can either use a single IP to resolve both the system and apps domain, or one IP for each.
+
+In addition, assign the following IP addresses and address ranges within your network:
+
+1.	Assign IP Addresses to the “Uplink” (outside) interface
+  *	Typically you have one SNAT and three DNATs per NSX Edge.
+  *	IP associated for SNAT use: All PCF internal IPs appear to be coming from this IP address at the NSX Edge.
+  *	IP associated with Ops Manager DNAT: This IP is the publicly routable interface for Ops Manager UI and SSH access.
+2.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
+  *	192.168.10.0/26 = PCF Deployment Network (Logical Switch or Port Group)
+  *	192.168.20.0/22 = Deployment Network for Elastic Runtime Tile (ERT)
+  *	192.168.24.0/22 = CF Tiles Network for all Tiles besides ERT
+  * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
+
+## <a id="firewall"></a>Step 1: Configure Firewall
+
+This procedure populates the NSX Edge internal firewall with rules to protect a PCF installation. 
+
+These rules provide granular control on what can be accessed within a PCF installation. For example, rules can be used to allow or deny another PCF installation behind a different NSX Edge access to apps published within the installation you are protecting.
+
+This step is not required for the installation to function properly when the firewall feature is disabled or set to "Allow All."
+
+To configure the NSX Edge firewall, navigate to **Edge**, **Manage**, **Firewall** and set the following:
+
+|  Name |  Source |  Destination | Service  |  Action |
+|---|---|---|---|---|
+|Allow Ingress -> Ops Manager|any|IP\_of\_OpsMgr|SSH, HTTP, HTTPS|Accept|
+|Allow Ingress -> Elastic Runtime|any|IP\_of\_NSX-LB|HTTP, HTTPS|Accept|
+|Allow Ingress -> SSH for Apps|any|tcp:IP\_of\_DiegoBrain:2222|any|Accept|
+|Allow Ingress -> TCProuter|any|tcp:IP\_of\_NSX-TCP-LB:5000|any|Accept|
+|Allow Inside <-> Inside|192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22|192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22|any|Accept|
+|Allow Egress -> IaaS|192.168.10.0/26|IP\_of\_vCenter IPs\_of\_ESXi-Svrs|HTTP, HTTPS|Accept|
+|Allow Egress -> DNS|192.168.0.0/16|IPs\_of\_DNS|DNS, DNS-UDP|Accept|
+|Allow Egress -> NTP|192.168.0.0/16|IPs\_of\_NTP|NTP|Accept|
+|Allow Egress -> SYSLOG|192.168.0.0/16|IPs\_of\_Syslog:514|SYSLOG|Accept|
+|Allow ICMP|192.168.10.0/26|\*|ICMP|Accept|
+|Allow Egress -> LDAP|192.168.10.0/26 192.168.20.0/22|IPs\_of\_LDAP:389|LDAP, LDAP-over-ssl|Accept|
+|Allow Egress -> All Outbound|192.168.0.0/16|any|any|Accept|
+|Default Rule|any|any|any|Deny|
+
+## <a id="load_balancer"></a>Step 2: Configure Load Balancer
+
+The NSX Edge provides software load balancing functionality, equivalent to the bundled HAProxy that is included with PCF, or hardware appliances such as an F5 or A10 load balancer.
+
+This step is required for the installation to function properly.
+
+There are seven high level steps to this procedure:
+
+1. Import SSL certificates to the Edge for SSL termination.
+1. Enable the load balancer.
+1. Create Application Profiles in the Load Balancing tab of NSX.
+1. Create Application Rules in the Load Balancer.
+1. Create Service Monitors for each pool type.
+1. Create Application Pools for the multiple groups needing load balancing.
+1. Create a virtual server (also known as a VIP) to pool balanced IPs.
+
+What you will need:
+
+  * PEM files of SSL certificates provided by the certificate supplier for only this installation of PCF, or the self-signed SSL certificates generated during PCF installation.
+
+In this procedure you marry the NSX Edge’s IP address used for load balancing with a series of internal IPs provisioned for Gorouters in PCF. It is important to know the IPs used for the GoRouters beforehand. 
+
+These IP addresses can be pre-selected or reserved prior to deployment (recommended) or discovered after deployment by looking them up in BOSH Director, which lists them in the release information of the Elastic Runtime installation.
+
+### <a id="import_ssl"></a> Step 2.1: Import SSL Certificate 
+
+PCF requires SSL termination at the load balancer.
+
+<p class="note"><strong>Note</strong>: If you intend to pass SSL termination thru the load balancer directly to the Gorouters, you can skip the step below and just check <b>Enable SSL Passthru</b> on the <b>HTTPS Application Profile</b>.</p>
+
+To enable SSL termination at the load balancer in NSX Edge, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Settings**, and then **Certificates**.
+1. Click Green Plus button to Add Certificate.
+1. Insert PEM file contents from the Networking configuration screen of Elastic Runtime.
+1. Save the results.
+
+### <a id="enable_lb"></a> Step 2.2: Enable the Load Balancer
+
+To enable the load balancer, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Global Configuration**.
+1. Edit load balancer global configuration.
+1. Enable load balancer.
+1. Enable acceleration.
+1. Set logging to desired level (**Info** or greater).
+
+### <a id="create_app"></a> Step 2.3: Create Application Profiles
+
+The Application Profiles allow advanced `X-Forward` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
+
+To create the application profiles, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Global Application Profiles**.
+
+1. Create/Edit Profile and make the **PCF-HTTP** rule, turning on **Insert X-Forwarded-For HTTP header**.
+
+    <%= image_tag('vsphere-app-profile-pcf-http.png') %>
+
+1. Create/Edit Profile and make the **PCF-HTTPS** rule, same as before, but add the service certificate inserted before.
+ 
+    <%= image_tag('vsphere-app-profile-pcf-https.png') %>
+
+1. Create/Edit Profile and make **PCF-TCP** rule, with the Type set to TCP.
+
+    <%= image_tag('vsphere-app-profile-pcf-tcp.png') %>
+
+### <a id="create_app_rules"></a> Step 2.4: Create Application Rules
+
+In order for the NSX Edge to perform proper `X-Forwarded` requests, you need to add a few HAProxy directives to the NSX Edge Application Rules. NSX supports most directives that HAProxy supports.
+
+To create the application rules, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Application Rules**. 
+1. Copy and paste the table entries below into each field.
+
+    |Rule Name|Script|
+    |---|---|
+    |option httplog|option httplog|
+    |reqadd X-Forwarded-Proto:\ https|reqadd X-Forwarded-Proto:\ https|
+    |reqadd X-Forwarded-Proto:\ http|reqadd X-Forwarded-Proto:\ http|
+
+    <%= image_tag('vsphere-lb-app-rules.png') %>
+
+### <a id="create_monitors"></a> Step 2.5: Create Monitors For Pools
+
+NSX ships with several load balancing monitoring types pre-defined. These types are for HTTP, HTTPS and TCP. For this installation, operators build new monitors matching the needs of each pool to ensure correct 1:1 monitoring for each pool type.
+
+To create monitors for pools, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Service Monitoring**.
+1. Create a new monitor for `http-routers`, and keep the defaults.
+1. Set the Type to `HTTP`.
+1. Set the Method to `GET`.
+1. Set the URL to `/health`.
+1. Create a new monitor for `tcp-routers`, and keep the defaults.
+1. Set the type to `HTTP`.
+1. Set the Method to `GET`.
+1. Set the URL to `/health`.
+1. Create a new monitor for `diego-brains`, and keep the defaults.
+1. Set the type to `TCP`.
+1. Create a new monitor for `ert-mysql-proxy`, and keep the defaults.
+1. Set the type to `TCP`.
+
+These monitors are selected during the next step when pools are created. A pool and a monitor are matched 1:1.
+
+### <a id="pools"></a> Step 2.6: Create Pools of Multi-Element PCF Targets
+
+The following steps creates the pools of resources that NSX Edge is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain and ERT MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
+
+#### <a id="http_router_pools"></a> Step 2.6a: Create Pool for `http-routers`
+
+To create pool for `http-routers`, access the NSX Edges UI and perform the following steps:
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+1. Enter ALL the IP addresses reserved for Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the NSX Edge load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
+1. Set the **Algorithm** to `ROUND-ROBIN`.
+1. Set **Monitors** to `http-routers`.
+    <%= image_tag('vsphere-edit-pool-bordered.png') %>
+
+#### <a id="tcp_router_pools"></a> Step 2.6b: Create Pool for `tcp-routers`
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+1. Enter ALL the IP addresses reserved for TCP Routers into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer ignores the missing resources as “down”.
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 8080.
+1. Set the **Algorithm** to `ROUND-ROBIN`.
+1. Set the **Monitors** to `tcp-routers`.
+
+#### <a id="diego_brain_pools"></a> Step 2.6c: Create Pool for `diego-brains`
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+1. Enter ALL the IP addresses reserved for Diego Brains into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer will just ignore the missing resources as “down”.
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+1. Set the **Port** to 2222 and the **Monitor Port** to 2222.
+1. Set the Algorithm to `ROUND-ROBIN`.
+1. Set the Monitors to `diego-brains`.
+
+#### <a id="ert_mysql_proxy_pools"></a> Step 2.6d: Create Pool for `ert-mysql-proxy`
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+1. Enter the two IP addresses reserved for MySQL-proxy into this pool.
+    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IPs are in the 192.168.20.0/22 address space.</p>
+1. Set the **Port** to 3306 and the **Monitor Port** to 1936.
+1. Set the **Algorithm** to `ROUND-ROBIN`.
+1. Set the **Monitors** to `ert-mysql-proxies`.
+
+### <a id="create_virtual_servers"></a> Step 2.7: Create Virtual Servers
+
+This is the Virtual IP (VIP() that the load balancer uses to represent the pool of Gorouters to the outside world. This also links the Application Policy, Application Rules, and backend pools to provide PCF load balancing services.  This is the interface that the load balancer balances **from**. You create three Virtual Servers.
+
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Virtual Servers**.
+1. Select an IP address from the available routable address space allocated to the NSX Edge. For information about reserved IPs, see <a href="#overview">General Overview</a>.
+1. Create a new Virtual Server named `GoRtr-HTTP` and select Application Profile `PCF-HTTP`.
+	*	Use **Select IP Address** to select the IP to use as a VIP on the uplink interface.
+	*	Set **Protocol** to match the **Application Profile** protocol (HTTP) and set **Port** to match the protocol (80).
+	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a>). This connects this VIP to the pool of resources being balanced to.
+	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
+	*	Switch to **Advanced Tab** on this Virtual Server.
+	*	Use the green plus to add/attach three Application Rules to this Virtual Server: 
+     * option httplog
+     * reqadd X-Forwarded-Proto:\ http
+    <p class="note"><strong>Note</strong>: Be careful to match protocol rules to the protocol `VIP- HTTP` to `HTTP` and `HTTPS` to `HTTPS`.</p>
+
+1. Create a new Virtual Server named `GoRtr-HTTPS` and select Application Profile `PCF-HTTPS`.
+	*	Use **Select IP Address** to select the **same IP** to use as a VIP on the uplink interface.
+	*	Set **Protocol** to match the **Application Profile** protocol (`HTTPS`) and set **Port** to match the protocol (443).
+	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a> (`http-routers`). This connects this VIP to that pool of resources being balanced to.
+	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
+	*	Switch to **Advanced Tab** on this Virtual Server.
+	* Use the green plus to add/attach three Application Rules to this Virtual Server: 
+     * option httplog
+     * reqadd X-Forwarded-Proto:\ https
+    <p class="note"><strong>Note</strong>: Be careful to match protocol rules to the protocol `VIP- HTTP` to `HTTP` and `HTTPS` to `HTTPS`.</p>
+
+1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `PCF-HTTPS`.
+	*	Use **Select IP Address** to select the same IP to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP to use as the VIP.
+	*	Set **Protocol** to TCP and set **Port** to 2222.
+	*	Set **Default Pool** to the pool name set in the <a href="#diego_brain_pools">above procedure</a> (`diego-brains`). This connects this VIP to that pool of resources being balanced to.
+	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
+    <%= image_tag('vsphere-vip-3.png') %>
+
+## <a id="nat_snat"></a> Step 3: Configure NAT/SNAT
+
+The NSX Edge obfuscates the PCF installation through network translation. The PCF installation is placed entirely on non-routable RFC-1918 network address space, so to be useful, you must translate routable IPs to non-routable IPs to make connections.
+
+<p class="note"><strong>Note</strong>: Correct NAT/SNAT configuration is required for the PCF installation to function correctly.</p>
+
+|Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
+|---|---|---|---|---|---|---|---|
+|SNAT|uplink|192.168.0.0/16|any|IP\_of\_PCF|any|any|All Nets Egress|
+|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask|
+
+NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the NSX Edge. At that point, the NSX Edge simply performs routing between the address segments.
+
+<p class="note"><strong>Note</strong>: NSX will generate a number of DNAT rules based on load balancing configs. These can safely be ignored.</p>
+
+## <a id="notes"></a> Additional Notes
+
+The NSX Edge Gateway also supports scenarios where Private RFC subnets and NAT are not utilized for **Deployment** or **Infrastructure** networks, and the guidance in this document can be modified to meet those scenarios.  
+
+Additionally, the NSX Edge supports up to 10 Interfaces allowing for more Uplink options if necessary.
+
+The use of Private RFC-1918 subnets for PCF Deployment networks was chosen due to its popularity with customers. NSX Edge devices are capable of leveraging ECMP, OSPF, BGP, and IS-IS to handle dynamic routing of customer and/or public L3 IP space.  That design is out of scope for this document, but is supported by VMware NSX and Pivotal PCF.
