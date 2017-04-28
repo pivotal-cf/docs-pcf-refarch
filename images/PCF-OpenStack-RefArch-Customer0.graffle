@@ -338,7 +338,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2017-04-27 20:23:39 +0000</string>
+	<string>2017-04-28 14:54:37 +0000</string>
 	<key>Modifier</key>
 	<string>keerys</string>
 	<key>NotesVisible</key>
@@ -455,11 +455,11 @@
 							<key>Color</key>
 							<dict>
 								<key>b</key>
-								<real>0.352941</real>
+								<real>0.35294117647058826</real>
 								<key>g</key>
 								<real>0.40000000000000002</real>
 								<key>r</key>
-								<real>0.054901999999999999</real>
+								<real>0.054901960784313725</real>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -510,11 +510,11 @@ TCP}</string>
 							<key>Color</key>
 							<dict>
 								<key>b</key>
-								<real>0.75686299999999995</real>
+								<real>0.35294117647058826</real>
 								<key>g</key>
-								<real>0.74902000000000002</real>
+								<real>0.40000000000000002</real>
 								<key>r</key>
-								<real>0.094117599999999996</real>
+								<real>0.054901960784313725</real>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -809,6 +809,8 @@ Balancing}</string>
 							<key>r</key>
 							<string>0</string>
 						</dict>
+						<key>Font</key>
+						<string>HelveticaNeue-Medium</string>
 						<key>Size</key>
 						<real>8.3000001907348633</real>
 					</dict>
