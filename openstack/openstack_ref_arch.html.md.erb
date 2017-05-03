@@ -1,30 +1,30 @@
 ---
-title: Reference Architecture for Pivotal Cloud Foundry on Openstack
+title: Reference Architecture for Pivotal Cloud Foundry on OpenStack
 owner: Customer0
 ---
 
 <strong><%= modified_date %></strong>
 
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Openstack. This architecture is valid for most production-grade PCF deployments in a single project using three availability zones (AZs).
+This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on OpenStack. This architecture is valid for most production-grade PCF deployments in a single project using three availability zones (AZs).
 
 ##<a id='base'></a> Base Reference Architecture ##
 
-The following diagram provides an overview of a reference architecture deployment of PCF on Openstack using three AZs.
+The following diagram provides an overview of a reference architecture deployment of PCF on OpenStack using three AZs.
 
 <%= image_tag('openstack-overview-arch.png') %>
 
-To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/openstack-overview-arch.png).
+To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/1.10/images/openstack-overview-arch.png).
 
 ### <a id="base_components"></a> Base Reference Architecture Components
 
-The following table lists the components that are part of a base reference architecture deployment on Openstack with three AZs.
+The following table lists the components that are part of a base reference architecture deployment on OpenStack with three AZs.
 
 <table class="nice">
 <th><strong>Component</strong></th>
 <th><strong>Reference Architecture Notes</strong></th>
 <tr>
  <td><strong>Domains & DNS</strong></td>
- <td>CF Domain <i>zones</i> and <i>routes</i> in use by the reference architecture include:<br><br>
+ <td>CF Domain zones and routes in use by the reference architecture include:<br><br>
    <ul>
      <li>zones for *.apps and *.sys (required)</li>
      <li>a route for Ops Manager (required)</li>
@@ -45,7 +45,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Application Load Balancer</strong></td>
- <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP and SSL traffic and forwards them to the Gorouter(s). Load balancers are outside the scope of this document.</td>
+ <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP, and SSL traffic and forwards them to the Gorouter(s). Load balancers are outside the scope of this document.</td>
 </tr>
 <tr>
  <td><strong>SSH Load Balancer</strong></td>
@@ -53,7 +53,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Gorouters</strong></td>
- <td>Accessed through the Application Load Balancer. Deployed on ERT network, one per AZ.</td>
+ <td>Accessed through the Application Load Balancer. Deployed on the ERT network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>Diego Brains</strong></td>
@@ -77,20 +77,20 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
 	<td><strong>Service Accounts</strong></td>
-	<td>Two service accounts are recommended: one for Openstack "paving", and the other for Ops Manager and BOSH. Consult the following list:<br><br>
+	<td>Two service accounts are recommended: one for OpenStack "paving," and the other for Ops Manager and BOSH. Consult the following list:<br><br>
 		<ul>
-		<li>Admin Account: Concourse will use this account to provision required Openstack resources as well as a Keystone service account.</li>
+		<li>Admin Account: Concourse will use this account to provision required OpenStack resources as well as a Keystone service account.</li>
 		<li>Keystone Service Account: This service account will be automatically provisioned with restricted access only to resources needed by PCF.
 		</ul>
 	</td>
 </tr>
 <tr>
-	<td><strong>Openstack Quota</strong></td>
-	<td>The default compute quota on a new Openstack subscription is typically not enough to host a multi-AZ deployment. The recommended quota for instances is 100. Your Openstack network quotas may also need to be increased.</td>
+	<td><strong>OpenStack Quota</strong></td>
+	<td>The default compute quota on a new OpenStack subscription is typically not enough to host a multi-AZ deployment. The recommended quota for instances is 100. Your OpenStack network quotas may also need to be increased.</td>
 </tr>
 </table>
 
-### <a id="openstack_components"></a> Openstack Objects
+### <a id="openstack_components"></a> OpenStack Objects
 
 The following table lists the network objects in this reference architecture.
 
@@ -105,7 +105,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Project</strong></td>
-  <td>One per deployment. A PCF deployment exists within a single project and a single Openstack region, but should distribute PCF jobs and instances across three Openstack AZs to ensure a high degree of availability.</td>
+  <td>One per deployment. A PCF deployment exists within a single project and a single OpenStack region, but should distribute PCF jobs and instances across three OpenStack AZs to ensure a high degree of availability.</td>
   <td>1</td>
   </tr>
   <tr>
@@ -121,8 +121,7 @@ The following table lists the network objects in this reference architecture.
    <ul>
    <li>1 x <strong>Public</strong> network.<br/>
    </ul>
-   <strong>NOTE:</strong> In many cases the public network is an "<i>under the cloud</i>" network as it's shared across projects.</li>
-   </a>
+   <p class="note"><strong>Note:</strong> In many cases, the public network is an "under the cloud" network that is shared across projects.</p>
    </td>
   <td>5</td>
   </tr>
@@ -174,7 +173,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Load Balancers</strong></td>
-  <td>PCF on Openstack requires a Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Load Balancers are recommended: one to forward the traffic to the Gorouters, <code>AppsLB</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
+  <td>PCF on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two load balancers are recommended: one to forward the traffic to the Gorouters, <code>AppsLB</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
   	<br><br>
   	The following table describes the required listeners for each load balancer:
   	<table>
@@ -207,12 +206,12 @@ The following table lists the network objects in this reference architecture.
   			<td>Forward traffic to Diego Brain for container SSH connections</td>
   		</tr>
   	</table>
-  Each Load Balancer needs a check to validate the health of the back-end instances:
+  Each load balancer needs a check to validate the health of the back-end instances:
   <ul>
   	<li><code>AppsLB</code> checks the health on Gorouter port 80 with TCP</li>
   	<li><code>SSHLB</code> checks the health on Diego Brain port 2222 with TCP</li>
   </ul>
-  <strong>NOTE:</strong> In many cases the load balancers are provided as an "<i>under the cloud</i>" service which is shared across projects.</li>
+  <p class="note"><strong>Note</strong>: In many cases, the load balancers are provided as an "under the cloud" service that is shared across projects.</p>
 </td>
 <td>
 2
