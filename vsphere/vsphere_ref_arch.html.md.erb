@@ -15,8 +15,8 @@ This document does not replace the [basic installation documentation] (../../cus
 
 | PCF Products Validated        | Version                   |
 | ----------------------------- |:-------------------------:|
-| PCF Ops Manager               | 1.9.latest                |
-| Elastic Runtime               | 1.9.latest                |
+| PCF Ops Manager               | 1.10.latest                |
+| Elastic Runtime               | 1.10.latest                |
 
 ## <a id="base-arch"></a> Base Reference Architecture 
 
@@ -41,7 +41,7 @@ To create a system following this architecture, do the following:
     Pivotal recommends NSX Logical Switches for all clusters used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
     Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
 
-1. Populate each cluster with two VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
+1. Populate each cluster with three VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
 
 1. For hosting capacity, populate each cluster with three ESXi hosts, making nine hosts for each installation. All installations collectively draw from the same nine hosts.
 
@@ -56,6 +56,7 @@ To create a system following this architecture, do the following:
   - Elastic Runtime (ERT)
   - Service tiles (one or more)
   - Dynamic service tiles (a network managed entirely by BOSH Director)
+  - IsoZone##
 
 ### <a id="scale"></a> Scaling
 
@@ -65,7 +66,7 @@ To support more PCF installations, scale this architecture vertically by adding 
 
 ### <a id="priority"></a> Priority
 
-In this architecture, multiple PCF installations share host resources. You can use vCenter resource allocation shares to assign `High`, `Normal`, or `Low` priority to pools used by different installations. When host resources keep up with demand, these share values make no difference, but when multiple installations compete for limited resources, you can prioritize a production installation over a development installation (for example) by assigning its resource pools a `High` share value setting.
+In this architecture, multiple PCF installations can share host resources. You can use vCenter resource allocation shares to assign `High`, `Normal`, or `Low` priority to pools used by multiple installations. When host resources keep up with demand, these share values make no difference, but when multiple installations compete for limited resources, you can prioritize a production installation over a development installation (for example) by assigning its resource pools a `High` share value setting.
 
 ### <a id="storage"></a> Storage Configuration
 
@@ -83,15 +84,16 @@ You can allocate networked storage to the host clusters following one of two com
 
 <p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed individually in the vSphere tile.</p>
 
-* **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for any persistent data, but you can use DASD or JBOD for ephemeral data.
+* **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for both ephemeral and persistent storage types used by PCF.
 
 ### <a id="networking"></a> Networking
 
 Using VMware NSX SDN (software-defined networking) provides the following benefits:
 
-  * Distributed firewall capability per-installation through the built-in Edge Firewall
+  * Distributed, hyper-local firewall capability per-installation through the built-in Edge Firewall
   * High capacity, resilient, distributed load balancing per-installation through the NSX Load Balancer
-  * Installation obfuscation through the use of non-routed RFC-1918 networks behind the NSX Edge and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
+  * Network fencing
+  * Element obfuscation through the use of non-routed RFC-1918 networks behind the NSX Edge and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
   * High repeatability of installations through the repeat use of all network and addressing conventions on the right hand side of the diagram (the Tenant Side)
   * Automatic rule and ACL sharing via NSX Manager Global Ruleset
   * Automatic HA pairing of NSX Edges, managed by NSX Manager
@@ -106,6 +108,7 @@ Each PCF installation consumes four (or more) networks with the NSX Edge, aligne
 - **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
 docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
+- **IsoZones##**: A single network granted to the Isolation Zones Tile for use to isolate goRouters and Diego Cells into a new network space independent of the ERT installation.
 
 All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
 
@@ -124,7 +127,7 @@ On the tenant side, each interface defined on the NSX Edge acts as the IP gatewa
 - **Deployment** network: 192.168.20.0/22
 - **CF Tiles** network: 192.168.24.0/22
 - **Dynamic Services** network: 192.168.28.0/22
-- **Services-B** (future use) network(s): 192.168.32.0/22, and so on..._
+- **IsoZone##** network: 192.168.32.0/22, Gateway at .1
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
