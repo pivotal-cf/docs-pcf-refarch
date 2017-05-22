@@ -41,7 +41,7 @@ To create a system following this architecture, do the following:
     Pivotal recommends NSX Logical Switches for all clusters used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
     Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
 
-1. Populate each cluster with three VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
+1. Populate each cluster with two VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
 
 1. For hosting capacity, populate each cluster with three ESXi hosts, making nine hosts for each installation. All installations collectively draw from the same nine hosts.
 
@@ -239,7 +239,8 @@ For this approach, the architect assigns parallel capacity from two sites indepe
 
 East/West mirroring the [base architecture](#base-arch) yields a deployment with six total clusters, three from each side. This may seem like a lot of gear to apply to PCF, but in a Business Continuity and Disaster Recovery (BCDR) scenario, doubling everything is the point.
 
-Combining the East/West multi-datacenter and [single-cluster](#single-cluster) approaches creates a geometry with two clusters and three resource pools in one cluster per site, or six AZs. Such a deployment only uses one cluster of capacity from each site, and does not scale readily. But drawing capacity from only one cluster makes it easy to provision with only a few hosts.
+Combining the East/West multi-datacenter and [single-cluster](#single-cluster) approaches creates a geometry with two clusters and 
+pools in one cluster per site, or six AZs. Such a deployment only uses one cluster of capacity from each site, and does not scale readily. But drawing capacity from only one cluster makes it easy to provision with only a few hosts.
 
 A multi-datacenter architecture makes replicating storage less critical. There are enough AZs from either side to survive a point failure, and you can recover the installation without vSphere HA enabled for the clusters.
 
