@@ -1,0 +1,93 @@
+---
+title: How to Migrate PCF to a New Datastore in vSphere
+owner: Customer0
+---
+
+<strong><%= modified_date %></strong>
+<html class="list-style-none"></html>
+
+This topic describes how to migrate your Pivotal Cloud Foundry (PCF) installation to a new vSphere datastore. 
+
+## <a id="prereqs"></a> Prerequisites
+ 
+Both the new and existing vSphere datastores must reside in the same datacenter and resource pool.
+
+To avoid service disruption, Pivotal recommends that you configure your overall PCF deployment for [high availability](../../concepts/high-availability.html). In addition, check for configurations necessary to achieve high availability in each of your installed product tiles.
+
+If your environment has any single points of failure, service may be disrupted as a result of the migration. 
+
+## <a id="prep"></a>Before You Begin 
+
+This section describes the steps you should perform prior to the migration.
+
+### <a id="backup"></a>Step 1: Backup Your Environment
+
+Ensure that your PCF environment is fully backed up. 
+
+For more information on how to backup PCF, see [Backing up Pivotal Cloud Foundry](../../customizing/backup-restore/backup-pcf.html). 
+
+### <a a id="doc"></a>Step 2: Document Current Environment Settings
+
+Document your current environment settings before proceeding with the datastore migration. It is important to know which VMs are running and in which datastore they reside.
+
+If there are any issues during or after the migration, you need this information to restore your environment.
+
+To obtain this information, perform the following steps:
+
+1. Run the following command.
+    <pre class="terminal">
+$ bosh instances --details > instances.txt 
+    </pre>
+1. Save the resulting file `instances.txt` to a safe location.
+1. Note the datastore where each VM resides in vSphere.
+
+### <a id="outofsync"></a>Step 3: Modify CPI Timeout Value (Optional)
+
+If you have previously encountered `out of sync` errors when modifying your PCF deployment, consider increasing the timeout value of the CPI before migrating the datastores. 
+
+For more information, see [Prevent Out-of-Sync VM Error](#prevent_sync_error) in the "After the Migration" section.
+
+### <a id="system_health"></a>Step 4: Check System Health
+
+In **Elastic Runtime**, check the **Status** tab and make sure there are no errors or reported issues.
+
+### <a id="tile_heatlh"></a> Step 5: Check Installed Products Health
+
+In each tile installed in your PCF deployment, check the **Status** tab and make sure there are no errors or reported issues.
+
+### <a id="opsman_health"></a> Step 6: Check Ops Manager Director Status
+
+1. Check that there are no pending changes and that the status of all tiles is green.
+1. Make sure the last Installation Log does not contain any errors.
+1. Before proceeding with the migration, click **Apply Changes** to make sure there are no errors in the Installation Log.
+
+## <a id="migrate_proc"></a> Procedure: Migrate PCF to a New Datastore
+
+1. In Ops Manager Director, navigate to the **vCenter Config** page.
+1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** field to reflect the new datastore names. Then click **Save**. 
+    <p class="note"><strong>Note</strong>: If you are using Datastore Clustering feature in vSphere, provide only the individual names of the datastores in the cluster. Do not use the name of the cluster that contains them.</p>
+1. Confirm that the Ops Manager Director VM has persistent disk on the new datastore. 
+   1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your PCF deployment VMs and new datastore.
+   1. Click the **Related Objects** and **Virtual Machines**. 
+   1. Locate the Ops Manager VM and verify that the VM has an expected value in the **Provisioned Space** column.
+    <%= image_tag('vsphere-web-client.png') %> 
+1. In Ops Manager Director, navigate to the **Director Config** page.
+1. Check the **Recreate all VMs** 
+1. Click **Apply Changes**.
+
+## <a id="after"></a> After the Migration
+
+When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`.  
+
+### <a id="fix_sync_error"></a> Fix Failed BOSH Deployment with Out-of-Sync Error
+
+If your PCF deployment gets into this state, you can resolve the issue by performing the steps in the following KB article:
+
+* [How to recover from a failed bosh deployment when VMs are out of sync on vSphere](https://discuss.pivotal.io/hc/en-us/articles/218051768-How-to-recover-from-a-failed-bosh-deployment-when-VMs-are-out-of-sync-on-Vsphere)
+
+### <a id="prevent_sync_error"></a> Prevent Out-of-Sync Error
+ 
+You can also prevent the `out of sync` BOSH error by increasing the CPI timeout to a larger value before performing the migration. Follow the instructions in the following KB article. 
+
+* [How to increase timeout on Bosh CPI command calls](https://discuss.pivotal.io/hc/en-us/articles/218570487-How-to-increase-timeout-on-Bosh-CPI-command-calls)
+
