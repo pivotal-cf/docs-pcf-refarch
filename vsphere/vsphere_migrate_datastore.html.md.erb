@@ -45,13 +45,15 @@ $ bosh instances --details > instances.txt
 
 The default timeout for the BOSH CPI is 60 minutes. When performing a datastore migration, BOSH must copy all of the data from the old disks to the new disks within this time limit. In general, most copy operations should fit within this time limit, but ultimately, it depends on the hardware in your deployment and the size of your existing persistent disks. 
 
-To determine whether 60 minutes is sufficient for the datastore migration, estimate how long it takes to copy 100GB of data.
-
-Then based on the size of your persistent disks, determine whether 60 minutes is sufficient time to copy that amount of data.
+To determine whether 60 minutes is sufficient for the datastore migration, estimate how long it takes to copy 100GB of data. Then based on the size of your persistent disks, determine whether 60 minutes is sufficient time to copy that amount of data.
 
 If you have previously encountered `out of sync` errors when modifying your PCF deployment, you should increase the timeout value of the CPI before migrating the datastores. 
 
-For more information, see [Prevent Out-of-Sync VM Error](#prevent_sync_error) in the "After the Migration" section.
+To modify the default BOSH CPI timeout, follow the instructions in the following KB article. 
+
+* [How to increase timeout on BOSH CPI command calls](https://discuss.pivotal.io/hc/en-us/articles/218570487-How-to-increase-timeout-on-Bosh-CPI-command-calls)
+
+For more information on how to resolve the error after migrating your datastore, see <a href="#after">After the Migration</a>.
 
 ### <a id="system_health"></a>Step 4: Check System Health
 
