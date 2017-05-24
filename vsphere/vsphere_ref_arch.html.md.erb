@@ -108,7 +108,7 @@ Each PCF installation consumes four (or more) networks with the NSX Edge, aligne
 - **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
 docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
-- **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate goRouters and Diego Cells into a new network space independent of the ERT installation.
+- **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
 
 All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
 
