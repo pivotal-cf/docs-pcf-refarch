@@ -74,7 +74,7 @@ You can allocate networked storage to the host clusters following one of two com
 
 * **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`. Installation #1 will use `ds01` until it is full, then `ds02`, and so on.
 
-* **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03` and `ds05`, and installation #2 to use `ds02`, `ds04` and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
+* **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
 <p class="note"><strong>Note:</strong> If a vSphere datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the sDRS feature on any datastores used by PCF. Otherwise, vMotion activity can rename independent disks and cause BOSH to malfunction.</p>
 
@@ -108,18 +108,18 @@ Each PCF installation consumes four (or more) networks with the NSX Edge, aligne
 - **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
 docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
-- **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate goRouters and Diego Cells into a new network space independent of the ERT installation.
+- **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
 
 All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
 
 Provision each NSX Edge with at least four routable IP addresses from the service provider:
 
-1. A static IP by which NSX Manager manages the NSX Edge
-2. A static IP for use as egress SNAT (traffic from the tenant side exits the Edge on this IP)
-3. A static IP for DNATs to Ops Manager
-4. A static IP for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
+1. A static IP address by which NSX Manager manages the NSX Edge
+2. A static IP address for use as egress SNAT. Traffic from the tenant side exits the Edge on this IP address 
+3. A static IP address for DNATs to Ops Manager
+4. A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
 
-In addition to these four, there are many more uses for IPs on the routed side of the NSX Edge. Pivotal recommends reserving a total of ten contiguous, static IPs per NSX Edge for future needs and flexibility.
+In addition to these four, many more uses for IP addresses exist on the routed side of the NSX Edge. Pivotal recommends reserving a total of ten contiguous, static IP addresses per NSX Edge for future needs and flexibility.
 
 On the tenant side, each interface defined on the NSX Edge acts as the IP gateway for the network used on that port group. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `.1` for each:
 
@@ -161,8 +161,8 @@ The reference architecture for deploying production PCF on vSphere without VMwar
 
 - Load balancing is handled by an external service, such as a hardware appliance or a VM from a 3rd party.
 - An external service also performs SSL termination.
-- You need to set up firewalls for each zone or network inside the installation, rather than having the NSX Edge appliance span multiple networks. 
-- To obfuscate network addresses, you need to configure a SNAT/DNAT and single or possible multiple VLANs from the routable network, rather than turn on the SNAT/DNAT functionality of the NSX Edge.
+- You must set up firewalls for each zone or network inside the installation, rather than having the NSX Edge appliance span multiple networks. 
+- To obfuscate network addresses, you must configure a SNAT/DNAT and single or possible multiple VLANs from the routable network, rather than turn on the SNAT/DNAT functionality of the NSX Edge.
 
 ### <a id="no-nsx-design"></a> Networking Design
 
@@ -219,7 +219,7 @@ To view a larger version of this diagram, click [here](../images/vsphere-multi-d
 
 PCF and BOSH treat the stretched cluster as an AZ, and make the same demands on it that they do with any other AZ. So the hosting, networking, and storage components within the stretched cluster must perform with normal latency and connectivity.
 
-For seamless operation, hosts must share all datastores, and you need to replicate storage across sites. Otherwise, vMotion cannot move VMs freely across hosts for maintenance or DRS.
+For seamless operation, hosts must share all datastores, and you must replicate storage across sites. Otherwise, vMotion cannot move VMs freely across hosts for maintenance or DRS.
 
 A stretched version of the base architecture splits three clusters across two sites, yielding a 4×3×3 geometry:
 
