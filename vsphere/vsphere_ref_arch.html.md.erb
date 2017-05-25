@@ -74,13 +74,13 @@ You can allocate networked storage to the host clusters following one of two com
 
 * **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`. Installation #1 will use `ds01` until it is full, then `ds02`, and so on.
 
-* **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03` and `ds05`, and installation #2 to use `ds02`, `ds04` and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
+* **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
 <p class="note"><strong>Note:</strong> If a vSphere datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the sDRS feature on any datastores used by PCF. Otherwise, vMotion activity can rename independent disks and cause BOSH to malfunction.</p>
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
-* **Capacity**: Pivotal recommends allocating at least 16TB of data storage for a typical PCF installation, either as two 8TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4TB volumes is reasonable. The primary consumer of storage is the NFS/WebDAV blobstore.
+* **Capacity**: Pivotal recommends allocating at least 16&nbsp;TB of data storage for a typical PCF installation, either as two 8&nbsp;TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4&nbsp;TB volumes is reasonable. The primary consumer of storage is the NFS/WebDAV blobstore.
 
 <p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed individually in the vSphere tile.</p>
 
@@ -114,12 +114,12 @@ All of these networks are considered "inside" or "tenant-side" networks, and use
 
 Provision each NSX Edge with at least four routable IP addresses from the service provider:
 
-1. A static IP by which NSX Manager manages the NSX Edge
-2. A static IP for use as egress SNAT (traffic from the tenant side exits the Edge on this IP)
-3. A static IP for DNATs to Ops Manager
-4. A static IP for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
+1. A static IP address by which NSX Manager manages the NSX Edge
+2. A static IP address for use as egress SNAT. Traffic from the tenant side exits the Edge on this IP address
+3. A static IP address for DNATs to Ops Manager
+4. A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
 
-In addition to these four, there are many more uses for IPs on the routed side of the NSX Edge. Pivotal recommends reserving a total of ten contiguous, static IPs per NSX Edge for future needs and flexibility.
+In addition to these four, many more uses for IP addreses on the routed side of the NSX Edge exist. Pivotal recommends reserving a total of ten contiguous, static IP addresses per NSX Edge for future needs and flexibility.
 
 On the tenant side, each interface defined on the NSX Edge acts as the IP gateway for the network used on that port group. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `.1` for each:
 
@@ -135,7 +135,7 @@ To view a larger version of this diagram, click [here](../images/vsphere-explode
 
 ##### <a name="dist-port-group"> </a> Distributed Port Groups
 
-vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (distributed port group) for each interface provisioned on the NSX Edge. 
+vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (Distributed Port Group) for each interface provisioned on the NSX Edge. 
 
 Alternatively, NSX Logical Switches can be used on the Tenant Side of this design, which leverages vWires, reducing the dependency on VLAN address space.
 
@@ -159,10 +159,10 @@ The reference architecture for deploying production PCF on vSphere without VMwar
 
 ### <a id="no-nsx-features"></a> Networking Features
 
-- Load balancing is handled by an external service, such as a hardware appliance or a VM from a 3rd party.
+- Load balancing is handled by an external service, such as a hardware appliance or a VM from a third party.
 - An external service also performs SSL termination.
-- You need to set up firewalls for each zone or network inside the installation, rather than having the NSX Edge appliance span multiple networks. 
-- To obfuscate network addresses, you need to configure a SNAT/DNAT and single or possible multiple VLANs from the routable network, rather than turn on the SNAT/DNAT functionality of the NSX Edge.
+- You must set up firewalls for each zone or network inside the installation, rather than having the NSX Edge appliance span multiple networks. 
+- To obfuscate network addresses, you must configure a SNAT/DNAT and single or possible multiple VLANs from the routable network, rather than turn on the SNAT/DNAT functionality of the NSX Edge.
 
 ### <a id="no-nsx-design"></a> Networking Design
 
@@ -239,8 +239,7 @@ For this approach, the architect assigns parallel capacity from two sites indepe
 
 East/West mirroring the [base architecture](#base-arch) yields a deployment with six total clusters, three from each side. This may seem like a lot of gear to apply to PCF, but in a Business Continuity and Disaster Recovery (BCDR) scenario, doubling everything is the point.
 
-Combining the East/West multi-datacenter and [single-cluster](#single-cluster) approaches creates a geometry with two clusters and 
-pools in one cluster per site, or six AZs. Such a deployment only uses one cluster of capacity from each site, and does not scale readily. But drawing capacity from only one cluster makes it easy to provision with only a few hosts.
+Combining the East/West multi-datacenter and [single-cluster](#single-cluster) approaches creates a geometry with two clusters and pools in one cluster per site, or six AZs. Such a deployment only uses one cluster of capacity from each site, and does not scale readily. But drawing capacity from only one cluster makes it easy to provision with only a few hosts.
 
 A multi-datacenter architecture makes replicating storage less critical. There are enough AZs from either side to survive a point failure, and you can recover the installation without vSphere HA enabled for the clusters.
 
