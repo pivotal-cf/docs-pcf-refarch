@@ -24,13 +24,11 @@ This section describes the steps you should perform prior to the migration.
 
 Ensure that your PCF environment is fully backed up. 
 
-For more information on how to backup PCF, see [Backing up Pivotal Cloud Foundry](../../customizing/backup-restore/backup-pcf.html). 
+For more information about how to backup PCF, see [Backing up Pivotal Cloud Foundry](../../customizing/backup-restore/backup-pcf.html). 
 
 ### <a a id="doc"></a>Step 2: Document Current Environment Settings
 
-Document your current environment settings before proceeding with the datastore migration. It is important to know which VMs are running and in which datastore they reside.
-
-If there are any issues during or after the migration, you need this information to restore your environment.
+Document your current environment settings before proceeding with the datastore migration. Record which VMs are running and in which datastore they reside. If you experience any issues during or after the migration, you must have this information to restore your environment.
 
 To obtain this information, perform the following steps:
 
@@ -45,7 +43,7 @@ $ bosh instances --details > instances.txt
 
 The default timeout for the BOSH CPI is 60 minutes. When performing a datastore migration, BOSH must copy all of the data from the old disks to the new disks within this time limit. In general, most copy operations should fit within this time limit, but ultimately, it depends on the hardware in your deployment and the size of your existing persistent disks. 
 
-To determine whether 60 minutes is sufficient for the datastore migration, estimate how long it takes to copy 100GB of data. Then based on the size of your persistent disks, determine whether 60 minutes is sufficient time to copy that amount of data.
+To determine whether 60 minutes is sufficient for the datastore migration, estimate how long it takes to copy 100&nbsp;GB of data. Then, based on the size of your persistent disks, determine whether 60 minutes is sufficient time to copy that amount of data.
 
 If you have previously encountered `out of sync` errors when modifying your PCF deployment, you should increase the timeout value of the CPI before migrating the datastores. 
 
@@ -53,7 +51,7 @@ To modify the default BOSH CPI timeout, follow the instructions in the following
 
 * [How to increase timeout on BOSH CPI command calls](https://discuss.pivotal.io/hc/en-us/articles/218570487-How-to-increase-timeout-on-Bosh-CPI-command-calls)
 
-For more information on how to resolve the error after migrating your datastore, see <a href="#after">After the Migration</a>.
+For more information about how to resolve the error after migrating your datastore, see <a href="#after">After the Migration</a>.
 
 ### <a id="system_health"></a>Step 4: Check System Health
 
