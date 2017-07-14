@@ -99,6 +99,8 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
   * Automatic HA pairing of NSX Edges, managed by NSX Manager
   * Support for PCF Go Router IP membership in the NSX Edge virtual load balancer pool by the BOSH CPI (not an Ops Manager feature)
 
+<p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To fix this issue, override the default by navigating to the Networking section of the Elastic Runtime tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
+
 #### <a id="network-design"></a> Networking Design
 
 Each PCF installation consumes four (or more) networks with the NSX Edge, aligned to specific job types:
