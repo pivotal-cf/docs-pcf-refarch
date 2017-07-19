@@ -40,19 +40,19 @@ At a high level, there are currently two possible ways of granting public intern
 1. NATs provide public access to PCF internals, or
 2. Every PCF VM receives its own public IP address (no NAT).
 
-The latter scenario is currently outlined in the [existing installation documentation](../../customizing/gcp.html) for GCP deployments of PCF. Providing each PCF VM with a public IP is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
+The latter scenario is currently outlined in the [existing installation documentation](../../customizing/gcp.html) for GCP deployments of PCF. Providing each PCF VM with a public IP address is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
 
 However, if you require NATs, you may refer to the following section.
 
 ### <a id="nat_network_diagram"></a> NAT-based Solution
 
-This diagram illustrates the case where you want to expose only a minimal number of public IPs.
+This diagram illustrates the case where you want to expose only a minimal number of public IP addresses.
 
 <%= image_tag('gcp-net-topology-base.png') %>
 
 To view a larger version of this diagram, click [here](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/gcp-net-topology-base.png).
 
-### <a id="no_nat"></a> Public IPs Solution
+### <a id="no_nat"></a> Public IP addresses Solution
 
 If you prefer not to use a NAT solution, you can configure PCF on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between Cloud Foundry components are routed through the front end load balancer and the Gorouter.
 
@@ -60,16 +60,16 @@ If you prefer not to use a NAT solution, you can configure PCF on GCP to assign 
 
 The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NATs).
 
-|**Network Object**| **Notes**| **Minimum Number: NAT-based** | **Minimum Number: Public IPs**|
+|**Network Object**| **Notes**| **Minimum Number: NAT-based** | **Minimum Number: Public IP Addresses**|
 |--------------------|------------|----------------------|---------------------------|
-| **External IPs** | For a NAT solution, use 1) global IP for apps and system access 2) Ops Manager (or optional Jumpbox) | 2 | 30+ |
+| **External IPs** | For a NAT solution, use 1) global IP address for apps and system access 2) Ops Manager (or optional Jumpbox) | 2 | 30+ |
 | **NATs** | One NAT per availability zone. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of PCF will likely only ever require one GCP Network object | 1 | 1 |
 | **Subnets** | Separate subnets for 1) infrastructure (Ops Manager, Ops Manager Director, Jumpbox) 2) ERT 3) services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy PCF without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source & destination fields in a rule. The preferred method use in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers**| Used to handle requests to Gorouters and infrastructure components. GCP uses 2 or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
-| **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. | (1) | (1)|
+| **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. | (1) | (1)|
 
 ### <a id="network_comm"></a> Network Communication in GCP Deployments
 
