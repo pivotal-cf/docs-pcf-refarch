@@ -101,7 +101,7 @@ The following table lists the network objects in this reference architecture.
   <th><strong>Notes</strong></th>
   <th><strong>Estimated Number</strong></th>
   <tr>
-  <td><strong>External Public IP addresses</strong></td>
+  <td><strong>External Public IPs</strong></td>
   <td>One per deployment, assigned to Ops Manager.</td>
   <td>1</td> 
   </tr>
@@ -116,7 +116,7 @@ The following table lists the network objects in this reference architecture.
    <ul>
      <li>1 x (/24) infrastructure (BOSH Director) subnet</li>
      <li>3 x (/24) public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
-     <li>3 x (/20) ERT subnets (GoRouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
+     <li>3 x (/20) ERT subnets (Gorouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
      <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
      <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
    </ul>
@@ -132,7 +132,7 @@ The following table lists the network objects in this reference architecture.
   	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and ERT.</li>
   	</ul>
     For more information, see the Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_table_associations.tf">script</a> that performs the route table association. 
-  	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP address, it is accessible from the Internet through the public IP address; for example, Ops Manager. ERT needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
+  	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP, it is accessible from the Internet through the public IP; for example, Ops Manager. ERT needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
   </td>
   <td>4</td>
   </tr>
@@ -263,7 +263,7 @@ The following table lists the network objects in this reference architecture.
 </tr>
 <tr>
 <td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
+<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
 </td>
 <td>1</td>
 </tr>

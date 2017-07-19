@@ -46,7 +46,7 @@ This cookbook focuses on a single-site deployment and makes the following design
 - The service provider (outside) interface is connected appropriately to the network backbone of the environment, as either routed or non-routed depending on the design. This cookbook does not cover provisioning of the uplink interface.
 -	Routable IP addresses should be applied to the service provider (outside) interface of the NSX Edge. Pivotal recommends that you apply 10 consecutive routable IP addresses to each NSX Edge.
   -	One reserved for NSX use (Controller to Edge I/F)
-  -	One for NSX Load Balancer to GoRouters
+  -	One for NSX Load Balancer to Gorouters
   - One for NSX Load Balancer to Diego Brains for SSH to apps
   -	One routable IP address, used to access the Ops Manager frontend 
   -	One routable IP address, used with SNAT egress
