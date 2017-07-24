@@ -9,7 +9,7 @@ This guide presents reference architectures for Pivotal Cloud Foundry (PCF) on v
 
 ## <a id="overview"></a> Overview
 
-Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios. These test deployments host up to 1500 app instances and use PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services.
+Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios. These designs are sized for up to 1500 app instances.
 
 This document does not replace the [basic installation documentation] (../../customizing/vsphere.html), but gives proven examples of how to apply those instructions to real-world production environments.
 
@@ -20,13 +20,13 @@ This document does not replace the [basic installation documentation] (../../cus
 
 ## <a id="base-arch"></a> Base Reference Architecture 
 
-This recommended architecture relies on VMware NSX Edge, a software-defined services gateway that runs on VMware ESX/ESXi virtual hosts and combines a firewall, load balancer, and NAT/SNAT. However, see below for architectures that do not rely on NSX Edge.
+This recommended architecture includes VMware vSphere, NSX-v and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing,  firewall, NAT/SNAT and load balaning. In the absence of NSX, see below for architectures that do not rely on the ESG.
 
 For more information about installing and configuring NSX Edge for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere</a>.
 
-The diagram below shows an architecture for two PCF installations sharing the same vSphere server clusters, yet segmented from each other with VMware Resource Pools. 
+The diagram below shows an architecture for one PCF installations in vSphere clusters, segmented with Resource Pools. More Resource Pools can be added to the existing CLusters to stack more PCF installations into the same capacity.
 
-This design supports long term use, capacity growth at the vSphere level, and maximum installation security through the NSX Edge firewall. It allocates 3+ servers to each cluster, as recommended for vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
+This design supports long term use, capacity growth at the vSphere level, and maximum installation security through the ESG firewall. It allocates a minimum of 3 (or more) servers to each cluster, as recommended by vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
 
 <%= image_tag('vsphere-overview-arch.png') %>
 
@@ -36,55 +36,53 @@ To view a larger version of this diagram, click [here](../images/vsphere-overvie
 
 To create a system following this architecture, do the following:
 
-1. From vCenter, create three clusters.<br/><br/>
+1. In vCenter, create (or identify existing) three clusters.<br/><br/>
 
-    Pivotal recommends NSX Logical Switches for all clusters used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
-    Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
+1. Enable DRS on each cluster and set vMotion to fully automated. Populate each cluster with a Resource Pool for each PCF installation.
 
-1. Populate each cluster with two VMware Resource Pools. Enable VMware distributed resource scheduler (DRS) for each Resource Pool, so vMotion can automatically migrate data to avoid downtime.
+1. For compute, populate each cluster with three (or more) ESXi hosts, making nine+ hosts for each installation. All installations collectively draw from the same nine hosts.
 
-1. For hosting capacity, populate each cluster with three ESXi hosts, making nine hosts for each installation. All installations collectively draw from the same nine hosts.
-
-1. In one PCF deployment, use Ops Manager to create three Availability Zones (AZs), each corresponding to one of the Resource Pools from each cluster.
-
-1. In the other PCF deployment, create an AZ for each of the three remaining Resource Pools.
+1. In the PCF deployment, use Ops Manager to create three Availability Zones (AZs), each corresponding to one of the Resource Pools from each cluster.
 
 1. For storage, add dedicated datastores to each PCF deployment following one of the two approaches, vertical or horizontal, as described [below](#storage).
 
-1. Supply core networking for each deployment by configuring an NSX Edge with the following subnets. See [below](#networking-design) for details:
+1. Supply core networking for each deployment by configuring an ESG with the following subnets. See [below](#networking-design) for details:
   - Infrastructure
   - Elastic Runtime (ERT)
   - Service tiles (one or more)
   - Dynamic service tiles (a network managed entirely by BOSH Director)
   - IsoZone##
 
+    Pivotal recommends NSX Logical Switches (vWires) for all networks used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
+    Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
+
 ### <a id="scale"></a> Scaling
 
 You can easily scale up this architecture to support additional PCF installations with the same capacity, keeping each one resource-protected and separated.
 
-To support more PCF installations, scale this architecture vertically by adding Resource Pools. To add capacity to all PCF installations, scale it horizontally by adding hosts to the existing clusters in sets of three, one per cluster. 
+To support more PCF installations, scale this architecture vertically by adding Resource Pools to existing clusters. To add capacity to all PCF installations, scale it horizontally by adding ESXi hosts to the existing clusters in sets of three, one per cluster. 
 
 ### <a id="priority"></a> Priority
 
-In this architecture, multiple PCF installations can share host resources. You can use vCenter resource allocation shares to assign `High`, `Normal`, or `Low` priority to pools used by multiple installations. When host resources keep up with demand, these share values make no difference, but when multiple installations compete for limited resources, you can prioritize a production installation over a development installation (for example) by assigning its resource pools a `High` share value setting.
+In this architecture, multiple PCF installations can share host resources. You can use vCenter resource allocation shares to assign `High`, `Normal`, or `Low` priority to pools used by each installation. When host resources keep up with demand, these share values make no difference, but when multiple installations compete for limited resources, you can prioritize a production installation over a development installation (for example) by assigning its resource pools a `High` share value setting.
 
 ### <a id="storage"></a> Storage Configuration
 
-You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_. The approach you follow should reflect how your data center arranges its storage and host blocks in its physical layout:
+Shared storage is a requirement for PCF. You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_. The approach you follow should reflect how your data center arranges its storage and host blocks in its physical layout:
 
-* **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`. Installation #1 will use `ds01` until it is full, then `ds02`, and so on.
+* **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`.
 
-* **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
+* **Vertical**: You grant each cluster its own dedicated datastores, creating a 'cluster-aligned' storage strategy. vSphere VSAN is an example of this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
-<p class="note"><strong>Note:</strong> If a vSphere datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the sDRS feature on any datastores used by PCF. Otherwise, vMotion activity can rename independent disks and cause BOSH to malfunction.</p>
+<p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. See (link to How to Migrate PCF to a New Datastore in vSPhere)</p>
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
-* **Capacity**: Pivotal recommends allocating at least 16&nbsp;TB of data storage for a typical PCF installation, either as two 8&nbsp;TB stores or a greater number of smaller volumes. Small installations without many tiles can use less; two 4&nbsp;TB volumes is reasonable. The primary consumer of storage is the NFS/WebDAV blobstore.
+* **Capacity**: For producton use, Pivotal recommends allocating at least 8&nbsp;TB of data storage for a PCF installation, either as one 8&nbsp;TB stores or a number of smaller volumes adding up to 8&nbsp;TB. Small installations without many tiles can use 4-6&nbsp;TB. Frequently used development PCF installations may require far more storage as there will be much more use of new code and buildpacks. The primary consumer of storage is the NFS/WebDAV blobstore.
 
-<p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed individually in the vSphere tile.</p>
+<p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-* **Type**: Pivotal recommends block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for both ephemeral and persistent storage types used by PCF.
+* **Type**: Pivotal recommends either block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for both ephemeral and persistent storage types used by PCF. All-flash-based storage and SSD-cached storage are highly desirable. Data deduplication and compression, if done in hardware at the storage array, are highly desirable. These technologies can drive down the need for storage capacity dramatically.
 
 ### <a id="networking"></a> Networking
 
