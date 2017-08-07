@@ -239,7 +239,7 @@ To create pool for `http-routers`, access the NSX Edges UI and perform the follo
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter ALL the IP addresses reserved for TCP Routers into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer ignores the missing resources as "down".
     <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
-1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 8080.
+1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 80.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
 1. Set the **Monitors** to `tcp-routers`.
 
