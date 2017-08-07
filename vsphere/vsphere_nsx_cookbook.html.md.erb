@@ -204,13 +204,9 @@ To create monitors for pools, access the NSX Edges UI and perform the following 
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Service Monitoring**.
 1. Create a new monitor for `http-routers`, and keep the defaults.
-1. Set the Type to `HTTP`.
-1. Set the Method to `GET`.
-1. Set the URL to `/health`.
+1. Set the Type to `TCP`.
 1. Create a new monitor for `tcp-routers`, and keep the defaults.
-1. Set the type to `HTTP`.
-1. Set the Method to `GET`.
-1. Set the URL to `/health`.
+1. Set the type to `TCP`.
 1. Create a new monitor for `diego-brains`, and keep the defaults.
 1. Set the type to `TCP`.
 1. Create a new monitor for `ert-mysql-proxy`, and keep the defaults.
