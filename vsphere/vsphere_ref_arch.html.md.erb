@@ -90,14 +90,15 @@ Shared storage is a requirement for PCF. You can allocate networked storage to t
 
 Using VMware NSX SDN (software-defined networking) provides the following benefits:
 
-  * Distributed, hyper-local firewall capability per-installation through the built-in Edge Firewall
-  * High capacity, resilient, distributed load balancing per-installation through the NSX Load Balancer
-  * Network fencing
-  * Element obfuscation through the use of non-routed RFC-1918 networks behind the NSX Edge and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
-  * High repeatability of installations through the repeat use of all network and addressing conventions on the right hand side of the diagram (the Tenant Side)
-  * Automatic rule and ACL sharing via NSX Manager Global Ruleset
-  * Automatic HA pairing of NSX Edges, managed by NSX Manager
-  * Support for PCF Gorouter IP membership in the NSX Edge virtual load balancer pool by the BOSH CPI (not an Ops Manager feature)
+  * Network fencing of the entire PCF installation
+  * Distributed, hyper-local firewall capability per installation through the built-in ESG Firewall
+  * High capacity, resilient, distributed load balancing per installation through the ESG Load Balancer
+  * Element obfuscation through the use of non-routed RFC-1918 networks behind the ESG and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
+  * High repeatability of installations through the reuset use of all network and addressing conventions on the right hand side of the diagram (the Tenant Side)
+  * Centrally-managed rule and ACL sharing via NSX Manager Global Ruleset
+  * HA pairs of ESGs (optional) for extra levels of redundancy
+  * BOSH CPI can add/remove Gorouter members from load balanced pools in ESG (not an Ops Manager feature)
+  * ESG Security Group tagging managed by BOSH, to group like VMs per PCF installation into security groups
 
 <p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To fix this issue, override the default by navigating to the Networking section of the Elastic Runtime tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
 
@@ -105,31 +106,35 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 Each PCF installation consumes four (or more) networks with the NSX Edge, aligned to specific job types:
 
-- **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM.
-- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Diego cell VMs that Elastic Runtime deploys apps into, and it also hosts Elastic Runtime support components. 
-- **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
-- **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
-docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
+- **Infrastructure**: This small network hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM. Operators will access these resources to manage a PCF installation.
+- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Elastic Runtime tile (ERT), Diego Cells, Windows Cells and is the network apps are deployed onto. 
+- **Services**: This network has a large CIDR range. It hosts tiles (services) that are installed via Ops Manager and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT.
+- **Dynamic Services**: A single network granted to BOSH Director for use with tiles (services) that require an [on-demand](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is a special purpose network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
 - **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
 
-All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space to make provisioning repeatable. The NSX Edge translates between the tenant and service provider side networks using SNAT and DNAT.
+<p class="note"><strong>Note</strong>:All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space which are not advertised to the outside by the ESG to make provisioning repeatable. The ESG routes between the tenant and service provider side networks and connects traffic thru using SNAT and DNAT.</p>
 
-Provision each NSX Edge with at least four routable IP addresses from the service provider:
+For each PCF installation, provision an ESG with at least four routable IP addresses from the service provider:
 
 1. A static IP address by which NSX Manager manages the NSX Edge
 2. A static IP address for use as egress SNAT. Traffic from the tenant side exits the Edge on this IP address
 3. A static IP address for DNATs to Ops Manager
 4. A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
 
-In addition to these four, many more uses for IP addresses on the routed side of the NSX Edge exist. Pivotal recommends reserving a total of ten contiguous, static IP addresses per NSX Edge for future needs and flexibility.
+In addition to these, many more uses for IP addresses on the routed side of the ESG exist. Pivotal recommends reserving a total of ten contiguous static IP addresses per ESG for future needs and flexibility. Examples include:
 
-On the tenant side, each interface defined on the NSX Edge acts as the IP gateway for the network used on that port group. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `.1` for each:
+  * Load balancer VIP for TCP Routers (if deploying TCP routing for non 80/443 access to apps)
+  * Load Balancer VIP for DiegoBrains (if deploying in multiples)
+  * Load Balancer VIP for MySQL proxies (if deploying in multiples)
+  * Monitoring or metrics endpoint for platform monitoring
 
-- **Infra** (infrastructure) network: 192.168.10.0/26 
+On the tenant side, each interface defined on the ESG acts as the IP gateway for the network used. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `192.168.zzz.1` for each:
+
+- **Infrastructure** network: 192.168.10.0/26 
 - **Deployment** network: 192.168.20.0/22
 - **CF Tiles** network: 192.168.24.0/22
 - **Dynamic Services** network: 192.168.28.0/22
-- **IsoZone##** network: 192.168.32.0/22, Gateway at .1
+- **IsoZone##** network: 192.168.32.0/22
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
@@ -137,9 +142,9 @@ To view a larger version of this diagram, click [here](../images/vsphere-explode
 
 ##### <a name="dist-port-group"> </a> Distributed Port Groups
 
-vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (Distributed Port Group) for each interface provisioned on the NSX Edge. 
+vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (Distributed Port Group) for each interface provisioned on the ESG. 
 
-Alternatively, NSX Logical Switches can be used on the Tenant Side of this design, which leverages vWires, reducing the dependency on VLAN address space.
+NSX Logical Switches should be used on the Tenant Side of this design, which leverages vWires, reducing the dependency on available VLAN capacity.
 
 <%= image_tag('vsphere-port-groups.png') %>
 
@@ -149,11 +154,11 @@ To view a larger version of this diagram, click [here](../images/vsphere-port-gr
 
 #### <a id="one_arm_lb"></a> One Armed Load Balancing
 
-The NSX Edge can act as a stand-alone, one-armed load balancer. 
+The ESG can act as a stand-alone, one-armed load balancer. 
 
-This variant can improve performance and separate the dependence on the Edge that acts as NAT/SNAT/Firewall/Router by separating the load balancing function to a separate Edge deployed exclusively for use per installation. 
+This variant can improve performance and separate the dependence on the ESG that acts as NAT/SNAT/Firewall/Router by separating the load balancing function to a separate ESG deployed exclusively for use per installation. 
 
-In short, you divide the jobs between two Edges per install rather than one. To implement this architecture, you place a single interface (internal) of a new Edge on the Deployment network, enable the load balancing function, and DNAT to it through the boundary Edge.
+In short, you divide the jobs between two ESGs per install rather than one. To implement this architecture, you place a single interface (internal) of a new ESG on the Deployment network, enable the load balancing function, and DNAT to it through the boundary ESG.
 
 ## <a id="no-nsx"></a> Reference Architecture Without VMware NSX
 
@@ -162,13 +167,13 @@ The reference architecture for deploying production PCF on vSphere without VMwar
 ### <a id="no-nsx-features"></a> Networking Features
 
 - Load balancing is handled by an external service, such as a hardware appliance or a VM from a third party.
-- An external service also performs SSL termination.
-- You must set up firewalls for each zone or network inside the installation, rather than having the NSX Edge appliance span multiple networks. 
-- To obfuscate network addresses, you must configure a SNAT/DNAT and single or possible multiple VLANs from the routable network, rather than turn on the SNAT/DNAT functionality of the NSX Edge.
+- An external service also performs SSL termination unless that is passed thru to the Gorouters.
+- You must set up firewalls for each zone or network inside the installation, rather than having the ESG fence all the inside networks. 
+- There is no network fencing of the PCF installation, so RFC-1918 non-routable networks aren't used, DNAT/SNAT is not used and the address space consumed is from routable ranges already established in the datacenter.
 
 ### <a id="no-nsx-design"></a> Networking Design
 
-The more traditional approach without SDN would be to deploy a single VLAN for use with all of PCF, or possibly a pair of VLANs, one for infrastructure and one for PCF. As VLAN capacity is frequently limited and scarce, this design seeks to limit the need for VLANs to a functional minimum.
+The more traditional approach without SDN would be to deploy a single VLAN for use with all of PCF, or possibly a pair of VLANs, one for infrastructure and one for the rest of PCF. As VLAN capacity is frequently limited and scarce, this design seeks to limit the need for VLANs to a functional minimum.
 
 <%= image_tag('vsphere-no-nsx.png') %>
 
@@ -181,19 +186,19 @@ In this example, the firewall and load balancer functions run outside of vSphere
 
 In a typical installation, you assign each of these port groups to a VLAN out of the datacenter pool, and a routable IP address segment. Routing functions are handled by switching layers outside of vSphere, such as a top-of-rack (TOR) or end-of-row (EOR) switch/router appliance.
 
-It is still valid to deploy all the networks shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
+It is valid to deploy more networks than these two, up to and including those shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
 
 ## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
 
-If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each.
+If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each. The key point to to try to get to three AZs if at all possible, as this reduces future pain around trying to grow a PCF. 
 
-To reduce resource use even further, you can place all hosts into a single cluster with VMware DRS and HA (high availability) enabled.
+To reduce resource use even further, you can place all hosts into a single cluster with VMware DRS and HA (high availability) enabled. Here's an exaple of that approach, using resource pools in the single cluster to emulate (spoof) a three cluster design. While the resource pools actually do little more that organize the VMs, it forces a habit of deploying PCF constructs in threes, which is desirable.
 
 <%= image_tag('vsphere-single-cluster.png') %>
 
 To view a larger version of this diagram, click [here](../images/vsphere-single-cluster.png).
 
-A two-cluster architecture may offer useful symmetry at the vSphere level, but PCF works best when it deploys resources in odd numbers. A two-cluster configuration would force the operator into aligning odd-numbered components into two AZs, which does not work well for PCF internal voting algorithms. If you do not want to consume three clusters for PCF, using one works better than using two.
+You may be tempted to consider a two cluster architecture. A two cluster architecture may offer useful symmetry at the vSphere level, but PCF works best when it deploys resources in odd numbers (1 - 3 - 5). A two-cluster configuration would force the operator into aligning odd-numbered components into even numbered containers, which does not work well for PCF internal voting algorithms. If you do not want to consume three clusters for PCF, using one cluster works better than using two.
 
 ### <a id="single-cluster-design"></a> Networking Design
 
@@ -205,7 +210,7 @@ Pivotal recommends mapping all datastores used by PCF to all of the hosts in a s
 
 To avoid downtime, some PCF customer scenarios demand a multi-datacenter architecture that spreads deployment resources across more than one physical location. A multi-datacenter architecture can support the hardware, power source, and geographic redundancy needed to guarantee high availability.
 
-One interesting strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components (such as consul) in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this would call for five consul VMs, so each site has at least two if not the third. DRS anti-affinity rules can be used here (set at the IaaS level) to force like VMs apart for best effect.
+One interesting strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this would call for five VMs, so each site has at least two if not the third. DRS anti-affinity rules can be used here (set at the IaaS level) to force like VMs apart for best effect.
 
 The two main ways of designing a multi-datacenter PCF architecture is with [stretched clusters](#multi-datacenter-stretched), in which single logical clusters combine components in multiple physical locations, and [East/West clusters](#multi-datacenter-east-west), in which locally self-contained clusters are mirrored across multiple locations.
 
@@ -213,7 +218,7 @@ Both of these approaches have their own caveats, and you can combine either with
 
 ### <a id="multi-datacenter-stretched"></a> Multi-Datacenter vSphere With Stretched Clusters
 
-For this approach, you define logical clusters that contain components physically located in two or more sites. With four hosts, for example, build a a four-host cluster with two hosts in an East datacenter and two from the West. Apply networking such that all hosts see the same networks through a stretched layer 2 application. Or you can use NSX or another SDN solution to tunnel one location over the other.
+For this approach, you define logical clusters that contain components physically located in two or more sites. With four hosts, for example, build a a four-host cluster with two hosts in an East datacenter and two from the West. Apply networking such that all hosts see the same networks through a stretched layer 2 application. Or you can use NSX or another SDN solution to extend L2 networking via L3 connections.
 
 <%= image_tag('vsphere-multi-datacenter.png') %>
 
@@ -231,7 +236,7 @@ A stretched version of the base architecture splits three clusters across two si
 
 You can also deploy a stretched version of the [single-cluster](#single-cluster) model. This may be the more practical approach to achieving HA, since any stretched deployment already requires so many resources from two sites.
 
-As with any VMware installation, job scheduling works more efficiently when VMs have fewer cores, so you should configure many smaller Diego Cell VMs rather than a lower number of larger ones. If single or 2-core VMs can handle your apps, favor them over 4- and 8-core options. This is especially important with stretched deployments.
+As with any VMware installation, job scheduling works more efficiently when VMs have fewer cores, so you should configure many smaller Diego Cell VMs rather than a lower number of larger ones. If 2-core to 4-core VMs can handle your apps, favor them over 8- and 12-core options. This is especially important with stretched deployments.
 
 Network traffic is a challenge with stretched clusters, since app traffic may enter at any connection point in either location, but can only leave through a designated gateway. The architect should consider that app traffic landing in the East might have to flow out of the West, a "trombone effect" that forces additional traffic across datacenter links.
 
