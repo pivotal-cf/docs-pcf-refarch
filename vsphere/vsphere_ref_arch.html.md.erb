@@ -22,9 +22,9 @@ This document does not replace the [basic installation documentation] (../../cus
 
 This recommended architecture includes VMware vSphere, NSX-v and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing,  firewall, NAT/SNAT and load balaning. In the absence of NSX, see below for architectures that do not rely on the ESG.
 
-To use all features listed here, NSX Edge requires at least Advanced licensing from VMware.
+To use all features listed here, ESG requires at least Advanced licensing from VMware.
 
-For more information about installing and configuring NSX Edge for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere</a>.
+For more information about installing and configuring ESG for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere</a>.
 
 The diagram below shows an architecture for one PCF installations in vSphere clusters, segmented with Resource Pools. More Resource Pools can be added to the existing CLusters to stack more PCF installations into the same capacity.
 
@@ -55,7 +55,7 @@ To create a system following this architecture, do the following:
   - Dynamic service tiles (a network managed entirely by BOSH Director)
   - IsoZone##
 
-    Pivotal recommends NSX Logical Switches (vWires) for all networks used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the NSX Edge as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
+    Pivotal recommends NSX Logical Switches (vWires) for all networks used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the ESG as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
     Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
 
 ### <a id="scale"></a> Scaling
@@ -104,7 +104,7 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 #### <a id="network-design"></a> Networking Design
 
-Each PCF installation consumes four (or more) networks with the NSX Edge, aligned to specific job types:
+Each PCF installation consumes four (or more) networks with the ESG, aligned to specific job types:
 
 - **Infrastructure**: This small network hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM. Operators will access these resources to manage a PCF installation.
 - **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Elastic Runtime tile (ERT), Diego Cells, Windows Cells and is the network apps are deployed onto. 
@@ -116,7 +116,7 @@ Each PCF installation consumes four (or more) networks with the NSX Edge, aligne
 
 For each PCF installation, provision an ESG with at least four routable IP addresses from the service provider:
 
-1. A static IP address by which NSX Manager manages the NSX Edge
+1. A static IP address by which NSX Manager manages the ESG
 2. A static IP address for use as egress SNAT. Traffic from the tenant side exits the Edge on this IP address
 3. A static IP address for DNATs to Ops Manager
 4. A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
