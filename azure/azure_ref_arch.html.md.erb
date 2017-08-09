@@ -112,7 +112,7 @@ If you require multiple resource groups, you may refer to the [Multiple Resource
 
 ### <a id="base-network-layout"></a> Network Layout
 
-This diagram illustrates the network topology of the base reference architecture for PCF on Azure. In this deployment, you expose only a minimal number of public IPs and deploy only one resource group.
+This diagram illustrates the network topology of the base reference architecture for PCF on Azure. In this deployment, you expose only a minimal number of public IP addresses and deploy only one resource group.
 
 <%= image_tag('azure-net-topology-base.png') %>
 
@@ -127,13 +127,13 @@ The following table lists the network objects in PCF on Azure reference architec
   <th><strong>Notes</strong></th>
   <th><strong>Estimated Number</strong></th>
   <tr>
-  <td><strong>External Public IPs</strong></td>
+  <td><strong>External Public IP addresses</strong></td>
   <td>Use
    <ol>
-     <li>global IP for apps and system access</li>
+     <li>global IP address for apps and system access</li>
      <li>Ops Manager (or optional Jumpbox).</li>
    </ol>
-   Optionally, you can use a public IPs fro the ssh-proxy and tcp-router load balancers.
+   Optionally, you can use a public IP address for the ssh-proxy and tcp-router load balancers.
   </td>
   <td>1-4</td>
   </tr>
@@ -172,7 +172,7 @@ The following table lists the network objects in PCF on Azure reference architec
   </tr>
   <tr>
   <td><strong>Jumpbox</strong></td>
-  <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
+  <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
 </td>
   <td>1</td>
   </tr>
