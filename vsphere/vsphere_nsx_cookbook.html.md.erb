@@ -60,13 +60,13 @@ The following diagram provides an example of port groups used with an NSX Edge:
 
 <%= image_tag('vsphere-nsx-v4-portgroups.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-nsx-v4-portgroups.png).
+[View a larger version of this diagram](../images/vsphere-nsx-v4-portgroups.png).
 
 The following is an example of a network architecture deployment.
 
 <%= image_tag('vsphere-overview-arch.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-overview-arch.png).
+[View a larger version of this diagram](../images/vsphere-overview-arch.png).
 
 ## <a id="prereq"></a>Prep Step: Configure DNS and Network Prerequisites
 
@@ -140,7 +140,7 @@ These IP addresses can be pre-selected or reserved prior to deployment (recommen
 
 PCF requires SSL termination at the load balancer.
 
-<p class="note"><strong>Note</strong>: If you intend to pass SSL termination thru the load balancer directly to the Gorouters, you can skip the step below and just check <b>Enable SSL Passthru</b> on the <b>HTTPS Application Profile</b>.</p>
+<p class="note"><strong>Note</strong>: If you intend to pass SSL termination through the load balancer directly to the Gorouters, you can skip the step below and select <strong>Enable SSL Passthru</strong> on the <strong>HTTPS Application Profile</strong>.</p>
 
 To enable SSL termination at the load balancer in NSX Edge, access the NSX Edges UI and perform the following steps:
 
@@ -216,7 +216,7 @@ These monitors are selected during the next step when pools are created. A pool 
 
 ### <a id="pools"></a> Step 2.6: Create Pools of Multi-Element PCF Targets
 
-The following steps creates the pools of resources that NSX Edge is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain and ERT MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
+The following steps creates the pools of resources that NSX Edge is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain, and ERT MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
 
 #### <a id="http_router_pools"></a> Step 2.6a: Create Pool for `http-routers`
 

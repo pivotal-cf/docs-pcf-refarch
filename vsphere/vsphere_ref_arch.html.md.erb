@@ -20,29 +20,29 @@ This document does not replace the [basic installation documentation] (../../cus
 
 ## <a id="base-arch"></a> Base Reference Architecture 
 
-This recommended architecture includes VMware vSphere, NSX-v and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing,  firewall, NAT/SNAT and load balaning. In the absence of NSX, see below for architectures that do not rely on the ESG.
+This recommended architecture includes VMware vSphere, NSX-v, and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing, firewall, NAT/SNAT and load balaning. In the absence of NSX, see below for architectures that do not rely on the ESG.
 
 To use all features listed here, ESG requires at least Advanced licensing from VMware.
 
 For more information about installing and configuring ESG for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">NSX Edge Cookbook for Pivotal Cloud Foundry on vSphere</a>.
 
-The diagram below shows an architecture for one PCF installations in vSphere clusters, segmented with Resource Pools. More Resource Pools can be added to the existing CLusters to stack more PCF installations into the same capacity.
+The diagram below shows an architecture for one PCF installation in vSphere clusters, segmented with Resource Pools. More Resource Pools can be added to the existing Clusters to stack more PCF installations into the same capacity.
 
-This design supports long term use, capacity growth at the vSphere level, and maximum installation security through the ESG firewall. It allocates a minimum of 3 (or more) servers to each cluster, as recommended by vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
+This design supports long-term use, capacity growth at the vSphere level, and maximum installation security through the ESG firewall. It allocates a minimum of 3 (or more) servers to each cluster, as recommended by vSphere, and spreads PCF components across 3 (or another odd number) of clusters, as [recommended](../../concepts/high-availability.html) for PCF.
 
 <%= image_tag('vsphere-overview-arch.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-overview-arch.png).
+[View a larger version of this diagram](../images/vsphere-overview-arch.png).
 
 ### <a id="install"></a> Installation
 
 To create a system following this architecture, do the following:
 
-1. In vCenter, create (or identify existing) three clusters.<br/><br/>
+1. In vCenter, create or identify three existing clusters.
 
-1. Enable DRS on each cluster and set vMotion to fully automated. Populate each cluster with a Resource Pool for each PCF installation.
+1. Enable DRS on each cluster and set vMotion to **fully automated**. Populate each cluster with a Resource Pool for each PCF installation.
 
-1. For compute, populate each cluster with three (or more) ESXi hosts, making nine+ hosts for each installation. All installations collectively draw from the same nine hosts.
+1. For compute, populate each cluster with three or more ESXi hosts, making nine+ hosts for each installation. All installations collectively draw from the same nine+ hosts.
 
 1. In the PCF deployment, use Ops Manager to create three Availability Zones (AZs), each corresponding to one of the Resource Pools from each cluster.
 
@@ -60,7 +60,7 @@ To create a system following this architecture, do the following:
 
 ### <a id="scale"></a> Scaling
 
-You can easily scale up this architecture to support additional PCF installations with the same capacity, keeping each one resource-protected and separated.
+You can scale up this architecture to support additional PCF installations with the same capacity, keeping each resource-protected and separated.
 
 To support more PCF installations, scale this architecture vertically by adding Resource Pools to existing clusters. To add capacity to all PCF installations, scale it horizontally by adding ESXi hosts to the existing clusters in sets of three, one per cluster. 
 
@@ -74,17 +74,21 @@ Shared storage is a requirement for PCF. You can allocate networked storage to t
 
 * **Horizontal**: You grant all hosts access to all datastores, and assign a subset to each installation. For example, with 6 datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores, then provision PCF installation #1 to use stores `ds01` through `ds03`, and installation #2 to use `ds04` through `ds06`.
 
-* **Vertical**: You grant each cluster its own dedicated datastores, creating a 'cluster-aligned' storage strategy. vSphere VSAN is an example of this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
+* **Vertical**: You grant each cluster its own dedicated datastores, creating a "cluster-aligned" storage strategy. vSphere VSAN is an example of this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
-<p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. See (link to How to Migrate PCF to a New Datastore in vSPhere)</p>
+<p class="note"><strong>Note</strong>: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
-* **Capacity**: For producton use, Pivotal recommends allocating at least 8&nbsp;TB of data storage for a PCF installation, either as one 8&nbsp;TB stores or a number of smaller volumes adding up to 8&nbsp;TB. Small installations without many tiles can use 4-6&nbsp;TB. Frequently used development PCF installations may require far more storage as there will be much more use of new code and buildpacks. The primary consumer of storage is the NFS/WebDAV blobstore.
+####Capacity####
+
+For production use, Pivotal recommends allocating at least 8&nbsp;TB of data storage for a PCF installation, either as one 8&nbsp;TB store or a number of smaller volumes adding up to 8&nbsp;TB. Small installations without many tiles can use 4-6&nbsp;TB. Frequently-used development PCF installations may require far more storage as there will be much more use of new code and buildpacks. The primary consumer of storage is the NFS/WebDAV blobstore.
 
 <p class="note"><strong>Note</strong>: At time of publication, PCF does not support the use of vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-* **Type**: Pivotal recommends either block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for both ephemeral and persistent storage types used by PCF. All-flash-based storage and SSD-cached storage are highly desirable. Data deduplication and compression, if done in hardware at the storage array, are highly desirable. These technologies can drive down the need for storage capacity dramatically.
+####Type####
+
+Pivotal recommends either block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE. Redundant storage is highly recommended for both ephemeral and persistent storage types used by PCF. All-flash-based storage and SSD-cached storage are highly desirable. Data de-duplication and compression, if done in hardware at the storage array, are highly desirable. These technologies can dramatically reduce the need for storage capacity.
 
 ### <a id="networking"></a> Networking
 
@@ -94,7 +98,7 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
   * Distributed, hyper-local firewall capability per installation through the built-in ESG Firewall
   * High capacity, resilient, distributed load balancing per installation through the ESG Load Balancer
   * Element obfuscation through the use of non-routed RFC-1918 networks behind the ESG and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that need exposure
-  * High repeatability of installations through the reuset use of all network and addressing conventions on the right hand side of the diagram (the Tenant Side)
+  * High repeatability of installations through the reuse of all network and addressing conventions on the right-hand side of the diagram, the **Tenant Side**
   * Centrally-managed rule and ACL sharing via NSX Manager Global Ruleset
   * HA pairs of ESGs (optional) for extra levels of redundancy
   * BOSH CPI can add/remove Gorouter members from load balanced pools in ESG (not an Ops Manager feature)
@@ -107,12 +111,12 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 Each PCF installation consumes four (or more) networks with the ESG, aligned to specific job types:
 
 - **Infrastructure**: This small network hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM. Operators will access these resources to manage a PCF installation.
-- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Elastic Runtime tile (ERT), Diego Cells, Windows Cells and is the network apps are deployed onto. 
-- **Services**: This network has a large CIDR range. It hosts tiles (services) that are installed via Ops Manager and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT.
-- **Dynamic Services**: A single network granted to BOSH Director for use with tiles (services) that require an [on-demand](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is a special purpose network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
+- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Elastic Runtime tile (ERT), Diego Cells, and Windows Cells, and is the network apps are deployed onto. 
+- **Services**: This network has a large CIDR range. It hosts tiles (services) that are installed using Ops Manager and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT.
+- **Dynamic Services**: A single network granted to BOSH Director for use with tiles (services) that require an [on-demand](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is a special purpose network that is marked as "Services" with a checkbox in the vSphere Ops Manager Director tile.
 - **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
 
-<p class="note"><strong>Note</strong>:All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space which are not advertised to the outside by the ESG to make provisioning repeatable. The ESG routes between the tenant and service provider side networks and connects traffic thru using SNAT and DNAT.</p>
+<p class="note"><strong>Note</strong>:All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space which are not advertised to the outside by the ESG to make provisioning repeatable. The ESG routes between the tenant and service provider side networks and connects traffic through using SNAT and DNAT.</p>
 
 For each PCF installation, provision an ESG with at least four routable IP addresses from the service provider:
 
@@ -121,11 +125,11 @@ For each PCF installation, provision an ESG with at least four routable IP addre
 3. A static IP address for DNATs to Ops Manager
 4. A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
 
-In addition to these, many more uses for IP addresses on the routed side of the ESG exist. Pivotal recommends reserving a total of ten contiguous static IP addresses per ESG for future needs and flexibility. Examples include:
+In addition to these, many more uses for IP addresses on the routed side of the ESG exist. Pivotal recommends reserving a total of ten contiguous static IP addresses per ESG for future needs and flexibility. Examples include the following:
 
-  * Load balancer VIP for TCP Routers (if deploying TCP routing for non 80/443 access to apps)
-  * Load Balancer VIP for DiegoBrains (if deploying in multiples)
-  * Load Balancer VIP for MySQL proxies (if deploying in multiples)
+  * Load balancer VIP for TCP Routers, if deploying TCP routing for non 80/443 access to apps
+  * Load Balancer VIP for DiegoBrains, if deploying in multiples
+  * Load Balancer VIP for MySQL proxies, if deploying in multiples
   * Monitoring or metrics endpoint for platform monitoring
 
 On the tenant side, each interface defined on the ESG acts as the IP gateway for the network used. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `192.168.zzz.1` for each:
@@ -138,7 +142,7 @@ On the tenant side, each interface defined on the ESG acts as the IP gateway for
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-exploded-edge.png).
+[View a larger version of this diagram](../images/vsphere-exploded-edge.png).
 
 ##### <a name="dist-port-group"> </a> Distributed Port Groups
 
@@ -148,11 +152,11 @@ NSX Logical Switches should be used on the Tenant Side of this design, which lev
 
 <%= image_tag('vsphere-port-groups.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-port-groups.png).
+[View a larger version of this diagram](../images/vsphere-port-groups.png).
 
 ### <a id="highperf"></a> High Performance Variants
 
-#### <a id="one_arm_lb"></a> One Armed Load Balancing
+#### <a id="one_arm_lb"></a> One-Armed Load Balancing
 
 The ESG can act as a stand-alone, one-armed load balancer. 
 
@@ -167,9 +171,9 @@ The reference architecture for deploying production PCF on vSphere without VMwar
 ### <a id="no-nsx-features"></a> Networking Features
 
 - Load balancing is handled by an external service, such as a hardware appliance or a VM from a third party.
-- An external service also performs SSL termination unless that is passed thru to the Gorouters.
+- An external service also performs SSL termination unless that is passed through to the Gorouters.
 - You must set up firewalls for each zone or network inside the installation, rather than having the ESG fence all the inside networks. 
-- There is no network fencing of the PCF installation, so RFC-1918 non-routable networks aren't used, DNAT/SNAT is not used and the address space consumed is from routable ranges already established in the datacenter.
+- There is no network fencing of the PCF installation, so RFC-1918 non-routable networks are not used, DNAT/SNAT is not used, and the address space consumed is from routable ranges already established in the datacenter.
 
 ### <a id="no-nsx-design"></a> Networking Design
 
@@ -177,12 +181,12 @@ The more traditional approach without SDN would be to deploy a single VLAN for u
 
 <%= image_tag('vsphere-no-nsx.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-no-nsx.png).
+[View a larger version of this diagram](../images/vsphere-no-nsx.png).
 
 In this example, the firewall and load balancer functions run outside of vSphere, on generic devices that most datacenters provide. The PCF installation is bound to two port groups provided by a DVS on ESXi, each of which aligns to different job types:
 
   1. **Infra**: CPI, BOSH, and Ops Manager VMs that communicate with the IaaS layer
-  2. **PCF**: the deployment network for all tiles, including ERT
+  2. **PCF**: The deployment network for all tiles, including ERT
 
 In a typical installation, you assign each of these port groups to a VLAN out of the datacenter pool, and a routable IP address segment. Routing functions are handled by switching layers outside of vSphere, such as a top-of-rack (TOR) or end-of-row (EOR) switch/router appliance.
 
@@ -190,15 +194,15 @@ It is valid to deploy more networks than these two, up to and including those sh
 
 ## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
 
-If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each. The key point to to try to get to three AZs if at all possible, as this reduces future pain around trying to grow a PCF. 
+If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each. The key point is to try to get to three AZs if at all possible, as this reduces future pain around trying to grow a PCF. 
 
-To reduce resource use even further, you can place all hosts into a single cluster with VMware DRS and HA (high availability) enabled. Here's an exaple of that approach, using resource pools in the single cluster to emulate (spoof) a three cluster design. While the resource pools actually do little more that organize the VMs, it forces a habit of deploying PCF constructs in threes, which is desirable.
+To reduce resource use even further, you can place all hosts into a single cluster with VMware DRS and HA (high availability) enabled. The following is an example of that approach, using resource pools in the single cluster to emulate (spoof) a three-cluster design. While the resource pools actually do little more that organize the VMs, it forces a habit of deploying PCF constructs in threes, which is desirable.
 
 <%= image_tag('vsphere-single-cluster.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-single-cluster.png).
+[View a larger version of this diagram](../images/vsphere-single-cluster.png).
 
-You may be tempted to consider a two cluster architecture. A two cluster architecture may offer useful symmetry at the vSphere level, but PCF works best when it deploys resources in odd numbers (1 - 3 - 5). A two-cluster configuration would force the operator into aligning odd-numbered components into even numbered containers, which does not work well for PCF internal voting algorithms. If you do not want to consume three clusters for PCF, using one cluster works better than using two.
+You may be tempted to consider a two-cluster architecture. A two-cluster architecture may offer useful symmetry at the vSphere level, but PCF works best when it deploys resources in odd numbers (1 - 3 - 5). A two-cluster configuration would force the operator into aligning odd-numbered components into even numbered containers, which does not work well for PCF internal voting algorithms. If you do not want to consume three clusters for PCF, using one cluster works better than using two.
 
 ### <a id="single-cluster-design"></a> Networking Design
 
@@ -210,7 +214,7 @@ Pivotal recommends mapping all datastores used by PCF to all of the hosts in a s
 
 To avoid downtime, some PCF customer scenarios demand a multi-datacenter architecture that spreads deployment resources across more than one physical location. A multi-datacenter architecture can support the hardware, power source, and geographic redundancy needed to guarantee high availability.
 
-One interesting strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this would call for five VMs, so each site has at least two if not the third. DRS anti-affinity rules can be used here (set at the IaaS level) to force like VMs apart for best effect.
+One interesting strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this would call for five VMs, so each site has at least two if not the third. DRS anti-affinity rules can be used here, set at the IaaS level, to force like VMs apart for best effect.
 
 The two main ways of designing a multi-datacenter PCF architecture is with [stretched clusters](#multi-datacenter-stretched), in which single logical clusters combine components in multiple physical locations, and [East/West clusters](#multi-datacenter-east-west), in which locally self-contained clusters are mirrored across multiple locations.
 
@@ -218,13 +222,13 @@ Both of these approaches have their own caveats, and you can combine either with
 
 ### <a id="multi-datacenter-stretched"></a> Multi-Datacenter vSphere With Stretched Clusters
 
-For this approach, you define logical clusters that contain components physically located in two or more sites. With four hosts, for example, build a a four-host cluster with two hosts in an East datacenter and two from the West. Apply networking such that all hosts see the same networks through a stretched layer 2 application. Or you can use NSX or another SDN solution to extend L2 networking via L3 connections.
+For this approach, you define logical clusters that contain components physically located in two or more sites. With four hosts, for example, build a a four-host cluster with two hosts in an East datacenter and two from the West. Apply networking such that all hosts see the same networks through a stretched layer 2 application, or use NSX or another SDN solution to extend L2 networking via L3 connections.
 
 <%= image_tag('vsphere-multi-datacenter.png') %>
 
-To view a larger version of this diagram, click [here](../images/vsphere-multi-datacenter.png).
+[View a larger version of this diagram](../images/vsphere-multi-datacenter.png).
 
-PCF and BOSH treat the stretched cluster as an AZ, and make the same demands on it that they do with any other AZ. So the hosting, networking, and storage components within the stretched cluster must perform with normal latency and connectivity.
+PCF and BOSH treat the stretched cluster as an AZ, and make the same demands on it that they do with any other AZ. The hosting, networking, and storage components within the stretched cluster must perform with normal latency and connectivity.
 
 For seamless operation, hosts must share all datastores, and you need to replicate storage across sites. Otherwise, vMotion cannot move VMs freely across hosts for maintenance or DRS.
 
