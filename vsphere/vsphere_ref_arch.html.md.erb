@@ -146,6 +146,8 @@ On the tenant side, each interface defined on the ESG acts as the IP gateway for
 
 [View a larger version of this diagram](../images/vsphere-exploded-edge.png).
 
+<p class="note"><strong>Note</strong>: Note: Please review the container-to-container settings in your installation for any IP address range conflits with the enterprise addressing scheme in use. Change the range to a non-conflicting range as needed.</p>
+
 ##### <a name="dist-port-group"> </a> Distributed Port Groups
 
 vSphere DVS (Distributed Virtual Switching) is recommended for all Clusters used by PCF. NSX will create a DPG (Distributed Port Group) for each interface provisioned on the ESG. 
