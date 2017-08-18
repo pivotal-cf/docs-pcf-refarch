@@ -107,7 +107,7 @@ Each PCF installation consumes four (or more) networks with the NSX Edge, aligne
 
 - **Infrastructure**: This inward-facing network has a small CIDR range and hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as Jumpbox VM.
 - **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Diego cell VMs that Elastic Runtime deploys apps into, and it also hosts Elastic Runtime support components. 
-- **CF Tiles**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
+- **Services**: This network (or multiple networks) has a large CIDR range. It hosts services that are installed with Ops Manager tiles and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT. A more involved approach would be to deploy multiple**CF-Tiles-#** networks, one for each tile or one for each type of tile. For example, a network for databases, a network for message busses and so on. 
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an [on-demand](http://
 docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is the only network that is marked as "Services" with a check box in the vSphere Ops Manager Director tile.
 - **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
@@ -127,13 +127,15 @@ On the tenant side, each interface defined on the NSX Edge acts as the IP gatewa
 
 - **Infra** (infrastructure) network: 192.168.10.0/26 
 - **Deployment** network: 192.168.20.0/22
-- **CF Tiles** network: 192.168.24.0/22
+- **Services** network: 192.168.24.0/22
 - **Dynamic Services** network: 192.168.28.0/22
 - **IsoZone##** network: 192.168.32.0/22, Gateway at .1
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
 To view a larger version of this diagram, click [here](../images/vsphere-exploded-edge.png).
+
+<p class="note"><strong>Note</strong>: Review the container-to-container settings in your installation for any IP address range conflicts with the enterprise addressing scheme in use. Change the range to a non-conflicting range as needed.</p>
 
 ##### <a name="dist-port-group"> </a> Distributed Port Groups
 
