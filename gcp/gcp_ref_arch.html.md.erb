@@ -30,6 +30,8 @@ The following table lists the components that are part of a reference architectu
 |**CF Database**| Reference architecture uses GCP Cloud SQL rather than internal databases. Configure your database with a strong password and limit access only to components that require database access. |
 |**CF Blob Storage and Buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
 |**Services**|Deployed on the PCF managed services subnet. Each service is deployed to each availability zone. |
+|**Dynamic Services**| Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service. It is recommended to provision the multi-tenant dynamic services subnet as a /22 block.|
+
 
 ## <a id="common_network"></a> Alternative GCP Network Layouts for PCF ##
 
