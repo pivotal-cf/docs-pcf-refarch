@@ -266,7 +266,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 1. Create a new Virtual Server named `GoRtr-HTTP` and select Application Profile `PCF-HTTP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (HTTP) and set **Port** to match the protocol (80).
-	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a>). This connects this VIP to the pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a>. This connects this VIP to the pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
 	*	Switch to **Advanced Tab** on this Virtual Server.
 	*	Use the green plus to add/attach three Application Rules to this Virtual Server: 
@@ -284,6 +284,14 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
      * option httplog
      * reqadd X-Forwarded-Proto:\ https
     <p class="note"><strong>Note</strong>: Be careful to match protocol rules to the protocol `VIP- HTTP` to `HTTP` and `HTTPS` to `HTTPS`.</p>
+
+
+1. Create a new Virtual Server named `TCPRtrs` and select Application Profile `PCF-TCP`.
+	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
+	*	Set **Protocol** to match the **Application Profile** protocol (TCP) and set **Port** to match the protocol (5000).
+	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a> (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
+	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
+    <%= image_tag('vsphere-tcprouter-vip.png') %>
 
 1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `PCF-HTTPS`.
 	*	Use **Select IP Address** to select the same IP address address to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP address to use as the VIP.
