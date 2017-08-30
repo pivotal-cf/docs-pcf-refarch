@@ -72,9 +72,13 @@ The following table lists the components that are part of a base reference archi
  <td>Reference architecture uses 4 S3 buckets: buildpacks, droplets, packages, and resources.</td>
 </tr> 
 <tr>
- <td><strong>Service Tiles</strong></td>  
+ <td><strong>Service Tiles</strong></td>
  <td>Deployed on all three service subnets, one per AZ.</td>
-</tr> 
+</tr>
+<tr>
+ <td><strong>Dynamic Services</strong></td>
+ <td>Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service. It is recommended to provision the multi-tenant dynamic services subnet as a /22 block.</td>
+</tr>
 <tr>
 	<td><strong>Service User & Roles</strong></td>
 	<td>One IAM role and one IAM user are recommended: the IAM role for Terraform, and the IAM user for Ops Manager and BOSH. Consult the following list:<br><br>
