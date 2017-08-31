@@ -37,11 +37,12 @@ The ESG can scale to accommodate very large PCF deployments as needed.
 
 This cookbook focuses on a single-site deployment and makes the following design assumptions:
 
--	There are four non-routable networks on the tenant (inside) side of the ESG.
+-	There are five non-routable networks on the tenant (inside) side of the ESG.
    - The **Infra** network is used to deploy Ops Manager and BOSH Director.
    - The **Deployment** network is used exclusively by Elastic Runtime to deploy DEAs/Cells that host apps and related elements.
    - The **CF Tiles** network is used for all other deployed tiles in a PCF installation.
    - The **Services** network is used by BOSH Director for service tiles.
+   - The **Container-to-Container** network is used for container to container communication in the Cells.
 -	There is a single service provider (outside) interface on the ESG that provides Firewall, Load Balancing and NAT/SNAT services.
 - The service provider (outside) interface is connected appropriately to the network backbone of the environment, as either routed or non-routed depending on the design. This cookbook does not cover provisioning of the uplink interface.
 -	Routable IP addresses should be applied to the service provider (outside) interface of the ESG. Pivotal recommends that you apply 10 consecutive routable IP addresses to each ESG.
@@ -68,6 +69,12 @@ The following is an example of a network architecture deployment.
 
 [View a larger version of this diagram](../images/vsphere-overview-arch.png).
 
+The following diagram illustrates container-to-container networking. The overlay addresses are wrapped and transported using the underlay deployment subnet.
+
+<%= image_tag('vsphere-pcf-c2c-networking.png') %>
+
+[View a larger version of this diagram](../images/vsphere-pcf-c2c-networking.png).
+
 ## <a id="prereq"></a>Prep Step: Configure DNS and Network Prerequisites
 
 As a prerequisite, create wildcard DNS entries for system and apps domains in PCF. Map these domains to the selected IP address on the uplink (outside) interface of the ESG in your DNS server. 
@@ -85,6 +92,7 @@ In addition, assign the following IP addresses and address ranges within your ne
   *	192.168.20.0/22 = Deployment Network for Elastic Runtime Tile (ERT)
   *	192.168.24.0/22 = CF Tiles Network for all Tiles besides ERT
   * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
+  * 10.255.0.0/16 = Container-to-Container network for intercontainer communication.
 
 ## <a id="firewall"></a>Step 1: Configure Firewall
 
