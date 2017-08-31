@@ -5,7 +5,7 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Azure. 
+This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Azure.
 
 Azure does not provide resources in a way that translates directly to PCF availability zones. Instead, Azure provides high availability through fault domains and [availability sets](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability).
 
@@ -93,7 +93,7 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Dynamic Services</strong></td>  
- <td>Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service.</td>
+ <td>Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service. Pivotal recommends provisioning the multi-tenant dynamic services subnet as a /22 block.</td>
 </tr>  
 </table>
 
