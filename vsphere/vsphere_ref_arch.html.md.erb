@@ -54,6 +54,7 @@ To create a system following this architecture, do the following:
   - Service tiles (one or more)
   - Dynamic service tiles (a network managed entirely by BOSH Director)
   - IsoZone##
+  - Container-to-Container Networking (C2C)
 
     Pivotal recommends NSX Logical Switches (vWires) for all networks used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the ESG as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
     Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
@@ -108,7 +109,7 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 <p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To fix this issue, override the default by navigating to the Networking section of the Elastic Runtime tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
 
-#### <a id="network-design"></a> Networking Design
+#### <a id="networking-design"></a> Networking Design
 
 Each PCF installation consumes four (or more) networks with the ESG, aligned to specific job types:
 
@@ -117,6 +118,7 @@ Each PCF installation consumes four (or more) networks with the ESG, aligned to 
 - **Services**: This network has a large CIDR range. It hosts tiles (services) that are installed using Ops Manager and managed by BOSH. A simple approach is to use this network for all PCF tiles except ERT.
 - **Dynamic Services**: A single network granted to BOSH Director for use with tiles (services) that require an [on-demand](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) (dynamic) address space for deployment. This is a special purpose network that is marked as "Services" with a checkbox in the vSphere Ops Manager Director tile.
 - **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a new network space independent of the ERT installation.
+- **Container-to-Container Networking**: A single network dedicated to communication between containers.
 
 <p class="note"><strong>Note</strong>:All of these networks are considered "inside" or "tenant-side" networks, and use non-routable RFC-1918 network space which are not advertised to the outside by the ESG to make provisioning repeatable. The ESG routes between the tenant and service provider side networks and connects traffic through using SNAT and DNAT.</p>
 
@@ -141,6 +143,7 @@ On the tenant side, each interface defined on the ESG acts as the IP gateway for
 - **Services** network: 192.168.24.0/22
 - **Dynamic Services** network: 192.168.28.0/22
 - **IsoZone##** network: 192.168.32.0/22
+- **Container-to-Container Networking** network: 10.255.0.0/16
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
