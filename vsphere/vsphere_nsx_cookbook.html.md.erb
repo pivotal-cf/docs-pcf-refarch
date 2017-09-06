@@ -161,7 +161,7 @@ To enable the load balancer, access the NSX Edges UI and perform the following s
 
 ### <a id="create_app"></a> Step 2.3: Create Application Profiles
 
-The Application Profiles allow advanced `X-Forward` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
+The Application Profiles allow advanced `x-forwarded` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
 
 To create the application profiles, access the NSX Edges UI and perform the following steps:
 
@@ -181,12 +181,12 @@ To create the application profiles, access the NSX Edges UI and perform the foll
 
 ### <a id="create_app_rules"></a> Step 2.4: Create Application Rules
 
-In order for the NSX Edge to perform proper `X-Forwarded` requests, you need to add a few HAProxy directives to the NSX Edge Application Rules. NSX supports most directives that HAProxy supports.
+In order for the NSX Edge to perform proper `x-forwarded` requests, you need to add a few HAProxy directives to the NSX Edge Application Rules. NSX supports most directives that HAProxy supports.
 
 To create the application rules, access the NSX Edges UI and perform the following steps:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Application Rules**. 
-1. Copy and paste the table entries below into each field.
+1. Copy and paste the table entries below into each field, one per rule.
 
     |Rule Name|Script|
     |---|---|
