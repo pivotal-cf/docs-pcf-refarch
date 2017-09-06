@@ -169,7 +169,7 @@ To enable the load balancer, access the ESG UI and perform the following steps:
 
 ### <a id="create_app"></a> Step 2.3: Create Application Profiles
 
-The Application Profiles allow advanced `X-Forward` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
+The Application Profiles allow advanced `x-forwarded` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
 
 To create the application profiles, access the ESG UI and perform the following steps:
 
@@ -189,12 +189,12 @@ To create the application profiles, access the ESG UI and perform the following 
 
 ### <a id="create_app_rules"></a> Step 2.4: Create Application Rules
 
-In order for the ESG to perform proper `X-Forwarded` requests, you need to add a few HAProxy directives to the ESG Application Rules. NSX supports most directives that HAProxy supports.
+In order for the ESG to perform proper `x-forwarded` requests, you need to add a few HAProxy directives to the ESG Application Rules. NSX supports most directives that HAProxy supports.
 
 To create the application rules, access the ESG UI and perform the following steps:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Application Rules**. 
-1. Copy and paste the table entries below into each field.
+1. Copy and paste the table entries below into each field, one per rule.
 
     |Rule Name|Script|
     |---|---|
@@ -212,9 +212,13 @@ To create monitors for pools, access the ESG UI and perform the following steps:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Service Monitoring**.
 1. Create a new monitor for `http-routers`, and keep the defaults.
-1. Set the Type to `TCP`.
+1. Set the Type to `HTTP`.
+1. Set the Method to `GET`.
+1. Set the URL to `/health`.
 1. Create a new monitor for `tcp-routers`, and keep the defaults.
-1. Set the type to `TCP`.
+1. Set the type to `HTTP`.
+1. Set the Method to `GET`.
+1. Set the URL to `/health`.
 1. Create a new monitor for `diego-brains`, and keep the defaults.
 1. Set the type to `TCP`.
 1. Create a new monitor for `ert-mysql-proxy`, and keep the defaults.
@@ -302,7 +306,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
     <%= image_tag('vsphere-tcprouter-vip.png') %>
 
 1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `PCF-HTTPS`.
-	*	Use **Select IP Address** to select the same IP address address to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP address to use as the VIP.
+	*	Use **Select IP Address** to select the same IP address to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP address to use as the VIP.
 	*	Set **Protocol** to TCP and set **Port** to 2222.
 	*	Set **Default Pool** to the pool name set in the <a href="#diego_brain_pools">above procedure</a> (`diego-brains`). This connects this VIP to that pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
