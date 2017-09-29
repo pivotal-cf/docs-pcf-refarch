@@ -229,3 +229,17 @@ To deploy PCF on Azure with multiple resource groups, you can define custom role
    "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"]
   }
   </pre>
+
+### <a id="multiple_resource_groups_multiple_load_balancer"></a> Multiple Resource Group and Multiple Load Balancer Deployment
+
+This diagram illustrates the case where you want to deploy multiple load balancers with your multi resource group deployment.
+
+The key design points of this deployment are the following:
+
+* There are two load balancers to the Go Router. The first ALB is for API access, which utilizes a private IP. The system domain should resolve to this ALB. The second ALB is for application access, which can either use a public or private IP. The apps domain should resolve to this ALB.
+
+* At this time, Azure does not allow the Go Routers to be members of more than one Azure load balancer (ALB) member pool for the same port(s) (i.e. 80 & 443). This requires an additional reverse proxy to front the Go Routers to allow it to expose traffic on these ports for the system domain.
+
+<%= image_tag('azure-multi-resgroup-multi-lb.png') %>
+
+[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-multi-resgroup-multi-lb.png).
