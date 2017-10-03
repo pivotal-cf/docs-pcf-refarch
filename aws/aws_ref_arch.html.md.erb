@@ -272,3 +272,18 @@ The following table lists the network objects in this reference architecture.
 </table>
 
 
+### <a id="vpn_peering"></a> Integrate PCF with customer data center through VPN
+
+At times, applications on PCF need to access on-premise data. The connection between an AWS VPC and an on-premise datacenter is made through [VPN peering](http://docs.aws.amazon.com/AmazonVPC/latest/NetworkAdminGuide/Introduction.html). When employing non-VPN peering, there are several points to consider:
+
+1. Assign routable IP addresses with the following in mind: 
+  * It may not be realistic to request multiple routable /22 address spaces, due to IP exhaustion.
+  * Using different VPC address spaces can cause snowflakes deployments and present difficulties in automation.
+  * Only make the load balancer, NAT devices, and Ops Manager routable.
+  * PCF components can route egress through a NAT instance. As a result, operators do not need to assign routable IPs to PCF components.
+2. Inbound traffic from the datacenter should come through an <a href="http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-internal-load-balancers.html">internal load balancer</a>.
+3. Outbound traffic to the datacenter should go through AWS NAT instances.
+
+<%= image_tag('aws-vpn.png') %>
+
+[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/aws-vpn.png).
