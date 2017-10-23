@@ -39,7 +39,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Ops Manager</strong></td>  
- <td>Deployed on one of the three public subnets and accessible by FQDN or through an optional Jumpbox.</td>
+ <td>Deployed on one of the three public subnets and accessible by FQDN or through an optional jumpbox.</td>
 </tr> 
 <tr>
  <td><strong>BOSH Director</strong></td>  
@@ -47,7 +47,7 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Elastic Load Balancers - HTTP, HTTPS, and SSL</strong></td>  
- <td>Required. Load balancer that handles incoming HTTP, HTTPS, and SSL traffic and forwards them to the Gorouter(s). Deployed on all three public subnets.</td>
+ <td>Required. Load balancer that handles incoming HTTP, HTTPS, and SSL traffic and forwards them to the Gorouters. Deployed on all three public subnets.</td>
 </tr> 
 <tr>
  <td><strong>Elastic Load Balancers - SSH</strong></td>  
@@ -55,15 +55,15 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Gorouters</strong></td>  
- <td>Accessed through the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
+ <td>Accessed through the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three Elastic Runtime subnets, one per AZ.</td>
 </tr> 
 <tr>
  <td><strong>Diego Brains</strong></td>  
- <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Elastic Load Balancers. Deployed on all three ERT subnets, one per AZ.</td>
+ <td>Required. However, the SSH container access functionality is optional and enabled through the SSH Elastic Load Balancers. Deployed on all three Elastic Runtime subnets, one per AZ.</td>
 </tr> 
 <tr>
  <td><strong>TCP Routers</strong></td>  
- <td>Optional feature for TCP routing. Deployed on all three ERT subnets, one per AZ.</td>
+ <td>Optional feature for TCP routing. Deployed on all three Elastic Runtime subnets, one per AZ.</td>
 </tr> 
 <tr>
  <td><strong>CF Database</strong></td>  
@@ -120,7 +120,7 @@ The following table lists the network objects in this reference architecture.
    <ul>
      <li>1 x (/24) infrastructure (BOSH Director) subnet</li>
      <li>3 x (/24) public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
-     <li>3 x (/20) ERT subnets (Gorouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
+     <li>3 x (/20) Elastic Runtime subnets (Gorouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
      <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
      <li>3 x (/22) dynamic services subnets (used for on-demand services), one per AZ</li>
      <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
@@ -134,10 +134,10 @@ The following table lists the network objects in this reference architecture.
   <td>This reference architecture requires 4 route tables: one for the public subnet, and one each for all 3 private subnets across 3 AZs. Consult the following list:<br><br>
   	<ul>
   	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for OpsManager and the NAT Gateway.</li>
-  	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and ERT.</li>
+  	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and Elastic Runtime.</li>
   	</ul>
     For more information, see the Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_table_associations.tf">script</a> that performs the route table association. 
-  	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP, it is accessible from the Internet through the public IP; for example, Ops Manager. ERT needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
+  	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP address, it is accessible from the Internet through the public IP address; for example, Ops Manager. Elastic Runtime needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
   </td>
   <td>4</td>
   </tr>
@@ -268,7 +268,7 @@ The following table lists the network objects in this reference architecture.
 </tr>
 <tr>
 <td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox. 
+<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox. 
 </td>
 <td>1</td>
 </tr>
@@ -283,7 +283,7 @@ At times, applications on PCF need to access on-premise data. The connection bet
   * It may not be realistic to request multiple routable /22 address spaces, due to IP exhaustion.
   * Using different VPC address spaces can cause snowflakes deployments and present difficulties in automation.
   * Only make the load balancer, NAT devices, and Ops Manager routable.
-  * PCF components can route egress through a NAT instance. As a result, operators do not need to assign routable IPs to PCF components.
+  * PCF components can route egress through a NAT instance. As a result, operators do not need to assign routable IP addresses to PCF components.
 2. Inbound traffic from the datacenter should come through an <a href="http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-internal-load-balancers.html">internal load balancer</a>.
 3. Outbound traffic to the datacenter should go through AWS NAT instances.
 

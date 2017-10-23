@@ -39,7 +39,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Ops Manager</strong></td>
- <td>Deployed on the infrastructure network and accessible by FQDN or through an optional Jumpbox.</td>
+ <td>Deployed on the infrastructure network and accessible by FQDN or through an optional jumpbox.</td>
 </tr>
 <tr>
  <td><strong>BOSH Director</strong></td>
@@ -47,7 +47,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Application Load Balancer</strong></td>
- <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP, and SSL traffic and forwards them to the Gorouter(s). Load balancers are outside the scope of this document.</td>
+ <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP, and SSL traffic and forwards them to the Gorouters. Load balancers are outside the scope of this document.</td>
 </tr>
 <tr>
  <td><strong>SSH Load Balancer</strong></td>
@@ -55,15 +55,15 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Gorouters</strong></td>
- <td>Accessed through the Application Load Balancer. Deployed on the ERT network, one per AZ.</td>
+ <td>Accessed through the Application Load Balancer. Deployed on the Elastic Runtime network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>Diego Brains</strong></td>
- <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Load Balancers. Deployed on the ERT network, one per AZ.</td>
+ <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Load Balancers. Deployed on the Elastic Runtime network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>TCP Routers</strong></td>
- <td>Optional feature for TCP routing. Deployed on the ERT network, one per AZ.</td>
+ <td>Optional feature for TCP routing. Deployed on the Elastic Runtime network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>CF Database</strong></td>
@@ -102,7 +102,7 @@ The following table lists the network objects in this reference architecture.
   <th><strong>Estimated Number</strong></th>
   <tr>
   <td><strong>Floating IP addresses</strong></td>
-  <td>Two per deployment, one assigned to Ops Manager, the other to your Jumpbox. </td>
+  <td>Two per deployment, one assigned to Ops Manager, the other to your jumpbox. </td>
   <td>2</td>
   </tr>
   <tr>
@@ -115,7 +115,7 @@ The following table lists the network objects in this reference architecture.
   <td>The reference architecture requires the following Tenant Networks:
    <ul>
      <li>1 x (/24) <strong>Infrastructure</strong> (Ops Manager, BOSH Director, Jumpbox).</li>
-     <li>1 x (/20) <strong>ERT</strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
+     <li>1 x (/20) <strong>Elastic Runtime</strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
      <li>1 x (/20) <strong>Services</strong> (RabbitMQ, MySQL, Spring Cloud Services, etc.)</li>
      <li>1 x (/24) <strong>On-demand services</strong> (Various.)</li>
    </ul>
@@ -221,7 +221,7 @@ The following table lists the network objects in this reference architecture.
 </tr>
 <tr>
 <td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a Jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the Jumpbox.
+<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox.
 </td>
 <td>1</td>
 </tr>
