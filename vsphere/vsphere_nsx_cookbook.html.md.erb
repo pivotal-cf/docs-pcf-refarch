@@ -46,7 +46,7 @@ This cookbook focuses on a single-site deployment and makes the following design
 - The service provider (outside) interface is connected appropriately to the network backbone of the environment, as either routed or non-routed depending on the design. This cookbook does not cover provisioning of the uplink interface.
 -	Routable IPs should be applied to the service provider (outside) interface of the NSX Edge. It is recommended that 10 consecutive routable IPs be applied to each NSX Edge.
   -	One reserved for NSX use (Controller to Edge I/F)
-  -	One for NSX Load Balancer to GoRouters
+  -	One for NSX Load Balancer to Gorouters
   - One for NSX Load Balancer to Diego Brains for SSH to apps
   -	One routable IP for used to access the Ops Manager frontend 
   -	One routable IP for use with SNAT egress
@@ -132,7 +132,7 @@ What you will need:
 
   * PEM files of SSL certificates provided by the certificate supplier for only this installation of PCF, or the self-signed SSL certificates generated during PCF installation.
 
-In this procedure you marry the NSX Edge’s IP address used for load balancing with a series of internal IPs provisioned for Gorouters in PCF. It is important to know the IPs used for the GoRouters beforehand. 
+In this procedure you marry the NSX Edge's IP address used for load balancing with a series of internal IPs provisioned for Gorouters in PCF. It is important to know the IPs used for the Gorouters beforehand. 
 
 These IP addresses can be pre-selected or reserved prior to deployment (recommended) or discovered after deployment by looking them up in BOSH Director, which lists them in the release information of the Elastic Runtime installation.
 

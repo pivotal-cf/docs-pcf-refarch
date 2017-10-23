@@ -126,7 +126,7 @@ On the tenant side, each interface defined on the NSX Edge acts as the IP gatewa
 - **Deployment** network: 192.168.20.0/22
 - **CF Tiles** network: 192.168.24.0/22
 - **Dynamic Services** network: 192.168.28.0/22
-- **Services-B** (future use) network(s): 192.168.32.0/22, and so on..._
+- **Services-B** (future use) networks: 192.168.32.0/22, and so on...
 
 <%= image_tag('vsphere-exploded-edge.png') %>
 
@@ -178,7 +178,7 @@ In this example, the firewall and load balancer functions run outside of vSphere
 
 In a typical installation, you assign each of these port groups to a VLAN out of the datacenter pool, and a routable IP address segment. Routing functions are handled by switching layers outside of vSphere, such as a top-of-rack (TOR) or end-of-row (EOR) switch/router appliance.
 
-It is still valid to deploy all the networks shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
+It is still valid to deploy all the networks shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so maintain a count of how many of those overall you will require.
 
 ## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
 

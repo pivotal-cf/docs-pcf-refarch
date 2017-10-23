@@ -21,12 +21,12 @@ The following table lists the components that are part of a reference architectu
 
 |**Component**| **Reference Architecture Notes**|
 |--------------------|------------|
-|**Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for Ops Manager (required), a route for doppler (required), a route for loggregator (required), a route for ssh access to app containers (optional) and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
+|**Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for Ops Manager (required), a route for doppler (required), a route for Loggregator (required), a route for ssh access to app containers (optional) and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
 |**Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or via an optional Jumpbox. |
 |**BOSH Director** | Deployed on the infrastructure subnet. |
-|**Gorouter(s)**| Accessed via the HTTP and TCP WebSockets load balancers. Deployed on the ERT subnet, one job per availability zone. | 
-|**Diego Brain(s)**| This component is required, however the SSH container access functionality is optional and enabled via the SSH Proxy load balancer. Deployed on the ERT subnet, one job per availability zone. |
-|**TCP Router(s)** | Optional feature for TCP routing. Deployed on the ERT subnet, one job per availability zone.|
+|**Gorouters**| Accessed via the HTTP and TCP WebSockets load balancers. Deployed on the Elastic Runtime subnet, one job per availability zone. | 
+|**Diego Brains**| Required. However, the SSH container access functionality is optional and enabled via the SSH Proxy load balancer. Deployed on the Elastic Runtime subnet, one job per availability zone. |
+|**TCP Routers** | Optional feature for TCP routing. Deployed on the Elastic Runtime subnet, one job per availability zone.|
 |**CF Database**| Reference architecture uses GCP Cloud SQL rather than internal databases. Configure your database with a strong password and limit access only to components that require database access. |
 |**CF Blob Storage and Buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
 |**Services**|Deployed on the PCF managed services subnet. Each service is deployed to each availability zone. |
@@ -65,7 +65,7 @@ The following table lists the network objects expected for each type of referenc
 | **External IPs** | For a NAT solution, use 1) global IP for apps and system access 2) Ops Manager (or optional Jumpbox) | 2 | 30+ |
 | **NATs** | One NAT per availability zone. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of PCF will likely only ever require one GCP Network object | 1 | 1 |
-| **Subnets** | Separate subnets for 1) infrastructure (Ops Manager, Ops Manager Director, Jumpbox) 2) ERT 3) services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
+| **Subnets** | Separate subnets for 1) infrastructure (Ops Manager, Ops Manager Director, Jumpbox) 2) Elastic Runtime 3) services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy PCF without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source & destination fields in a rule. The preferred method use in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers**| Used to handle requests to Gorouters and infrastructure components. GCP uses 2 or more load balancers. The HTTP load balancer and TCP Websockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
