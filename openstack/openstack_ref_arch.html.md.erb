@@ -55,15 +55,15 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Gorouters</strong></td>
- <td>Accessed through the Application Load Balancer. Deployed on the Elastic Runtime network, one per AZ.</td>
+ <td>Accessed through the Application Load Balancer. Deployed on the Pivotal Application Service (PAS) network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>Diego Brains</strong></td>
- <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Load Balancers. Deployed on the Elastic Runtime network, one per AZ.</td>
+ <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Load Balancers. Deployed on the PAS network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>TCP Routers</strong></td>
- <td>Optional feature for TCP routing. Deployed on the Elastic Runtime network, one per AZ.</td>
+ <td>Optional feature for TCP routing. Deployed on the PAS network, one per AZ.</td>
 </tr>
 <tr>
  <td><strong>CF Database</strong></td>
@@ -71,7 +71,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
  <td><strong>Storage Buckets</strong></td>
- <td>Reference architecture uses customer provided blobstore. Buckets are needed for BOSH and Elastic Runtime.</td>
+ <td>Reference architecture uses customer provided blobstore. Buckets are needed for BOSH and PAS.</td>
 </tr>
 <tr>
  <td><strong>Service Tiles</strong></td>
@@ -115,7 +115,7 @@ The following table lists the network objects in this reference architecture.
   <td>The reference architecture requires the following Tenant Networks:
    <ul>
      <li>1 x (/24) <strong>Infrastructure</strong> (Ops Manager, BOSH Director, Jumpbox).</li>
-     <li>1 x (/20) <strong>Elastic Runtime</strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
+     <li>1 x (/20) <strong>PAS</strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
      <li>1 x (/20) <strong>Services</strong> (RabbitMQ, MySQL, Spring Cloud Services, etc.)</li>
      <li>1 x (/24) <strong>On-demand services</strong> (Various.)</li>
    </ul>

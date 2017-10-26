@@ -39,7 +39,7 @@ This cookbook focuses on a single-site deployment and makes the following design
 
 -	There are five non-routable networks on the tenant (inside) side of the ESG.
    - The **Infra** network is used to deploy Ops Manager and BOSH Director.
-   - The **Deployment** network is used exclusively by Elastic Runtime to deploy DEAs/Cells that host apps and related elements.
+   - The **Deployment** network is used exclusively by Pivotal Application Service (PAS) to deploy DEAs/Cells that host apps and related elements.
    - The **CF Tiles** network is used for all other deployed tiles in a PCF installation.
    - The **Services** network is used by BOSH Director for service tiles.
    - The **Container-to-Container** network is used for container to container communication in the Cells.
@@ -89,7 +89,7 @@ In addition, assign the following IP addresses and address ranges within your ne
   *	IP associated with Ops Manager DNAT: This IP address is the publicly routable interface for Ops Manager UI and SSH access.
 2.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
   *	192.168.10.0/26 = PCF Deployment Network (Logical Switch or Port Group)
-  *	192.168.20.0/22 = Deployment Network for Elastic Runtime Tile (ERT)
+  *	192.168.20.0/22 = Deployment Network for PAS tile
   *	192.168.24.0/22 = CF Tiles Network for all Tiles besides ERT
   * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
   * 10.255.0.0/16 = Container-to-Container network for intercontainer communication.
@@ -107,7 +107,7 @@ To configure the ESG firewall, navigate to **Edge**, **Manage**, **Firewall** an
 |  Name |  Source |  Destination | Service  |  Action |
 |---|---|---|---|---|
 |Allow Ingress -> Ops Manager|any|IP\_of\_OpsMgr|SSH, HTTP, HTTPS|Accept|
-|Allow Ingress -> Elastic Runtime|any|IP\_of\_NSX-LB|HTTP, HTTPS|Accept|
+|Allow Ingress -> PAS|any|IP\_of\_NSX-LB|HTTP, HTTPS|Accept|
 |Allow Ingress -> SSH for Apps|any|tcp:IP\_of\_DiegoBrain:2222|any|Accept|
 |Allow Ingress -> TCProuter|any|tcp:IP\_of\_NSX-TCP-LB:5000|any|Accept|
 |Allow Inside <-> Inside|192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22|192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22|any|Accept|
@@ -142,7 +142,7 @@ What you will need:
 
 In this procedure you marry the ESG's IP address used for load balancing with a series of internal IP addresses provisioned for Gorouters in PCF. It is important to know the IP addresses used for the Gorouters beforehand. 
 
-These IP addresses can be pre-selected or reserved prior to deployment (recommended) or discovered after deployment by looking them up in BOSH Director, which lists them in the release information of the Elastic Runtime installation.
+These IP addresses can be pre-selected or reserved prior to deployment (recommended) or discovered after deployment by looking them up in BOSH Director, which lists them in the release information of the PAS installation.
 
 ### <a id="import_ssl"></a> Step 2.1: Import SSL Certificate 
 
@@ -154,7 +154,7 @@ To enable SSL termination at the load balancer in ESG, access the ESG UI and per
 
 1. Select **Edge**, **Manage**, **Settings**, and then **Certificates**.
 1. Click Green Plus button to Add Certificate.
-1. Insert PEM file contents from the Networking configuration screen of Elastic Runtime.
+1. Insert PEM file contents from the Networking configuration screen of PAS.
 1. Save the results.
 
 ### <a id="enable_lb"></a> Step 2.2: Enable the Load Balancer

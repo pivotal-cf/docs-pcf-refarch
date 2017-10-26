@@ -15,8 +15,8 @@ This document does not replace the [basic installation documentation] (../../cus
 
 | PCF Products Validated        | Version                   |
 | ----------------------------- |:-------------------------:|
-| PCF Ops Manager               | 1.12.latest               |
-| Elastic Runtime               | 1.12.latest               |
+| PCF Ops Manager                      | 2.0.latest               |
+| Pivotal Application Service (PAS)    | 2.0.latest               |
 
 See [Installing Pivotal Cloud Foundry on vSphere](../../customizing/vsphere.html#prerequisites) for general requirements for running PCF and specific requirements for running PCF on vSphere.
 
@@ -52,7 +52,7 @@ To create a system following this architecture, perform the following steps:
 
 1. Supply core networking for each deployment by configuring an ESG with the following subnets. See the [Networking Design](#networking-design) section of this topic for details.
   - Infrastructure
-  - Elastic Runtime (ERT)
+  - PAS
   - Service tiles (one or more)
   - Dynamic service tiles (a network managed entirely by BOSH Director)
   - IsoZone##
@@ -123,14 +123,14 @@ Using VMware NSX SDN (software-defined networking) provides the following benefi
 
 <p class="note warning"><strong>Warning</strong>: The overlay network IP range for Container-to-Container Networking must not conflict with any other IP addresses in your network.</p>
 
-<p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To resolve this issue, override the default by navigating to the Networking section of the Elastic Runtime tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
+<p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To resolve this issue, override the default by navigating to the Networking section of the PAS tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
 
 #### <a id="networking-design"></a> Networking Design
 
 Each PCF installation consumes four or more networks with the ESG, aligned to the following specific job types:
 
 - **Infrastructure**: This small network hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as jumpbox VM. Operators access these resources to manage a PCF installation.
-- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the Elastic Runtime tile, Diego Cells, and Windows Cells, and is the network onto which apps are deployed. 
+- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the PAS tile, Diego Cells, and Windows Cells, and is the network onto which apps are deployed. 
 - **Services**: This network has a large CIDR range. It hosts service tiles that are installed using Ops Manager and managed by BOSH. One approach is to use this network for all PCF tiles except ERT.
 - **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an on-demand, or _dynamic_, address space for deployment. This is a special purpose network that is marked as "Services" with a checkbox in the vSphere Ops Manager Director tile. See [About the On-Demand Services SDK](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) for more information. 
 - **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a network space independent of the ERT installation.
