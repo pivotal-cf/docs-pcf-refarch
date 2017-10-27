@@ -33,13 +33,13 @@ Document your current environment settings before proceeding with the datastore 
 To obtain this information, perform the following steps:
 
 1. Run the `bosh instances` command.
-  * If you use the original version of the BOSH CLI, run the following command:
-    <pre class="terminal">
-    $ bosh instances --details > instances.txt
-    </pre>
   * If you use [BOSH CLI v2](https://bosh.io/docs/cli-v2), run the following command, replacing `MY-ENV` with the alias you assigned to your BOSH Director:
     <pre class="terminal">
-    $ bosh2 -e MY-ENV instances --details > instances.txt
+    $ bosh -e MY-ENV instances --details > instances.txt
+    </pre>
+  * If you use the original version of the BOSH CLI, run the following command:
+    <pre class="terminal">
+    $ bosh-old instances --details > instances.txt
     </pre>
 1. Save the resulting file `instances.txt` to a safe location.
 1. Note the datastore where each VM resides in vSphere.
