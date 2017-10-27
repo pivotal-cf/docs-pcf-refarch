@@ -1,5 +1,5 @@
 ---
-title: Cookbook for Using Edge Services Gateway on PCF and VMware NSX
+title: Using Edge Services Gateway on VMware NSX
 owner: Customer0
 ---
 
@@ -9,6 +9,8 @@ owner: Customer0
 This cookbook provides guidance on how to configure the NSX firewall, load balancing and NAT/SNAT services for Pivotal Cloud Foundry (PCF) on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in PCF. 
 
 This document presents the reader with fundamental configuration options of an Edge Services Gateway (ESG) with PCF and vSphere NSX. Its purpose is not to dictate the settings required on every deployment, but instead to empower the NSX Administrator with the ability to establish a known good "base" configuration and apply specific security configurations as required.
+
+If you are using NSX, the specific configurations described here supersede any general recommendations in the [Preparing Your Firewall](../../customizing/config_firewall.html] topic.
 
 ## <a id="assumptions"></a> Assumptions
 

@@ -20,7 +20,18 @@ This document does not replace the [basic installation documentation] (../../cus
 
 See [PCF on vSphere Requirements](../../customizing/vsphere.html) for general requirements for running PCF and specific requirements for running PCF on vSphere.
 
-## <a id="base-arch"></a> Base Reference Architecture 
+### <a id="refarchs"></a>PCF Reference Architectures ##
+
+A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as AWS, that meets the following requirements:
+
+* Secure
+* Publicly-accessible
+* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Can host at least 100 app instances, or far more
+
+Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
+
+## <a id="base-arch"></a> Base vSphere Reference Architecture 
 
 This recommended architecture includes VMware vSphere, NSX-v, and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing, firewall, NAT/SNAT, and load balancing. In the absence of NSX, see below for architectures that do not rely on the ESG.
 
