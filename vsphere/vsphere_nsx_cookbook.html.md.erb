@@ -92,7 +92,7 @@ In addition, assign the following IP addresses and address ranges within your ne
 2.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
   *	192.168.10.0/26 = PCF Deployment Network (Logical Switch or Port Group)
   *	192.168.20.0/22 = Deployment Network for PAS tile
-  *	192.168.24.0/22 = CF Tiles Network for all Tiles besides ERT
+  *	192.168.24.0/22 = CF Tiles Network for all Tiles besides PAS
   * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
   * 10.255.0.0/16 = Container-to-Container network for intercontainer communication.
 
@@ -230,7 +230,7 @@ These monitors are selected during the next step when pools are created. A pool 
 
 ### <a id="pools"></a> Step 2.6: Create Pools of Multi-Element PCF Targets
 
-The following steps creates the pools of resources that ESG is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain, and ERT MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
+The following steps creates the pools of resources that ESG is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain, and PAS MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
 
 #### <a id="http_router_pools"></a> Step 2.6a: Create Pool for `http-routers`
 
