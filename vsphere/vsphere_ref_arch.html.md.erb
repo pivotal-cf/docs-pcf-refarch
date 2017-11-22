@@ -176,6 +176,25 @@ NSX Logical Switches should be used on the Tenant Side of this design, which lev
 
 ### <a id="highperf"></a> High Performance Variants
 
+#### <a id="nsx_dlr"></a> Using the NSX DLR (Distributed Logical Router)
+
+You can move the function of routing the Tenant-side networks shown on the NSX reference diagram to a different service provided by NSX. This iservice is the DLR, or Distributed Logical Router, a high-performance East/West routing feature.
+
+To do this, you establish a DLR instance in the NSX Manager and use it to be the gateway of each Logical Switch used by a PCF installation, in place of the ESG being that gateway. You still need a North/South gateway to the outside world, so the ESG is still required, but the jobs it's handling are now firewalling, NAT/SNAT and Load Balancing only.
+
+You must put an interface from the DLR and one on the inside of the ESG together in order to accomplish the North/South flow; typically this is done with a very small "glue net" running OSPF. Refer to VMware's technical materials around the DLR and PCF for greater details.
+
+Benefits of adding the DLR include:
+
+- Optimized East/West routing amongst the Tenant-side Logical Switches
+- Increased interface count for Tenant-side Logical Switches (from 9 total to 99)
+
+Concerns with this approach include:
+
+- Addition of the "glue net OSPF" relationship between DLR and ESG
+- Increased management and troubleshooting burden with the addition of the above
+- Do not improve North/South network traffic; same as without DLR
+
 #### <a id="one_arm_lb"></a> One-Armed Load Balancing
 
 The ESG can act as a stand-alone, one-armed load balancer. 
