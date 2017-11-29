@@ -193,7 +193,7 @@ NSX Logical Switches should be used on the Tenant Side of this design, which lev
 
 The ESG can act as a stand-alone, one-armed load balancer. 
 
-This variant can improve performance and separate the dependence on the ESG that acts as NAT/SNAT/Firewall/Router by separating the load balancing function to a separate ESG deployed exclusively for use per installation. 
+This variant can improve performance and separate the dependence on the ESG that acts as NAT/SNAT/Firewall/Gorouter by separating the load balancing function to a separate ESG deployed exclusively for use per installation. 
 
 This variant divides the jobs between two ESGs per install rather than one. To implement this architecture, you place a single interface (internal) of a new ESG on the Deployment network, enable the load balancing function, and DNAT to it through the boundary ESG.
 

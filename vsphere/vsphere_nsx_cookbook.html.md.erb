@@ -237,7 +237,7 @@ The following steps creates the pools of resources that ESG is load balancing \*
 To create pool for `http-routers`, access the ESG UI and perform the following steps:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
-1. Enter ALL the IP addresses reserved for Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as "down".
+1. Enter ALL the IP addresses reserved for the Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as "down".
     <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
 1. If required, adjust **Port** and **Monitor Port**. Note that by default the port and monitoring port are on HTTP port 80. The assumption is that internal traffic from the ESG load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted traffic inside the load balancer, adjust the ports accordingly.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
