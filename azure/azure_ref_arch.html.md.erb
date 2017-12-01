@@ -180,7 +180,11 @@ The following table lists the network objects in PCF on Azure reference architec
   </tr>
   <tr>
   <td><strong>Load Balancers</strong></td>
-  <td>Used to handle requests to Gorouters and infrastructure components. Azure uses 1 or more load balancers. The API and Apps load balancer is required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. In addition, you can use a MySQL load balancer to provide high availability to MySQL. This is also optional.</td>
+  <td>
+  Used to handle requests to Gorouters and infrastructure components. Azure uses 1 or more load balancers. The API and Apps load balancer is required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. In addition, you can use a MySQL load balancer to provide high availability to MySQL. This is also optional.
+
+  The idle timeout for load balancers should be set to 30 minutes. This is to avoid a situation where the load balancer will close an idle connection without sending a RST packet, which wreaks havoc with many TCP clients. Alternatively, an F5 can be setup behind the load balancer, which can have a lower idle timeout than Azure's load balancer.
+  </td>
   <td>1-4</td>
   </tr>
   <tr>
