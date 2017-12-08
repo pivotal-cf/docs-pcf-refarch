@@ -144,7 +144,7 @@ The following table lists the network objects in this reference architecture.
   <td><strong>Route Tables</strong></td>
   <td>This reference architecture requires 4 route tables: one for the public subnet, and one each for all 3 private subnets across 3 AZs. Consult the following list:<br><br>
   	<ul>
-  	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for OpsManager and the NAT Gateway.</li>
+  	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for Ops Manager and the NAT Gateway.</li>
   	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and PAS.</li>
   	</ul>
     For more information, see the Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_table_associations.tf">script</a> that performs the route table association. 
