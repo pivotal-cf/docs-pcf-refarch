@@ -52,10 +52,12 @@ This section describes the possible network layouts for PCF deployments as cover
 
 At a high level, there are currently two possible ways of granting public Internet access to PCF as described by the reference architecture:
 
-1. NATs provide public access to PCF internals, or
-2. Every PCF VM receives its own public IP address (no NAT).
+* NATs provide public access to PCF internals.
+	* The instructions for [Installing PCF on GCP Manually](../customizing/gcp-manual.html) use this method. 
+* Every PCF VM receives its own public IP address (no NAT).
+	* The instructions for [Installing PCF on GCP using Terraform](../customizing/gcp-terraform.html) use this method.
 
-The latter scenario is currently outlined in the [existing installation documentation](../../customizing/gcp.html) for GCP deployments of PCF. Providing each PCF VM with a public IP address is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
+Providing each PCF VM with a public IP address is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
 
 However, if you require NATs, you may refer to the following section.
 
