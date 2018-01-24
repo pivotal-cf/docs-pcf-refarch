@@ -323,7 +323,8 @@ The ESG obfuscates the PCF installation through network translation. The PCF ins
 |Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
 |---|---|---|---|---|---|---|---|
 |SNAT|uplink|192.168.0.0/16|any|IP\_of\_PCF|any|any|All Nets Egress|
-|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask|
+|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for external use|
+|DNAT|infra|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for internal use|
 
 NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the ESG. At that point, the ESG simply performs routing between the address segments.
 
