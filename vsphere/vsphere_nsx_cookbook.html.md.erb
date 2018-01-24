@@ -323,7 +323,11 @@ The ESG obfuscates the PCF installation through network translation. The PCF ins
 |Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
 |---|---|---|---|---|---|---|---|
 |SNAT|uplink|192.168.0.0/16|any|IP\_of\_PCF|any|any|All Nets Egress|
-|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask|
+|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for external use|
+|SNAT|infra|192.168.10.OpsMgr|any|IP\_of\_OpsMgr|any|tcp|OpsMgr Mask for internal use|
+|DNAT|infra|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for internal use|
+
+<p class="note"><strong>Note</strong>: The NAT/SNAT on the `infra` network in the this table is an example of an optional **Hairpin NAT** rule to allow VMs within the **Infrastructure** network to access the Ops Manager API.  This is because the Ops Manager's hostname, and API's HTTPS endpoint, is registered to Ops Manager external IP.  A pair of Hairpin NAT rules will be necessary on **each** internal network interface that requires API access to Ops Manager.  These rules should only be created if the network must access the Ops Manager API.</p>
 
 NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the ESG. At that point, the ESG simply performs routing between the address segments.
 
