@@ -82,7 +82,7 @@ The following table lists the network objects expected for each type of referenc
 | **External IPs** | For a NAT solution, use global IP address for apps and system access, and Ops Manager or optional jumpbox | 2 | 30+ |
 | **NATs** | One NAT per availability zone. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of PCF will likely only ever require one GCP Network object | 1 | 1 |
-| **Subnets** | Separate subnets for infrastructure (Ops Manager, Ops Manager Director, Jumpbox), PAS, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
+| **Subnets** | Separate subnets for infrastructure (Ops Manager, BOSH Director, Jumpbox), PAS, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy PCF without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source & destination fields in a rule. The preferred method use in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers**| Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
@@ -106,5 +106,5 @@ PCF deployments on GCP use two load balancers to handle Gorouter traffic because
 
 #### ICMP
 
-GCP routers do not respond ICMP; therefore, Pivotal recommends disabling ICMP checks in [Ops Manager Director network configuration](../../customizing/gcp-om-config.html#network). 
+GCP routers do not respond ICMP; therefore, Pivotal recommends disabling ICMP checks in [BOSH Director network configuration](../../customizing/gcp-om-config.html#network). 
 

@@ -66,7 +66,7 @@ In Pivotal Application Service (PAS), check the **Status** tab and make sure the
 
 In each tile installed in your PCF deployment, check the **Status** tab and make sure there are no errors or reported issues.
 
-### <a id="opsman_health"></a> Step 6: Check Ops Manager Director Status
+### <a id="opsman_health"></a> Step 6: Check BOSH Director Status
 
 1. Check that there are no pending changes and that the status of all tiles is green.
 1. Make sure the last Installation Log does not contain any errors.
@@ -74,16 +74,16 @@ In each tile installed in your PCF deployment, check the **Status** tab and make
 
 ## <a id="migrate_proc"></a> Procedure: Migrate PCF to a New Datastore
 
-1. In Ops Manager Director, navigate to the **vCenter Config** page.
+1. In BOSH Director, navigate to the **vCenter Config** page.
 1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** field to reflect the new datastore names, then click **Save**. 
     <p class="note"><strong>Note</strong>: If you use the Datastore Clustering feature in vSphere, provide only the individual names of the datastores in the cluster. Do not provide the name of the cluster that contains them.</p>
 1. Click **Apply Changes**.
-1. Confirm that the Ops Manager Director VM has persistent disk on the new datastore. 
+1. Confirm that the BOSH Director VM has persistent disk on the new datastore. 
    1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your PCF deployment VMs and new datastore.
    1. Click the **Related Objects** and **Virtual Machines**. 
    1. Locate the Ops Manager VM and verify that the VM has an expected value in the **Provisioned Space** column.
     <%= image_tag('vsphere-web-client.png') %> 
-1. In Ops Manager Director, navigate to the **Director Config** page, and select the **Recreate all VMs** option.
+1. In BOSH Director, navigate to the **Director Config** page, and select the **Recreate all VMs** option.
 1. Click **Apply Changes**.
 
 ## <a id="after"></a> After the Migration
