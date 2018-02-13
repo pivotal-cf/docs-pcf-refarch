@@ -1,5 +1,5 @@
 ---
-title: Cookbook for Using Edge Services Gateway on PCF and VMware NSX
+title: Using Edge Services Gateway on VMware NSX
 owner: Customer0
 ---
 
@@ -91,8 +91,8 @@ In addition, assign the following IP addresses and address ranges within your ne
   *	IP associated with Ops Manager DNAT: This IP address is the publicly routable interface for Ops Manager UI and SSH access.
 2.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
   *	192.168.10.0/26 = PCF Deployment Network (Logical Switch or Port Group)
-  *	192.168.20.0/22 = Deployment Network for Elastic Runtime Tile (ERT)
-  *	192.168.24.0/22 = CF Tiles Network for all Tiles besides ERT
+  *	192.168.20.0/22 = Deployment Network for Elastic Runtime tile
+  *	192.168.24.0/22 = CF Tiles Network for all Tiles besides Elastic Runtime
   * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
   * 10.255.0.0/16 = Container-to-Container network for intercontainer communication.
 
@@ -230,7 +230,7 @@ These monitors are selected during the next step when pools are created. A pool 
 
 ### <a id="pools"></a> Step 2.6: Create Pools of Multi-Element PCF Targets
 
-The following steps creates the pools of resources that ESG is load balancing \*__TO__\*, which are the Gorouter, TCP Router, Diego Brain, and ERT MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
+The following steps creates the pools of resources that ESG load balances to: the Gorouter, TCP Router, Diego Brain, and Elastic Runtime MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
 
 #### <a id="http_router_pools"></a> Step 2.6a: Create Pool for `http-routers`
 
@@ -316,18 +316,22 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 
 ## <a id="nat_snat"></a> Step 3: Configure NAT/SNAT
 
-The ESG obfuscates the PCF installation through network translation. The PCF installation is placed entirely on non-routable RFC-1918 network address space, so to be useful, you must translate routable IP addresses to non-routable IP addresses to make connections.
+The ESG obfuscates the PCF installation through network translation. The PCF installation is placed entirely on non-routable RFC-1918 network address space, so you must translate routable IP addresses to non-routable IP addresses to make connections.
 
-<p class="note"><strong>Note</strong>: Correct NAT/SNAT configuration is required for the PCF installation to function correctly.</p>
+<p class="note"><strong>Note</strong>: Correct NAT/SNAT configuration is required for the PCF installation to function as expected.</p>
 
 |Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
 |---|---|---|---|---|---|---|---|
 |SNAT|uplink|192.168.0.0/16|any|IP\_of\_PCF|any|any|All Nets Egress|
-|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask|
+|DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for external use|
+|SNAT|infra|192.168.10.OpsMgr|any|IP\_of\_OpsMgr|any|tcp|OpsMgr Mask for internal use|
+|DNAT|infra|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for internal use|
+
+<p class="note"><strong>Note</strong>: The NAT/SNAT on the <code>infra</code> network in this table is an example of an optional <strong>Hairpin NAT</strong> rule to allow VMs within the <strong>Infrastructure</strong> network to access the Ops Manager API. This is because the Ops Manager hostname and the API HTTPS endpoint are registered to the Ops Manager external IP address. A pair of Hairpin NAT rules are necessary on <strong>each</strong> internal network interface that requires API access to Ops Manager. You should create these rules only if the network must access the Ops Manager API.</p>
 
 NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the ESG. At that point, the ESG simply performs routing between the address segments.
 
-<p class="note"><strong>Note</strong>: NSX will generate a number of DNAT rules based on load balancing configs. These can safely be ignored.</p>
+<p class="note"><strong>Note</strong>: NSX generates a number of DNAT rules based on load balancing configs. You can safely ignore these.</p>
 
 ## <a id="notes"></a> Additional Notes
 
