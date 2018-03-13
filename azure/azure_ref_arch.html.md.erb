@@ -211,37 +211,43 @@ To deploy PCF on Azure with multiple resource groups, you can define custom role
 
 * Custom Role for BOSH Service Principal, applied to `Network` Resource Group, limits the BOSH Service Principal to minimum read-only access.
   <pre class="terminal">
-  {
-  "Name": "PCF Network Read Only",
-  "IsCustom": true,
-  "Description": "MVP PCF Read Network Resgroup",
-  "Actions": [
-  "Microsoft.Network/networkSecurityGroups/read",
-  "Microsoft.Network/networkSecurityGroups/join/action",
-  "Microsoft.Network/publicIPAddresses/read",<-- Only Required if Using Public IPs
-  "Microsoft.Network/publicIPAddresses/join/action", <-- Only Required if Using Public IPs
-  "Microsoft.Network/loadBalancers/read",
-  "Microsoft.Network/virtualNetworks/subnets/read",
-  "Microsoft.Network/virtualNetworks/subnets/join/action",
-  "Microsoft.Network/virtualNetworks/read"
-  ],
-  "NotActions": [],
-  "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"]
-  }
+  az role definition create --role-definition
+  { \
+  "Name": "PCF Network Read Only", \
+  "IsCustom": true, \
+  "Description": "MVP PCF Read Network Resgroup", \
+  "Actions": [ \
+  "Microsoft.Network/virtualNetworks/read", \
+  "Microsoft.Network/virtualNetworks/subnets/read", \
+  "Microsoft.Network/virtualNetworks/subnets/join/action", \
+  "Microsoft.Network/networkSecurityGroups/read", \
+  "Microsoft.Network/networkSecurityGroups/join/action", \
+  "Microsoft.Network/loadBalancers/read", \
+  "Microsoft.Network/publicIPAddresses/read", \
+  "Microsoft.Network/publicIPAddresses/join/action" \
+  ], \
+  "NotActions": [], \
+  "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"] \
+  } 
   </pre>
+  The last two actions (prefixed with Microsoft.Network/publicIPAddresses) are only required if using Public IPs.
+
 * Custom Role for BOSH Service Principal, applied to Subscription, allowing the Operator to deploy PCF components
   <pre class="terminal">
-  {
-   "Name": "PCF Deploy Min Perms",
-   "IsCustom": true,
-   "Description": "MVP PCF Terraform Perms",
-   "Actions": [
-     "Microsoft.Compute/register/action"
-   ],
-   "NotActions": [],
-   "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"]
+  az role definition create --role-definition
+  { \
+   "Name": "PCF Deploy Min Perms", \
+   "IsCustom": true, \
+   "Description": "MVP PCF Terraform Perms", \
+   "Actions": [ \
+     "Microsoft.Compute/register/action" \
+   ], \
+   "NotActions": [], \
+   "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"] \
   }
   </pre>
+
+* Custom roles can be assigned to service principals with `az role assignment create --role [ROLE] --assignee [SERVICE_PRINCIPAL]`
 
 ### <a id="multiple_resource_groups_multiple_load_balancer"></a> Multiple Resource Group and Multiple Load Balancer Deployment
 
