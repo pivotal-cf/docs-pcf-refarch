@@ -217,7 +217,7 @@ To deploy PCF on Azure with multiple resource groups, you can define custom role
   "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"] \
   } 
   </pre>
-  The last two actions (prefixed with Microsoft.Network/publicIPAddresses) are only required if using Public IPs.
+  The actions prefixed with `Microsoft.Network/publicIPAddresses` are only required if using IP addresses.
 
 * Custom Role for BOSH Service Principal, applied to Subscription, allowing the Operator to deploy PCF components
   <pre class="terminal">
