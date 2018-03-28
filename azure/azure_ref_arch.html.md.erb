@@ -247,7 +247,7 @@ To deploy PCF on Azure with multiple resource groups, you can define custom role
   }
   </pre>
 
-* Custom roles can be assigned to service principals with `az role assignment create --role [ROLE] --assignee [SERVICE_PRINCIPAL]`
+* Custom roles can be assigned to service principals with `az role assignment create --role [ROLE] --assignee [SERVICE_PRINCIPAL]`.
 
 ### <a id="multiple_resource_groups_multiple_load_balancer"></a> Multiple Resource Group and Multiple Load Balancer Deployment
 
@@ -276,7 +276,7 @@ them to Log Analytics, where they appear on unified dashboards and can be correl
 
 Azure DNS supports DNS delegation, allowing for sub-level domains to be hosted within Azure. This functionality is fully supported within PCF. 
 
-It is recommended to use a sub-zone for your PCF; i.e. if your company's domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`. 
+It is recommended to use a sub-zone for your PCF. For example, if your company's domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`. 
 
 As Azure DNS does not support recursion, in order to properly configure Azure DNS, create an `NS` record with your registrar which points to the four name servers supplied by your Azure DNS Zone configuration. Once your `NS` records have been created, you can then create the required wildcard `A` records for the PCF application and system domains, as well as any other records desired for your PCF deployments. 
 
@@ -284,11 +284,11 @@ You do not need to make any configuration changes in PCF to support Azure DNS.
 
 ### Azure Blob Storage
 
-Due to limitations in PCF, it is not possible to support a high-availability deployment of the backing NFS store needed for droplets, buildpacks, and other resources. Azure Blob Storage provides fully-redundant holt, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availablity deployments of PCF.
+Due to limitations in PCF, it is not possible to support a high-availability deployment of the backing NFS store needed for droplets, buildpacks, and other resources. Azure Blob Storage provides fully-redundant holt, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availability deployments of PCF.
 
 To enable Azure Blob Storage:
 
-1. Create a Storage Account with the level of redunancy you require. The storage account does not need to be in the same Gesource Group as PCF.
+1. Create a Storage Account with the level of redundancy you require. The storage account does not need to be in the same Gesource Group as PCF.
 1. Create Containers for the buildpacks, droplets, packages, and resources required by PCF.
 1. Open Ops Manager. 
 1. Select **Pivotal Application Services**.
