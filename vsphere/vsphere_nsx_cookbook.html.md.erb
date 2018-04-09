@@ -6,11 +6,12 @@ owner: Customer0
 <strong><%= modified_date %></strong>
 <html class="list-style-none"></html>
 
-This cookbook provides guidance on how to configure the NSX firewall, load balancing and NAT/SNAT services for Pivotal Cloud Foundry (PCF) on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in PCF. 
+This cookbook provides guidance on how to configure the NSX firewall, load balancing, and NAT/SNAT services for Pivotal Cloud Foundry (PCF) on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in PCF. 
 
 This document presents the reader with fundamental configuration options of an Edge Services Gateway (ESG) with PCF and vSphere NSX. Its purpose is not to dictate the settings required on every deployment, but instead to empower the NSX Administrator with the ability to establish a known good "base" configuration and apply specific security configurations as required.
 
 If you are using NSX, the specific configurations described here supersede any general recommendations in the [Preparing Your Firewall](../../customizing/config_firewall.html) topic.
+
 
 ## <a id="assumptions"></a> Assumptions
 
@@ -26,6 +27,7 @@ For detailed installation and configuration information about these products, re
 -	[NSX Installation and Upgrade Guide](https://pubs.vmware.com/NSX-6/topic/com.vmware.ICbase/PDF/nsx_6_install.pdf)
 -	[Reference Design: VMware NSX for vSphere (NSX) Network Virtualization Design Guide](https://www.vmware.com/files/pdf/products/nsx/vmw-nsx-network-virtualization-design-guide.pdf)
 -	[Pivotal Cloud Foundry Documentation](http://docs.pivotal.io/pivotalcf/getstarted/pcf-docs.html)
+
 
 ## <a id="overview"></a> General Overview
 
@@ -77,6 +79,7 @@ The following diagram illustrates container-to-container networking. The overlay
 
 [View a larger version of this diagram](../images/vsphere-pcf-c2c-networking.png).
 
+
 ## <a id="prereq"></a>Prep Step: Configure DNS and Network Prerequisites
 
 As a prerequisite, create wildcard DNS entries for system and apps domains in PCF. Map these domains to the selected IP address on the uplink (outside) interface of the ESG in your DNS server. 
@@ -95,6 +98,9 @@ In addition, assign the following IP addresses and address ranges within your ne
   *	192.168.24.0/22 = CF Tiles Network for all Tiles besides Elastic Runtime
   * 192.168.28.0/22 = Dynamic Services network for BOSH Director-managed service tiles.
   * 10.255.0.0/16 = Container-to-Container network for intercontainer communication.
+
+  You must update the security group and load balancer information for your PCF deployments using NSX-V on vSphere through the Ops Manager API. See [Updating NSX Security Group and Load Balancer Information](https://docs.pivotal.io/pivotalcf/2-2/customizing/update-nsx.html) for more information.
+
 
 ## <a id="firewall"></a>Step 1: Configure Firewall
 
@@ -121,6 +127,7 @@ To configure the ESG firewall, navigate to **Edge**, **Manage**, **Firewall** an
 |Allow Egress -> LDAP|192.168.10.0/26 192.168.20.0/22|IPs\_of\_LDAP:389|LDAP, LDAP-over-ssl|Accept|
 |Allow Egress -> All Outbound|192.168.0.0/16|any|any|Accept|
 |Default Rule|any|any|any|Deny|
+
 
 ## <a id="load_balancer"></a>Step 2: Configure Load Balancer
 
@@ -314,6 +321,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
     <%= image_tag('vsphere-vip-3.png') %>
 
+
 ## <a id="nat_snat"></a> Step 3: Configure NAT/SNAT
 
 The ESG obfuscates the PCF installation through network translation. The PCF installation is placed entirely on non-routable RFC-1918 network address space, so you must translate routable IP addresses to non-routable IP addresses to make connections.
@@ -333,10 +341,11 @@ NAT/SNAT functionality is not required if routable IP address space is used on t
 
 <p class="note"><strong>Note</strong>: NSX generates a number of DNAT rules based on load balancing configs. You can safely ignore these.</p>
 
+
 ## <a id="notes"></a> Additional Notes
 
 The ESG also supports scenarios where Private RFC subnets and NAT are not utilized for **Deployment** or **Infrastructure** networks, and the guidance in this document can be modified to meet those scenarios.  
 
 Additionally, the ESG supports up to 10 Interfaces allowing for more Uplink options if necessary.
 
-The use of Private RFC-1918 subnets for PCF Deployment networks was chosen due to its popularity with customers. ESG devices are capable of leveraging ECMP, OSPF, BGP, and IS-IS to handle dynamic routing of customer and/or public L3 IP space.  That design is out of scope for this document, but is supported by VMware NSX and Pivotal PCF.
+The use of Private RFC-1918 subnets for PCF Deployment networks was chosen due to its popularity with customers. ESG devices are capable of leveraging ECMP, OSPF, BGP, and IS-IS to handle dynamic routing of customer and/or public L3 IP space. That design is out of scope for this document, but is supported by VMware NSX and Pivotal PCF.
