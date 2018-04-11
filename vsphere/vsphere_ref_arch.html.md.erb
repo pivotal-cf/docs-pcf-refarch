@@ -178,7 +178,7 @@ NSX Logical Switches should be used on the Tenant Side of this design, which lev
 
 #### <a id="nsx_dlr"></a> Using the NSX DLR (Distributed Logical Router)
 
-You can move the function of routing the Tenant-side networks shown on the NSX reference diagram to a different service provided by NSX. This iservice is the DLR, or Distributed Logical Router, a high-performance East/West routing feature.
+You can move the function of routing the Tenant-side networks shown on the NSX reference diagram to a different service provided by NSX. This service is the DLR, or Distributed Logical Router, a high-performance East/West routing feature.
 
 To do this, you establish a DLR instance in the NSX Manager and use it to be the gateway of each Logical Switch used by a PCF installation, in place of the ESG being that gateway. You still need a North/South gateway to the outside world, so the ESG is still required, but the jobs it's handling are now firewalling, NAT/SNAT and Load Balancing only.
 
