@@ -18,6 +18,7 @@ This document does not replace the [basic installation documentation] (../../cus
 | PCF Ops Manager               | 1.12.latest               |
 | Elastic Runtime               | 1.12.latest               |
 
+
 ## <a id="base-arch"></a> Base Reference Architecture 
 
 This recommended architecture includes VMware vSphere, NSX-v, and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing, firewall, NAT/SNAT, and load balancing. In the absence of NSX, see below for architectures that do not rely on the ESG.
@@ -85,7 +86,7 @@ Shared storage is a requirement for PCF. You can allocate networked storage to t
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
-####Capacity####
+#### <a id="capacity"></a> Capacity
 
 Pivotal recommends the following capacity allocation for PCF installations:
 
@@ -96,7 +97,7 @@ The primary consumer of storage is the NFS/WebDAV blobstore.
 
 <p class="note"><strong>Note</strong>: PCF does not currently support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-####Type####
+#### <a id="type"></a> Type
 
 Pivotal recommends the following: 
 - Either block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE
@@ -203,6 +204,7 @@ This variant can improve performance and separate the dependence on the ESG that
 
 This variant divides the jobs between two ESGs per install rather than one. To implement this architecture, you place a single interface (internal) of a new ESG on the Deployment network, enable the load balancing function, and DNAT to it through the boundary ESG.
 
+
 ## <a id="no-nsx"></a> Reference Architecture Without VMware NSX
 
 The reference architecture for deploying production PCF on vSphere without VMware NSX SDN technology follows the [base architecture](#base-arch), but with the following differences.
@@ -231,6 +233,7 @@ In a typical installation, you assign each of these port groups to a VLAN from t
 
 It is valid to deploy more networks than these two, up to and including those shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
 
+
 ## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
 
 If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each. The key point is to try to get to three AZs if possible, as this reduces future difficulties when increasing the size of your PCF installation. 
@@ -248,6 +251,7 @@ You may be tempted to consider a two-cluster architecture. A two-cluster archite
 For a single-cluster deployment, follow the networking setup described in either the [base](#networking) or the [without-NSX](#no-nsx-design). architectures above. The internal compute arrangement for a production PCF deployment does not affect its networking.
 
 Pivotal recommends mapping all datastores used by PCF to all of the hosts in a single-cluster deployment.
+
 
 ## <a id="multi-datacenter"></a> Multi-Datacenter Reference Architecture
 
@@ -283,7 +287,7 @@ As with any VMware installation, job scheduling works more efficiently when VMs 
 
 Network traffic is a challenge with stretched clusters, since app traffic may enter at any connection point in either location, but can only leave through a designated gateway. The architect should consider that app traffic landing in the East might have to flow out of the West, a "trombone effect" that forces additional traffic across datacenter links.
 
-### <a id="multi-datacenter-east-west"></a>Multi-Datacenter vSphere With Combined East/West Clusters
+### <a id="multi-datacenter-east-west"></a> Multi-Datacenter vSphere With Combined East/West Clusters
 
 For this approach, the architect assigns parallel capacity from two sites independently, and deploys clusters to PCF in matched pairs. This creates even numbers of clusters, which makes suboptimal use of resources in PCF.
 
@@ -293,7 +297,8 @@ Combining the East/West multi-datacenter and [single-cluster](#single-cluster) a
 
 A multi-datacenter architecture makes replicating storage less critical. There are enough AZs from either side to survive a point failure, and you can recover the installation without vSphere HA enabled for the clusters.
 
-## <a id="add-docs"></a>Additional Documentation
+
+## <a id="add-docs"></a> Additional Documentation
 
 * <a href="vsphere_upgrade.html" class="subnav">How to Upgrade vSphere without PCF Downtime</a>
 * <a href="vsphere_migrate_datastore.html" class="subnav">How to Migrate PCF to a New Datastore in vSphere</a>
