@@ -1,22 +1,30 @@
 ---
 breadcrumb: Pivotal Cloud Foundry Documentation
-title: Platform Constructor Plane Reference Architectures
+title: Platform CI/CD Plane Reference Architectures
 owner: Customer0
 ---
 
 ## <a id="intro"></a>Introduction
 
-Concourse is the main CI tool used by the Pivotal and OSS Cloud Foundry communities to develop, test, deploy and manage Cloud Foundry foundations.
+Concourse is the main continuous integration and continuous delivery (CI/CD) tool that the Pivotal and open-source Cloud Foundry communities use to develop, test, deploy and manage Cloud Foundry foundations.
 
 <img src="images/concourse-hero.png" align="right" width="50%">
 
-This document describes best practices and deployment architecture patterns for Concourse as a management tool for Pivotal Cloud Foundry foundations. It only covers Concourse deployments using BOSH, which is the recommended install method for the tool in a production environment.
+This topic describes topologies and best practices for deploying Concourse on [BOSH](http://bosh.io), and using Concourse to manage Pivotal Cloud Foundry (PCF) foundations. For production environments, Pivotal recommends deploying Concourse with BOSH.
 
-The reference architecture covered in this document has been developed and validated in multiple PCF customer deployments as well as in internal Pivotal labs.
+The three topologies described in this document govern the network placement and relationship between two systems:
+
+* The **CI/CD plane** runs Concourse to gather sources for, integrate, update, and otherwise manage PCF foundations. Depending on security, latency, resource, and other considerations, this layer may also internally host Docker registries, S3 buckets, git repositories, and other tools.
+
+* Each **PCF foundation** runs PCF on an instance of BOSH.
+
+Each topology described below has been developed and validated in multiple PCF customer and Pivotal Labs environments.
 
 ## <a id="topologies"></a>Deployment Topologies
 
-Index of deployment topologies for the CI/CD plane, ordered by the strictness of network security policy and complexity to deploy and maintenance, from low to high:
+The main factor determining which CI/CD deployment topology best suits a site's needs is its security policies. Specifically, what are the allowed network connections between the CI/CD plane and the PCF foundations that it manages.
+
+The following three topologies, listed in increasing level of security strictness, answer a range of security needs:
 
 * Topology 1: Concourse server and worker VMs all colocated in one CI/CD plane
 
@@ -24,15 +32,17 @@ Index of deployment topologies for the CI/CD plane, ordered by the strictness of
 
 * Topology 3: Multiple Concourse servers co-located with PCF foundations
 
-### <a id="decision"></a>Deployment topology decision tree
+Increasing level of security across these topologies correlates with increasing network complexity and increasing effort required for initial deployment and maintenance.
 
-The PCF CI/CD plane topologies covered in this article are the most common Concourse deployment architectures found in customer sites and internal Pivotal labs over the course of the past few years.  The primary factor to decide which topology best fits an environment is typically the network architecture and security policies of the targeted site.
+### <a id="decision"></a>Topology Decision Tree and Additional Factors
 
-The simple decision tree graph below captures some of those decision factors and provides recommendations on the Concourse deployment topology that may best fit a specific environment.
+The graph below captures the some of the main decision factors and recommends the Concourse deployment topology that may best fit a specific environment.
 
 <%= image_tag('concourse-decision.png') %>
 
-The decision tree above covers mostly the decision factors for the Concourse server deployment. For other CI/CD plane tools such as S3 buckets, git servers and private Docker registries, the deployment location decision may depend on other factors such as network latency across network zones, security policies and air-gapped vs. Internet connected environments. Some notes and recommendations are made for the deployment of these tools in the topology details sections below but they are not extensively covered in this document.
+In addition to network connection policies, deciding on a deployment topology may depend on other factors, such as:
+
+* For other CI/CD plane tools, such as S3 buckets, git servers and private Docker registries, the deployment location decision may depend on other factors such as network latency across network zones, security policies and air-gapped vs. Internet-connected environments. Some notes and recommendations are made for the deployment of these tools in the topology details sections below but they are not extensively covered in this document.
 
 ### <a id="single-plane"></a>Concourse server and worker VMs all colocated in one CI/CD plane
 
