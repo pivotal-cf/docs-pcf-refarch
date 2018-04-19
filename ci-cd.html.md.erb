@@ -1,6 +1,6 @@
 ---
 breadcrumb: Pivotal Cloud Foundry Documentation
-title: Platform CI/CD Plane Reference Architectures
+title: CI/CD Plane Reference Architectures
 owner: Customer0
 ---
 
@@ -88,12 +88,12 @@ Pivotal recommends that you test network throughput and latency between those ne
 
 All Concourse worker VMs are required to connect to certain VMs on PCF foundation subnets across networks zones or data centers.
 
-See [PCF Management Pipelines](#pipelines) section for required VMs, ports, and external websites required for PCF management pipelines.
+See [PCF CI/CD Pipelines](#pipelines) section for required VMs, ports, and external websites required for PCF CI/CD pipelines.
 
 **Pros**
 
 - Simplified deployment and maintenance of centralized CI/CD plane, which requires only one BOSH deployment and runs one BOSH Director.
-- Simplified setup and maintenance of PCF management pipelines. All pipelines and Concourse teams use a single, centralized server. 
+- Simplified setup and maintenance of PCF CI/CD pipelines. All pipelines and Concourse teams use a single, centralized server. 
 
 **Cons**
 
@@ -129,12 +129,12 @@ Remote worker VMs require outbound access to the Concourse web/ATC server on por
 
 Remote worker VMs inside each PCF foundation network zone or data center are required to connect to VMs in their colocated foundation. They may also require access to external web sites or S3 repositories for downloading installation files.
 
-See [PCF Management Pipelines](#pipelines) section for required VMs and ports required for PCF management pipelines.
+See [PCF CI/CD Pipelines](#pipelines) section for required VMs and ports required for PCF CI/CD pipelines.
 
 **Pros**
 
 - Relatively simple maintenance of centralized CI/CD plane, which contains single Concourse server and other tools.
-- Simplified setup and maintenance of PCF management pipelines. All pipelines and Concourse teams use a single, centralized server.
+- Simplified setup and maintenance of PCF CI/CD pipelines. All pipelines and Concourse teams use a single, centralized server.
 
 **Cons**
 
@@ -157,7 +157,7 @@ Since workers run in the same network zone or data center as the PCF foundation,
 - **Air-gapped environments** require some way to bootstrap S3 repository with Docker images and PCF releases files for pipelines from external sites.
 - **Non-air-gapped environments**, in which workers can download required files from external websites, need those websites to be whitelisted in the proxy or firewall setup.
 
-See [PCF Management Pipelines](#pipelines).
+See [PCF CI/CD Pipelines](#pipelines).
 
 **Pros**
 
@@ -165,9 +165,9 @@ See [PCF Management Pipelines](#pipelines).
 
 **Cons**
 
-- Requires deploying and maintaining multiple Concourse and management tools.
+- Requires deploying and maintaining multiple Concourse and other tools.
 - Requires deploying and maintaining multiple PCF pipelines for each Concourse server.
-- For air-gapped environments, requires setting up an S3 repository for each management plane.
+- For air-gapped environments, requires setting up an S3 repository for each CI/CD plane.
 
 ## <a id="boot"></a>Deploying the CI/CD Plane
 
@@ -197,9 +197,9 @@ Regardless of the selected deployment topology for the PCF CI/CD plane, here are
 
 ### <a id="dedicated-director"></a>Dedicated BOSH Director
 
-Concourse and other management tools deployed as BOSH releases for PCF Management purposes should have a dedicated BOSH Director instance to install, manage and monitor their corresponding VMs. 
+Concourse and other CI/CD plane tools deployed as BOSH releases for PCF Management purposes should have a dedicated BOSH Director instance to install, manage and monitor their corresponding VMs. 
 
-Pivotal does **not** recommend using an existing PCF BOSH Director instance to deploy Concourse and other software (e.g. Minio S3, private Docker registry, CredHub). Sharing the same BOSH Director with PCF deployments increases the risk of accidental or undesired updates or deletion of those deployments. Having a dedicated BOSH Director for Concourse and management tools also provides higher flexibility for upgrades and updates execution, such as stemcell patches for those VMs.
+Pivotal does **not** recommend using an existing PCF BOSH Director instance to deploy Concourse and other software (e.g. Minio S3, private Docker registry, CredHub). Sharing the same BOSH Director with PCF deployments increases the risk of accidental or undesired updates or deletion of those deployments. Having a dedicated BOSH Director for Concourse and CI/CD plane tools also provides higher flexibility for upgrades and updates execution, such as stemcell patches for those VMs.
 
 <%= image_tag('concourse-dedicated-bosh.png') %>
 
@@ -231,13 +231,13 @@ https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.m
 
 #### <a id="git"></a>Git Server
 
-BOSH and Concourse implement the concepts of infrastructure- and pipelines-as-code. As such, it is important to store all the source code for deployments and pipelines in a source code control management tool, preferably a git-compatible one, as PCF management pipelines assume that one is used.
+BOSH and Concourse implement the concepts of infrastructure- and pipelines-as-code. As such, it is important to store all the source code for deployments and pipelines in a source code control management tool, preferably a git-compatible one, as PCF CI/CD pipelines assume that one is used.
 
 For internet connected environments, [GitHub](https://github.com) is the most popular repository. 
 
 GitLab, BitBucket and [GOGS](https://github.com/cloudfoundry-community/gogs-boshrelease) are examples of git servers that can be used for both connected and air-gapped environments.
 
-A git server that contains configuration and pipeline code for a PCF foundation needs to be accessible by the corresponding worker VMs that will run management pipelines for that foundation. 
+A git server that contains configuration and pipeline code for a PCF foundation needs to be accessible by the corresponding worker VMs that run CI/CD pipelines for that foundation. 
 
 #### <a id="s3"></a>S3 repository
 
@@ -255,7 +255,7 @@ For BOSH-deployed private registry alternatives, check [Docker Registry]() or [V
 
 Refer to the [Concourse Architecture](https://concourse-ci.org/architecture.html) topic for details on how to setup a load balancer to handle traffic across multiple instances of the ATC/web VM, as well as for notes on how to setup multiple worker instances.
 
-## <a id="pipelines"></a>PCF Management Pipelines
+## <a id="pipelines"></a>PCF CI/CD Pipelines
 
 **PCF Pipelines**
 
@@ -286,7 +286,7 @@ Frameworks such as [Maestro](https://github.com/pivotalservices/pcf-pipelines-ma
 
 ## <a id="team"></a>Concourse Team Management Best Practices
 
-When a single Concourse server hosts management pipelines for more than one PCF foundation, Pivotal recommends creating one Concourse team (not `main`) specific to each foundation, and associating that team with all pipelines for that foundation, e.g. install, upgrade, backup, and metering. 
+When a single Concourse server hosts CI/CD pipelines for more than one PCF foundation, Pivotal recommends creating one Concourse team (not `main`) specific to each foundation, and associating that team with all pipelines for that foundation, e.g. install, upgrade, backup, and metering. 
 
 <%= image_tag('concourse-pipelines.png') %>
 
