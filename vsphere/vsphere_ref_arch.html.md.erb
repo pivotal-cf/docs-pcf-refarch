@@ -80,7 +80,7 @@ You can allocate networked storage to the host clusters following one of two com
 
 * **Vertical**: You grant each host cluster its own dedicated datastores, giving each installation multiple datastores based on their host cluster. vSphere VSAN storage requires this architecture. With 6 datastores `ds01` through `ds06`, for example, you assign datastores `ds01` and `ds02` to cluster 1, `ds03` and `ds04` to cluster 2, and `ds05` and `ds06` to cluster 3. Then you provision PCF installation #1 to use `ds01`, `ds03`, and `ds05`, and installation #2 to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
-<p class="note"><strong>Note:</strong> If a vSphere datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the sDRS feature on any datastores used by PCF. Otherwise, vMotion activity can rename independent disks and cause BOSH to malfunction.</p>
+<p class="note"><strong>Note</strong>: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature of the sDRS function on any datastores used by PCF. Otherwise, s-vMotion (Storage vMotion) activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
 ### <a id="storage-type"></a> Storage Capacity and Type
 
