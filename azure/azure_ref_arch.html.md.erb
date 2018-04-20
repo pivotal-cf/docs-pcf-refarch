@@ -119,7 +119,7 @@ At a high level, there are currently two possible ways of deploying PCF as descr
 1. Single resource group, or
 1. Multiple resource groups.
 
-The first scenario is outlined in the [Installing PCF on Azure]. It models a single PCF deployment in a single Azure Resource Group.
+The first scenario is outlined in [Installing PCF on Azure](../../customizing/azure.html). It models a single PCF deployment in a single Azure Resource Group.
 
 If you require multiple resource groups, refer to the [Multiple Resource Group deployment](#multiple_resource_groups) section of this topic.
 
@@ -276,7 +276,7 @@ them to Log Analytics, where they appear on unified dashboards and can be correl
 
 Azure DNS supports DNS delegation, allowing for sub-level domains to be hosted within Azure. This functionality is fully supported within PCF. 
 
-It is recommended to use a sub-zone for your PCF. For example, if your company's domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`. 
+Pivotal recommends that use a sub-zone for your PCF deployment. For example, if your company's domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`. 
 
 As Azure DNS does not support recursion, in order to properly configure Azure DNS, create an `NS` record with your registrar which points to the four name servers supplied by your Azure DNS Zone configuration. Once your `NS` records have been created, you can then create the required wildcard `A` records for the PCF application and system domains, as well as any other records desired for your PCF deployments. 
 
