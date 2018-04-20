@@ -1,0 +1,3 @@
+Concourse diagrams come from slides:
+
+https://docs.google.com/presentation/d/1EYo_aP3wU8vUjQUBR4Bv1e3hHcLouOZzhFeb1_-43yo/edit#slide=id.p
