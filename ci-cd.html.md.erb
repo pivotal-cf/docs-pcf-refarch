@@ -129,7 +129,7 @@ Remote worker VMs require outbound access to the Concourse web/ATC server on por
 
 Remote worker VMs inside each PCF foundation network zone or data center are required to connect to VMs in their colocated foundation. They may also require access to external web sites or S3 repositories for downloading installation files.
 
-See [PCF CI/CD Pipelines](#pipelines) section for required VMs and ports required for PCF CI/CD pipelines.
+See the [PCF CI/CD Pipelines](#pipelines) section for required VMs and ports required for PCF CI/CD pipelines.
 
 **Pros**
 
@@ -156,8 +156,6 @@ Since workers run in the same network zone or data center as the PCF foundation,
 
 - **Air-gapped environments** require some way to bootstrap S3 repository with Docker images and PCF releases files for pipelines from external sites.
 - **Non-air-gapped environments**, in which workers can download required files from external websites, need those websites to be whitelisted in the proxy or firewall setup.
-
-See [PCF CI/CD Pipelines](#pipelines).
 
 **Pros**
 
@@ -191,30 +189,33 @@ There are a few alternatives to deploy BOSH Directors, Concourse servers, and ot
 
 * [Bosh Bootloader (BBL)](https://github.com/cloudfoundry/bosh-bootloader) deploys BOSH Director and Concourse on multiple IaaSes.
 
-## <a id="best-practices"></a>Best Practices for the Deployment of the CI/CD Plane
+## <a id="deployment-practices"></a>CI/CD Plane Deployment Best Practices
 
-Regardless of the selected deployment topology for the PCF CI/CD plane, here are some of the generic best practices for the deployments of its components:
+Here are some best practices for CI/CD plane components that apply across all deployment topologies:
 
 ### <a id="dedicated-director"></a>Dedicated BOSH Director
 
-Concourse and other CI/CD plane tools deployed as BOSH releases for PCF Management purposes should have a dedicated BOSH Director instance to install, manage and monitor their corresponding VMs. 
+Pivotal recommends deploying Concourse and other CI/CD plane tools on their own, dedicated BOSH layer, with their own BOSH Director that runs separately from the PCF foundations that the CI/CD plane manages.
 
-Pivotal does **not** recommend using an existing PCF BOSH Director instance to deploy Concourse and other software (e.g. Minio S3, private Docker registry, CredHub). Sharing the same BOSH Director with PCF deployments increases the risk of accidental or undesired updates or deletion of those deployments. Having a dedicated BOSH Director for Concourse and CI/CD plane tools also provides higher flexibility for upgrades and updates execution, such as stemcell patches for those VMs.
+Pivotal does **not** recommend using an existing PCF BOSH Director instance to deploy Concourse and other software (e.g. Minio S3, private Docker registry, CredHub). Sharing the same BOSH Director with PCF deployments increases the risk of accidental or undesired updates or deletion of those deployments.
+
+Dedicating a BOSH Director to Concourse other CI/CD plane tools also provides higher flexibility for PCF foundation upgrades and updates, such as stemcell patches.
 
 <%= image_tag('concourse-dedicated-bosh.png') %>
 
 ### <a id="manage-creds"></a>Credentials Management
 
-Credentials and sensitive information that needs to be fed into a Concourse pipeline should be stored encrypted in a Credentials Management software such as CredHub or Vault. Such credentials should never be stored in plain text in parameter files on file repositories.
+All credentials and other sensitive information that feeds into a Concourse pipeline should be encrypted and stored using credentials management software such as CredHub or Vault. Never store credentials as plain text in parameter files in file repositories.
 
 #### <a id="creds-credhub"></a>Credentials Management with CredHub
 
-Concourse supports integration with CredHub for credentials management in its pipelines, which can reference encrypted secrets stored in a CredHub server and get them automatically interpolated during execution of tasks.
+Concourse integrates with CredHub to manage credentials in its pipelines. The pipelines reference encrypted secrets stored in a CredHub server and retrieve them automatically during execution of tasks.
 
-Concourse can be integrated with a CredHub server by configuring its ATC job's deployment properties with information about the CredHub server and corresponding UAA authentication credentials.
-CredHub can be deployed in multiple ways: as an individual VM or integrated with other VMS, such as BOSH Director or co-located with Concourse's ATC/web VM.
+To integrate Concourse with a CredHub server, you configure its ATC job's deployment properties with information about the CredHub server and corresponding UAA authentication credentials.
 
-The co-location with Concourse’s ATC VM provides a CredHub server that is dedicated to the Concourse pipelines and is fully managed by Concourse administrators. Also, during Concourse upgrades, the CredHub server will only be down when Concourse ATC job is also down, minimizing potential credential server downtime for pipelines.
+You can deploy CredHub in multiple ways: as a dedicated VM, or integrated with other VMs, such as colocating the CredHub server the BOSH Director VM or Concourse's ATC/web VM.
+
+Colocating a CredHub server with Concourse’s ATC VM dedicates it to the Concourse pipelines and lets Concourse administrators manage the credentials server. This configuration also means that during Concourse upgrades, the CredHub server only goes down when the Concourse ATC job is also down, which minimizes potential credential server outages for running pipelines.
 
 The diagram below illustrates the jobs of Concourse VMs, along with the ones for the BOSH Director VM, when a dedicated CredHub server is deployed with Concourse.
 
@@ -224,35 +225,35 @@ The [Concourse Pipelines Integration with CredHub](https://github.com/pivotal-cf
 
 #### <a id="creds-vault"></a>Credentials Management with Vault
 
-https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.md 
+For how to configure Vault to manage credentials for Concourse pipelines, see [Secure credential automation with Vault and Concourse](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.md) in the PCF Pipelines repository.
 
 ### <a id="services"></a>Storage Services
 
 #### <a id="git"></a>Git Server
 
-BOSH and Concourse implement the concepts of infrastructure- and pipelines-as-code. As such, it is important to store all the source code for deployments and pipelines in a source code control management tool, preferably a git-compatible one, as PCF CI/CD pipelines assume that one is used.
+BOSH and Concourse implement the concepts of infrastructure-as-code and pipelines-as-code. As such, it is important to store all source code for deployments and pipelines in a version-controlled repository.
 
-For internet connected environments, [GitHub](https://github.com) is the most popular repository. 
+PCF CI/CD pipelines assume that their source code is kept in git-compatible repositories. [GitHub](https://github.com) is the most popular git-compatible repository for Internet-connected environments. 
 
 GitLab, BitBucket and [GOGS](https://github.com/cloudfoundry-community/gogs-boshrelease) are examples of git servers that can be used for both connected and air-gapped environments.
 
 A git server that contains configuration and pipeline code for a PCF foundation needs to be accessible by the corresponding worker VMs that run CI/CD pipelines for that foundation. 
 
-#### <a id="s3"></a>S3 repository
+#### <a id="s3"></a>S3 Repository
 
-For all environments, an S3 repository is required, at a minimum, for the storage of artifacts produced by the PCF backup pipelines. 
-When a private S3 repository is required for the environment and is not yet available internally, then BOSH-deployed S3 releases, such as [Minio S3](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release), could be used to setup one for the CI/CD plane.
+In all environments Concourse requires an S3 repository to store PCF backups possibly other files. 
+If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as [Minio S3](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) in your CI/CD plane.
 
 For air-gapped environments, an S3 repository is also the preferred method to store release files for PCF tiles, stemcells and buildpacks. Docker images can also be stored to an S3 repository as an alternative to a private Docker registry. See [Offline Pipelines for Airgapped Environments](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/offline-pipelines.md) for details.
 
 #### <a id="docker-registry"></a>Private Docker Registry
 
-For air-gapped environments, Docker Images for Concourse pipelines need to be stored either on a private Docker registry or on an S3 repository.
-For BOSH-deployed private registry alternatives, check [Docker Registry]() or [VMWare Harbor]().
+For air-gapped environments, Docker Images for Concourse pipelines need to be stored either on a private Docker registry or in an S3 repository.
+For BOSH-deployed private registry alternatives, check [Docker Registry](https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/private-docker-registry/docker-registry-release) or [VMWare Harbor](https://github.com/vmware/harbor).
 
 ### <a id="ha"></a>High Availability
 
-Refer to the [Concourse Architecture](https://concourse-ci.org/architecture.html) topic for details on how to setup a load balancer to handle traffic across multiple instances of the ATC/web VM, as well as for notes on how to setup multiple worker instances.
+For details on how to set up a load balancer to handle traffic across multiple instances of the ATC/web VM, and how to deploy multiple worker instances, see the [Concourse Architecture](https://concourse-ci.org/architecture.html) topic.
 
 ## <a id="pipelines"></a>PCF CI/CD Pipelines
 
