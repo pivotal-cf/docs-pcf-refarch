@@ -1,0 +1,311 @@
+---
+breadcrumb: Pivotal Cloud Foundry Documentation
+title: CI/CD Plane Reference Architectures
+owner: Customer0
+---
+
+## <a id="intro"></a>Introduction
+
+Concourse is the main continuous integration and continuous delivery (CI/CD) tool that the Pivotal and open-source Cloud Foundry communities use to develop, test, deploy and manage Cloud Foundry foundations.
+
+[//]: # ( <img src="images/concourse-hero.png" align="right" width="50%"> commented out decorative image )
+
+This topic describes topologies and best practices for deploying Concourse on [BOSH](http://bosh.io), and using Concourse to manage Pivotal Cloud Foundry (PCF) foundations. For production environments, Pivotal recommends deploying Concourse with BOSH.
+
+The three topologies described in this document govern the network placement and relationship between two systems:
+
+* The **CI/CD plane** runs Concourse to gather sources for, integrate, update, and otherwise manage PCF foundations. This layer may also host internal Docker registries, S3 buckets, git repositories, and other tools.
+
+* Each **PCF foundation** runs PCF on an instance of BOSH.
+
+Each topology described below has been developed and validated in multiple PCF customer and Pivotal Labs environments.
+
+## <a id="topologies"></a>Deployment Topologies
+
+Security policies are usually the main factor that determines which CI/CD deployment topology best suits a site's needs. Specifically, the decision depends on what network connections are allowed between the CI/CD plane and the PCF foundations that it manages.
+
+The following three topologies answer a range of security needs, ordered by increasing level of security around the PCF foundations:
+
+* [Topology 1](#topology1): Concourse server and worker VMs all colocated on CI/CD plane
+
+* [Topology 2](#topology2): Concourse server on CI/CD plane, and remote workers colocated with PCF foundations
+
+* [Topology 3](#topology3): Multiple Concourse servers and workers colocated with PCF foundations
+
+Across these three topologies, the increasing level of PCF foundation security correlates with:
+
+* Increasing network complexity
+* Increasing effort required for initial deployment and ongoing maintenance
+
+### <a id="decision"></a>Security Decision Factors
+
+The graph below captures the decision factors dictated by network security policy, and recommends Concourse deployment topologies that adhere to those policies.
+
+<%= image_tag('concourse-decision.png') %>
+
+### <a id="additional"></a>Additional Decision Factors
+
+In addition to security policy, deciding on a CI/CD deployment topology may also depend on factors such as:
+
+* Network latency across network zones
+* Air-gapped vs. Internet-connected environments
+* Resource limitations
+
+The [Credentials Management](#manage-creds) and [Storage Services](#services) sections below includes notes and recommendations regarding credentials management, Docker registries, S3 buckets, and git repositories, but does not cover these tools extensively.
+
+### <a id="placement"></a>Topology Objects
+
+Complete deployment topologies dictate the internal placement or remote use of the following:
+
+* Concourse server and worker VMs, as discussed [above](#topologies)
+* Credentials managers such as CredHub or Vault
+* Docker registries, public or private
+* S3 or other storage buckets, public or private
+* git or other code repositories, public or private
+
+### <a id="topology1"></a>Topology 1: Concourse Server and Worker VMs All Colocated on CI/CD Plane
+
+This simple topology follows network security policies that allow a single CI/CD plane to connect to all PCF foundations deployed across multiple network zones or data centers.
+
+<%= image_tag('concourse-single-plane.png') %>
+
+In this topology, the Concourse server and worker VMs, along with other tools (e.g. Docker registry, S3 buckets, Vault server), are all deployed to the same subnet.
+
+**Connectivity Requirements**
+
+Concourse worker VMs must be allowed to connect to:
+
+* The Ops Manager VM or a jumpbox VM in all of the PCF foundations networks
+* (on vSphere) The vCenter API for each PCF foundation
+
+**Performance Notes**
+
+Network data transfers between the CI/CD Plane and each PCF foundation network zone may carry large files such as PCF tiles, release files, and PCF foundation backup pipelines output.
+
+Pivotal recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
+
+**Firewall Requirements**
+
+All Concourse worker VMs are required to connect to certain VMs on PCF foundation subnets across networks zones or data centers.
+
+See [PCF CI/CD Pipelines](#pipelines) section for required VMs, ports, and external websites required for PCF CI/CD pipelines.
+
+**Pros**
+
+- Simplified deployment and maintenance of centralized CI/CD plane, which requires only one BOSH deployment and runs one BOSH Director.
+- Simplified setup and maintenance of PCF CI/CD pipelines. All pipelines and Concourse teams use a single, centralized server. 
+
+**Cons**
+
+- You may have to configure firewall rules in each PCF network to allow connectivity from workers in CI/CD zone, as mentioned above.
+
+### <a id="topology2"></a>Topology 2: Concourse Server on CI/CD Plane, and Remote Workers Colocated with PCF Foundations
+
+This topology supports environments where PCF foundation VMs cannot receive incoming traffic from IP addresses outside their network zone or data center, but they can initiate outbound connections to outside zones.
+
+As in [Topology 1](#topology1), the Concourse server, and potentially other VMs for tools such as Docker registries or S3 buckets, are deployed to a dedicated subnet. The difference here is that Concourse worker VM pools are deployed inside each PCF foundation subnet, network zone, or data center. 
+
+<%= image_tag('concourse-multi-zone.png') %>
+
+**Connectivity Requirements**
+
+Concourse worker VMs in each PCF foundation network zone or data center must:
+
+* Connect to the Ops Manager VM or a jumpbox VM in each PCF foundations network
+* (on vSphere) Connect to the vCenter API for each PCF foundation
+* Have outbound connection access to the Concourse web/ATC server on port 2222. This lets them handshake with the Concourse server to open a reverse SSH tunnel for ongoing communication between them and the Concourse ATC.
+
+For more details, see [Concourse Architecture](https://docs.pivotal.io/p-concourse/architecture.html).
+
+**Performance Notes**
+
+Remote workers have to download large installation files from either the Internet or from a configured S3 artifacts repository. For PCF backup pipelines, workers may also have to upload large backup files to the S3 repository.
+
+Pivotal recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
+
+**Firewall Requirements**
+
+Remote worker VMs require outbound access to the Concourse web/ATC server on port 2222.
+
+Remote worker VMs inside each PCF foundation network zone or data center are required to connect to VMs in their colocated foundation. They may also require access to external web sites or S3 repositories for downloading installation files.
+
+See the [PCF CI/CD Pipelines](#pipelines) section for required VMs and ports required for PCF CI/CD pipelines.
+
+**Pros**
+
+- Relatively simple maintenance of centralized CI/CD plane, which contains single Concourse server and other tools.
+- Simplified setup and maintenance of PCF CI/CD pipelines. All pipelines and Concourse teams use a single, centralized server.
+
+**Cons**
+
+- You have to reconfigure firewalls to grant outbound access to remote worker VMs.
+- In addition to deploying the CI/CD plane, you need an additional BOSH deployment and running BOSH Director for each PCF Foundation network zone or data center.
+- You need to manage multiple Concourse worker pools in multiple locations.
+
+### <a id="topology3"></a>Topology 3: Multiple Concourse Servers and Workers Colocated with PCF Foundations
+
+This topology supports environments where PCF foundation VMs can only be accessed from within the same network zone or data center. This scenario requires deploying complete and dedicated CI/CD planes within each deployment zone.  
+
+<%= image_tag('concourse-multi-foundation.png') %>
+
+**Performance Notes**
+
+Since workers run in the same network zone or data center as the PCF foundation, data transfer throughput should not limit pipeline performance.
+
+**Firewall Requirements**
+
+- **Air-gapped environments** require some way to bootstrap S3 repository with Docker images and PCF releases files for pipelines from external sites.
+- **Non-air-gapped environments**, in which workers can download required files from external websites, need those websites to be whitelisted in the proxy or firewall setup.
+
+**Pros**
+
+- Requires little or no firewall rules configuration for CI/CD plane VMs. In non-air-gapped environments, worker VMs download PCF releases and Docker images for pipelines from external websites.
+
+**Cons**
+
+- Requires deploying and maintaining multiple Concourse and other tools.
+- Requires deploying and maintaining multiple PCF pipelines for each Concourse server.
+- For air-gapped environments, requires setting up an S3 repository for each CI/CD plane.
+
+## <a id="boot"></a>Deploying the CI/CD Plane
+
+There are a few alternatives to deploy BOSH Directors, Concourse servers, and other tool releases to the CI/CD plane. Details on those alternatives are outside of the scope of this document, but refer to the links below for the most common options:
+
+**Manual deployments**
+
+* BOSH Director: [BOSH create-env](https://bosh.io/docs/init.html)
+* Concourse
+  - [Concourse](https://concourse-ci.org/clusters-with-bosh.html)
+  - [Concourse with CredHub](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/credhub-integration.md)
+  - [Concourse with Vault](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.md)
+* Docker registries
+  - [Private Docker Registry](https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/private-docker-registry/docker-registry-release)
+  - [VMware Harbor Registry](https://github.com/vmware/harbor)
+* S3 buckets
+  - [Minio S3](https://github.com/minio/minio-boshrelease)
+  - [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release)
+
+**Automated deployments**
+
+* [Bosh Bootloader (BBL)](https://github.com/cloudfoundry/bosh-bootloader) deploys BOSH Director and Concourse on multiple IaaSes.
+
+## <a id="deployment-practices"></a>CI/CD Plane Deployment Best Practices
+
+Here are some best practices for CI/CD plane components that apply across all deployment topologies:
+
+### <a id="dedicated-director"></a>Dedicated BOSH Director
+
+Pivotal recommends deploying Concourse and other CI/CD plane tools on their own, dedicated BOSH layer, with their own BOSH Director that runs separately from the PCF foundations that the CI/CD plane manages.
+
+Pivotal does **not** recommend using an existing PCF BOSH Director instance to deploy Concourse and other software (e.g. Minio S3, private Docker registry, CredHub). Sharing the same BOSH Director with PCF deployments increases the risk of accidental or undesired updates or deletion of those deployments.
+
+Dedicating a BOSH Director to Concourse other CI/CD plane tools also provides higher flexibility for PCF foundation upgrades and updates, such as stemcell patches.
+
+<%= image_tag('concourse-dedicated-bosh.png') %>
+
+### <a id="manage-creds"></a>Credentials Management
+
+All credentials and other sensitive information that feeds into a Concourse pipeline should be encrypted and stored using credentials management software such as CredHub or Vault. Never store credentials as plain text in parameter files in file repositories.
+
+#### <a id="creds-credhub"></a>Credentials Management with CredHub
+
+Concourse integrates with CredHub to manage credentials in its pipelines. The pipelines reference encrypted secrets stored in a CredHub server and retrieve them automatically during execution of tasks.
+
+To integrate Concourse with a CredHub server, you configure its ATC job's deployment properties with information about the CredHub server and corresponding UAA authentication credentials.
+
+You can deploy CredHub in multiple ways: as a dedicated VM, or integrated with other VMs, such as colocating the CredHub server the BOSH Director VM or Concourse's ATC/web VM.
+
+Colocating a CredHub server with Concourse’s ATC VM dedicates it to the Concourse pipelines and lets Concourse administrators manage the credentials server. This configuration also means that during Concourse upgrades, the CredHub server only goes down when the Concourse ATC job is also down, which minimizes potential credential server outages for running pipelines.
+
+The diagram below illustrates the jobs of Concourse VMs, along with the ones for the BOSH Director VM, when a dedicated CredHub server is deployed with Concourse.
+
+<%= image_tag('concourse-bosh-jobs.png') %>
+
+The [Concourse Pipelines Integration with CredHub](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/credhub-integration.md) documentation in the PCF Pipelines repo describes how to deploy a CredHub server integrated with Concourse.
+
+#### <a id="creds-vault"></a>Credentials Management with Vault
+
+For how to configure Vault to manage credentials for Concourse pipelines, see [Secure credential automation with Vault and Concourse](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.md) in the PCF Pipelines repository.
+
+### <a id="services"></a>Storage Services
+
+#### <a id="git"></a>Git Server
+
+BOSH and Concourse implement the concepts of infrastructure-as-code and pipelines-as-code. As such, it is important to store all source code for deployments and pipelines in a version-controlled repository.
+
+PCF CI/CD pipelines assume that their source code is kept in git-compatible repositories. [GitHub](https://github.com) is the most popular git-compatible repository for Internet-connected environments. 
+
+GitLab, BitBucket and [GOGS](https://github.com/cloudfoundry-community/gogs-boshrelease) are examples of git servers that can be used for both connected and air-gapped environments.
+
+A git server that contains configuration and pipeline code for a PCF foundation needs to be accessible by the corresponding worker VMs that run CI/CD pipelines for that foundation. 
+
+#### <a id="s3"></a>S3 Repository
+
+In all environments Concourse requires an S3 repository to store PCF backups possibly other files. 
+If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as [Minio S3](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) in your CI/CD plane.
+
+For air-gapped environments, an S3 repository is also the preferred method to store release files for PCF tiles, stemcells and buildpacks. Docker images can also be stored to an S3 repository as an alternative to a private Docker registry. See [Offline Pipelines for Airgapped Environments](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/offline-pipelines.md) for details.
+
+#### <a id="docker-registry"></a>Private Docker Registry
+
+For air-gapped environments, Docker Images for Concourse pipelines need to be stored either on a private Docker registry or in an S3 repository.
+For BOSH-deployed private registry alternatives, check [Docker Registry](https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/private-docker-registry/docker-registry-release) or [VMWare Harbor](https://github.com/vmware/harbor).
+
+### <a id="ha"></a>High Availability
+
+For details on how to set up a load balancer to handle traffic across multiple instances of the ATC/web VM, and how to deploy multiple worker instances, see the [Concourse Architecture](https://concourse-ci.org/architecture.html) topic.
+
+## <a id="pipelines"></a>PCF CI/CD Pipelines
+
+**PCF Pipelines**
+
+PCF Platform Automation with Concourse (PCF Pipelines) is a collection of Concourse pipelines for installing and upgrading Pivotal Cloud Foundry. See the [source on Github](https://github.com/pivotal-cf/pcf-pipelines) or download from [Pivotal Network](https://network.pivotal.io/products/pcf-automation/) (sign-in required).
+
+To run PCF Pipelines, you need:
+
+  - Ops Manager web UI, API and VM installed
+  - (vSphere environments) vCenter API installed
+  - For proxy- or Internet-connected environments, whitelist the following sites:
+
+    - [Docker Hub](https://hub.docker.io): hub.docker.io
+    - [Pivotal Network](https://network.pivotal.io): network.pivotal.io
+    - bosh.io
+
+**BOSH Backup and Restore (BBR) Pipelines**
+
+BBR Pipelines automate PCF foundation backups. See and download the [source on Github](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks). 
+
+To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
+
+**Pipelines Orchestration Frameworks**
+
+Frameworks such as [Maestro](https://github.com/pivotalservices/pcf-pipelines-maestro) can help:
+
+* Automate pipeline creation and management for multiple PCF foundations
+* Promote and audit configuration changes and version upgrades across all foundations
+
+## <a id="team"></a>Concourse Team Management Best Practices
+
+When a single Concourse server hosts CI/CD pipelines for more than one PCF foundation, Pivotal recommends creating one Concourse team (not `main`) specific to each foundation, and associating that team with all pipelines for that foundation, e.g. install, upgrade, backup, and metering. 
+
+<%= image_tag('concourse-pipelines.png') %>
+
+Dedicating a Concourse team to each PCF foundation has the following benefits:
+
+* **It avoids the clutter of pipelines in a single team.** 
+The list of pipelines for each foundation may be long, depending how many tiles are deployed to it.
+
+* **It avoids the risk of operators running a pipeline for the wrong foundation.**
+When a single team hosts maintenance pipelines for multiple foundations, the clutter of dozens of pipelines may lead operators to accidentally run a pipeline (e.g. upgrade or delete tile) targeted at the wrong PCF foundation.
+
+* **It allows for more granular access control settings per team.**
+PCF pipelines for higher environments (e.g. Production) may require a more restricted access control than ones from lower environments (e.g. Sandbox). Authentication settings for Concourse teams enable that level of control.
+
+* **It allows workers to be assigned to pipelines of a specific foundation.**
+Concourse deployment configuration allows for the assignment of workers to a single team. If that team contains pipelines of only one foundation, then the corresponding group of workers run pipelines only for that foundation. This is useful when security policy requires tooling and automation for a foundation (e.g. Production) to run on specific VMs.
+
+### <a id="app-dev"></a>Concourse Teams for App Development Orgs and Spaces
+
+When a Concourse server hosts pipelines for an app development team, Pivotal recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the Pivotal Application Service (PAS) user authentication and authorization (UAA) server.
+
+Associating Concourse teams with PAS org and space member lists synchronizes access between PAS and Concourse, letting developers see and operate the build pipelines for the apps they develop.
