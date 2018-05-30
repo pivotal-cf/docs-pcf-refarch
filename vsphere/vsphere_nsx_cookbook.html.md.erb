@@ -230,7 +230,7 @@ To create monitors for pools, access the ESG UI and perform the following steps:
 1. Set the URL to `/health`.
 1. Create a new monitor for `diego-brains`, and keep the defaults.
 1. Set the type to `TCP`.
-1. Create a new monitor for `ert-mysql-proxy`, and keep the defaults.
+1. Create a new monitor for `pas-mysql-proxy`, and keep the defaults.
 1. Set the type to `TCP`.
 
 These monitors are selected during the next step when pools are created. A pool and a monitor are matched 1:1.
@@ -269,14 +269,14 @@ To create pool for `http-routers`, access the ESG UI and perform the following s
 1. Set the Algorithm to `ROUND-ROBIN`.
 1. Set the Monitors to `diego-brains`.
 
-#### <a id="ert_mysql_proxy_pools"></a> Step 2.6d: Create Pool for `ert-mysql-proxy`
+#### <a id="ert_mysql_proxy_pools"></a> Step 2.6d: Create Pool for `pas-mysql-proxy`
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
 1. Enter the two IP addresses reserved for MySQL-proxy into this pool.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note:</strong> If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
 1. Set the **Port** to 3306 and the **Monitor Port** to 1936.
 1. Set the **Algorithm** to `ROUND-ROBIN`.
-1. Set the **Monitors** to `ert-mysql-proxies`.
+1. Set the **Monitors** to `pas-mysql-proxies`.
 
 ### <a id="create_virtual_servers"></a> Step 2.7: Create Virtual Servers
 
