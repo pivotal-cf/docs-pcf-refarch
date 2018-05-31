@@ -5,315 +5,405 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This guide presents reference architectures for Pivotal Cloud Foundry (PCF) on vSphere.
+This guide provides reference architectures for Pivotal Cloud Foundry (PCF),
+including Pivotal Application Service (PAS) and Pivotal Container Service (PKS), on vSphere.
 
 ## <a id="overview"></a> Overview
 
-Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios. These designs are sized for up to 1500 app instances.
+Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios.
+These designs are sized for up to 1500 app instances.
 
-This document does not replace the [basic installation documentation] (../../customizing/vsphere.html), but gives proven examples of how to apply those instructions to real-world production environments.
+This document does not replace the installation instructions provided in the [PCF on vSphere Requirements](../../customizing/vsphere.html) topic. Instead, it gives examples of how to apply those instructions to real-world production environments.
 
-| PCF Products Validated        | Version                   |
-| ----------------------------- |:-------------------------:|
-| PCF Ops Manager                      | 2.0.latest               |
-| Pivotal Application Service (PAS)    | 2.0.latest               |
+<table border="1" class="nice">
+  <thead>
+    <tr>
+      <th>PCF Products Validated</th>
+      <th>Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>vSphere</td>
+      <td>6.5</td>
+    </tr>
+    <tr>
+      <td>VMware NSX-T</td>
+      <td>2.1</td>
+    </tr>
+    <tr>
+      <td>Pivotal Cloud Foundry Operations Manager</td>
+      <td>2.0, 2.1</td>
+    </tr>
+    <tr>
+      <td>PAS</td>
+      <td>2.0, 2.1</td>
+    </tr>
+    <tr>
+      <td>PKS</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
 
-See [PCF on vSphere Requirements](../../customizing/vsphere.html) for general requirements for running PCF and specific requirements for running PCF on vSphere.
+## <a id="base-arch"></a> Base vSphere Reference Architecture
 
+This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
 
-## <a id="refarchs"></a> PCF Reference Architectures
+To use all features listed in this topic, you must have **Advanced** or above licensing from VMware for NSX-T.
+If you are not using NSX-T, see [Non-SDN Deployments](#non-sdn).
 
-A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as AWS, that meets the following requirements:
+This reference design supports capacity growth at the vSphere and PCF levels as well as installation security through the NSX-T firewall.
+It allocates a minimum of three or more servers to each cluster, as recommended by vSphere, and spreads PAS components across three clusters for [High Availability](../../concepts/high-availability.html).
 
-* Secure
-* Publicly-accessible
-* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-* Can host at least 100 app instances, or far more
+If you want to deploy PCF without NSX-T, see [vSphere Reference Architecture](https://docs.pivotal.io/pivotalcf/2-0/refarch/vsphere/vsphere_ref_arch.html), which includes NSX-V design considerations.
 
-Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
+### <a id="non-sdn"></a> Non-SDN Deployments
 
+This sections provides information about VLAN and container-to-container networking considerations for PCF deployments that do not rely on software-defined networking (SDN).
 
-## <a id="base-arch"></a> Base vSphere Reference Architecture 
+#### <a id="vlan-condiderations"></a> VLAN Considerations
 
-This recommended architecture includes VMware vSphere, NSX-V, and the ESG (Edge Services Gateway), a software-defined network services gateway that runs on VMware ESXi virtual hosts and combines routing, firewall, NAT/SNAT, and load balancing. In the absence of NSX, see below for architectures that do not rely on the ESG.
+Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool. For this approach, you need to deploy PAS and PKS in a particular alignment.
 
-To use all features listed here, ESG requires at least **Advanced** licensing from VMware.
+<%= image_tag('../images/load-balancing.png') %>
 
-For more information about installing and configuring ESG for use with PCF on vSphere, see the <a href="./vsphere_nsx_cookbook.html" class="subnav">Cookbook for Using Edge Services Gateway on PCF and VMware NSX</a>.
+[View a larger version of this diagram](../images/load-balancing.png)
 
-The diagram below shows an architecture for one PCF installation in vSphere clusters, segmented with Resource Pools. More Resource Pools can be added to the existing Clusters to stack more PCF installations into the same capacity.
+If you are designing a non-SDN environment, ensure that VLANs and address space for PAS and PKS do not overlap.
+In addition, keep in mind that non-SDN PCF environments have the following characteristics: 
 
-This design supports long-term use, capacity growth at the vSphere level, and maximum installation security through the ESG firewall. It allocates a minimum of three or more servers to each cluster, as recommended by vSphere, and spreads PCF components across three or another odd number of clusters, as recommended for [High Availability](../../concepts/high-availability.html).
+* Load balancing is performed external to the PCF installation.
+* Client SSL termination needs to happen either at the load balancer, Gorouters, or both. Plan for certificates to accomplish this.
+* Firewall layer is accomplished external to the PCF installation.
 
-<%= image_tag('vsphere-overview-arch.png') %>
+#### <a id="c2c-cni"></a> Container-to-Container Networking and CNI Considerations
 
-[View a larger version of this diagram](../images/vsphere-overview-arch.png).
+Changing your container-to-container networking strategy after deployment is possible. However, with NSX-T, you need both the VMware NSX-T Container Plug-In for PCF tile and NSX-T infrastructure.
+For information about deploying PAS on vSphere with NSX-T internal networking using the VMware NSX-T Container Plug-In for PCF tile, see [Deploying PAS with NSX-T Networking](../../customizing/vsphere-nsx-t.html).
 
-### <a id="install"></a> Installation
+Migrating from a non-SDN environment to an SDN-enabled solution is possible but best considered as a greenfield deployment. Inserting an SDN layer under an active PCF installation is disruptive.
 
-To create a system following this architecture, perform the following steps:
+#### <a id="pas"></a> PAS Without SDN
 
-1. In vCenter, create or identify three existing clusters.
+You can use PAS without an SDN overlay.
+For more information, see [PCF on vSphere Requirements](../../customizing/vsphere.html).
 
-1. Enable DRS on each cluster and set vMotion to **fully automated**. Populate each cluster with a Resource Pool for each PCF installation.
+#### <a id="pks"></a> PKS Without SDN
 
-1. For compute, populate each cluster with three or more ESXi hosts, making nine or more hosts for each installation. All installations collectively draw from the same group of nine or more hosts.
+PKS is supplied with NSX-T SDN included, along with the associated licensing.
+However, you can ignore the bundled NSX-T SDN solution and use a built-in network stack, Flannel, which handles container networking.
 
-1. In the PCF deployment, use Ops Manager to create three Availability Zones (AZs), each corresponding to one of the Resource Pools from each cluster.
+For more information about PKS without NSX-T, see [Installing PKS on vSphere](https://docs.pivotal.io/runtimes/pks/1-0/installing-pks-vsphere.html).
 
-1. For storage, add dedicated datastores to each PCF deployment following one of the two approaches, vertical or horizontal, as described in the [Storage Configuration](#storage) section of this topic.
+### <a id="sdn-deployments"></a> SDN-Enabled Deployments With NSX-T
 
-1. Supply core networking for each deployment by configuring an ESG with the following subnets. See the [Networking Design](#networking-design) section of this topic for details.
-  - Infrastructure
-  - PAS
-  - Service tiles (one or more)
-  - Dynamic service tiles (a network managed entirely by BOSH Director)
-  - IsoZone##
-  - Container-to-Container Networking
+This sections provides information about network requirements, routing, and load balancing for PAS and PKS deployments that rely on SDN.
 
-    Pivotal recommends NSX Logical Switches (vWires) for all networks used by PCF. This approach avoids VLAN consumption while benefiting from the overlay capability NSX enables. NSX can create a DPG (Distributed Port Group) on a DVS (Distributed Virtual Switch) for each interface provisioned on the ESG as shown in the <a href="#dist-port-group">Port Groups diagram</a> below.<br/><br/>
-    Alternatively, port groups on a DVS with VLANs tagged on each can be used for the networks above.
+#### <a id="network-pas"></a> Network Requirements for PAS
 
-### <a id="scale"></a> Scaling
+PAS requires a number of statically defined networks to host the main components it is composed of. If you consider the “inside” of an NSX-T deployment, a series of non-routable address banks that the NSX-T routers manage is defined as follows:
 
-You can scale up this architecture to support additional PCF installations with the same capacity, keeping each resource-protected and separated.
+<p class="note"><strong>Note</strong>: These static networks have a smaller host address space assigned than reference designs for PCF v1.xx.</p>
 
-To support more PCF installations, scale this architecture vertically by adding Resource Pools to existing clusters. To add capacity to all PCF installations, scale it horizontally by adding ESXi hosts to the existing clusters in sets of three, one per cluster. 
+* Infrastructure: `192.168.1.0/24`
+* Deployment: `192.168.2.0/24`
+* Services: `192.168.3.0/24`
 
-### <a id="priority"></a> Priority
+    The Services network can be used with Ops Manager tiles that you might install in addition to PAS.
+    Some of these tiles may require on-demand network capacity. Pivotal recommends that you consider adding a network per tile that needs such resources and pair them up in the tile’s configuration.
 
-In this architecture, multiple PCF installations can share host resources. You can use vCenter resource allocation shares to assign `High`, `Normal`, or `Low` priority to pools used by each installation. When host resources keep up with demand, these share values make no difference, but when multiple installations compete for limited resources, you can prioritize a production installation over a development installation by assigning its resource pools a `High` share value setting.
+* OD#-Services: `192.168.4.0` - `192.168.9.0` in /24 segments
 
-### <a id="storage"></a> Storage Configuration
+    For example, the Redis for PCF tile asks for Network and Services Network. The first one is for placing the broker, and the second one is for deploying worker VMs to support the service. In this scenario, you can deploy a new network OD-Services1 and instruct Redis for PCF to use the Services network for the broker and the OD-Services1 network for the workers. The next tile can also use the Services network for the broker and a new OD-Services2 network for workers and so on.
 
-Shared storage is a requirement for PCF. You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_. The approach you follow should reflect how your data center arranges its storage and host blocks in its physical layout.
+* Isolation Segment##: `192.168.10.0`- `192.168.63.0` in /24 segments
 
-* **Horizontal**: You grant all hosts access to all datastores and assign a subset to each installation. 
-<br><br>
-    For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first PCF installation to use stores `ds01` through `ds03`, and your second PCF installation to use `ds04` through `ds06`.
+    Isolation segments can be added to an existing PAS installation. This range of address space is designated for use when adding one or more segments. A /24-network in this range should be deployed for each new isolation segment.
+    There is reserved capacity for more than 50 isolation segments, each having more than 250 VMs, in this address bank.
 
-* **Vertical**: You grant each cluster its own dedicated datastores, creating a "cluster-aligned" storage strategy. vSphere VSAN is an example of this architecture. 
-<br><br>
-    For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to your first cluster, `ds03` and `ds04` to your second cluster, and `ds05` and `ds06` to your third cluster. You then provision your first PCF installation to use `ds01`, `ds03`, and `ds05`, and your second PCF installation to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
+* On-Demand-Org##: `192.168.128.0/17` = 128 orgs/foundation
 
-<p class="note"><strong>Note</strong>: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature of the sDRS function on any datastores used by PCF. Otherwise, s-vMotion (Storage vMotion) activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
+    New to the PCF v2.x reference design is the concept of dynamically assigned org networks that are attached to automatically generated NSX T1 routers.
+    The operator does not define these networks in Ops Manager, but rather allows for them to be built by supplying a non-overlapping block of address space for this purpose. This is configurable in the NCP pane of the VMware NSX-T Container Plug-In for PCF tile in Ops Manager. The default is /24. A new /24 is assigned to every org.
 
-### <a id="storage-type"></a> Storage Capacity and Type
+This reference uses a pattern that follows previous references. However, all networks now break on the /24 boundary, and the network octet is numerically sequential (1-2-3).
 
-#### <a id="capacity"></a> Capacity
+#### <a id="network-pks"></a> Network Requirements for PKS
 
-Pivotal recommends the following capacity allocation for PCF installations:
+When deploying PKS using Ops Manager, you must allow for a block of address space for dynamic networks that PKS deploys per namespace.
+The recommended address space is `172.20.0.0/16`.
 
-- For production use, at least 8&nbsp;TB of data storage, either as one 8&nbsp;TB store or a number of smaller volumes adding up to 8&nbsp;TB. Frequently-used development may require significantly more storage to accomodate new code and buildpacks. 
-- For small installations without many tiles, 4-6&nbsp;TB. 
+#### <a id="external-routing"></a> Network Requirements for External Routing
 
-The primary consumer of storage is the NFS/WebDAV blobstore. 
+Routable external IPs on the provider side, for example, for NATs, PAS orgs, and load balancers, are assigned to the T0 router, which is located in front of the PCF installation. There are two approaches to assigning address space blocks to this job:
 
-<p class="note"><strong>Note</strong>: PCF does not currently support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+* Without PKS or with PKS Ingress: The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs, one job is advertised as a route for traffic and the other job is for aligning T0 DNATs and SNATs, load balancers, and other jobs. Unlike with NSX-V, SNATs consume much more address space than before.
 
-#### <a id="type"></a> Type
+* With PKS No Ingress: Relative to above, this approach has much higher address space consumption for load balancer VIPs. Therefore, allow for 4x the address space due to the fact that Kubernetes service types allocate addresses frequently.
 
-Pivotal recommends the following: 
-- Either block-based (fiber channel or iSCSI) and file-based (NFS) over high-speed carriers such as 8Gb FC or 10GigE
-- Redundant storage for both ephemeral and persistent storage types used by PCF. All-flash-based storage and SSD-cached storage are highly desirable.
-- Data de-duplication and compression, if done in hardware at the storage array
+Provider routable address space is /25 or /23 for PKS No Ingress.
 
-These technologies can dramatically reduce the need for storage capacity.
+NSX-T handles the routing between a T0 router and any T1 routers associated with it.
 
-### <a id="networking"></a> Networking
+### <a id="pas-nsxt"></a> PAS with NSX-T
 
-Using VMware NSX SDN (software-defined networking) provides the following benefits:
+Expanding PAS with SDN features is best considered as a greenfield effort. Inserting an SDN layer under a working PAS installation is non-trivial and likely triggers a rebuild. NSX-T constructs that can be used by PAS include the following:
 
-  * Network fencing of the entire PCF installation
-  * Distributed, hyper-local firewall capability per installation through the built-in ESG Firewall
-  * High capacity, resilient, distributed load balancing per installation through the ESG Load Balancer
-  * Element obfuscation through the use of non-routed RFC-1918 networks behind the ESG and the use of SNAT/DNAT connections to expose only the endpoints of Cloud Foundry that require exposure
-  * High-repeatability of installations through the reuse of all network and addressing conventions on the right-hand side of the diagram, the **Tenant Side**
-  * Centrally-managed rule and ACL sharing through the NSX Manager Global Ruleset
-  * HA pairs of ESGs (optional) for extra levels of redundancy
-  * BOSH CPI can add and remove Gorouter members from load balanced pools in ESG (not an Ops Manager feature)
-  * ESG Security Group tagging managed by BOSH, to group like VMs per PCF installation into security groups
+* Logical networks (vWires), encapsulated broadcast domains
+* VLAN exhaustion avoidance through the use of logical networks
+* Routing services and NAT/SNAT to network fence the PCF installation
+* Load balancing services to pool systems such as Gorouters
+* SSL termination at the load balancer
+* Distributed routing and firewall services at the hypervisor
 
-<p class="note warning"><strong>Warning</strong>: The overlay network IP range for Container-to-Container Networking must not conflict with any other IP addresses in your network.</p>
+<%= image_tag('../images/pas-with-nsxt.png') %>
 
-<p class="note"><strong>Note</strong>: When using VMware NSX for vSphere 6.2.3+, the default VXLAN port of 4789 used by Container-to-Container Networking will not work. To resolve this issue, override the default by navigating to the Networking section of the PAS tile and entering a different value in <strong>VXLAN Tunnel Endpoint Port</strong>.</p>
+[View a larger version of this diagram](../images/pas-with-nsxt.png)
 
-#### <a id="networking-design"></a> Networking Design
+The VMware NSX-T Container Plug-In for PCF tile, which provides a container networking stack instead of the built-in Silk solution, interlocks with NSX-T already deployed on the IaaS. This tile cannot be used unless NSX-T has already been established on the IaaS. These technologies cannot be retrofitted into an established PKS or PAS installation.
 
-Each PCF installation consumes four or more networks with the ESG, aligned to the following specific job types:
+To deploy PAS with NSX-T, you need to provide the following in the VMware NSX-T Container Plug-In for PCF tile:
 
-- **Infrastructure**: This small network hosts resources that interact with the IaaS layer and back-office systems, such as the cloud provider interface (CPI), BOSH, Ops Manager, and other utility VMs such as jumpbox VM. Operators access these resources to manage a PCF installation.
-- **Deployment**: Also known as the _apps wire_, this network has a large CIDR range. It hosts the PAS tile, Diego Cells, and Windows Cells, and is the network onto which apps are deployed. 
-- **Services**: This network has a large CIDR range. It hosts service tiles that are installed using Ops Manager and managed by BOSH. One approach is to use this network for all PCF tiles except PAS.
-- **Dynamic Services**: A single network granted to BOSH Director for use with service tiles that require an on-demand, or _dynamic_, address space for deployment. This is a special purpose network that is marked as "Services" with a checkbox in the vSphere BOSH Director tile. See [About the On-Demand Services SDK](http://docs.pivotal.io/on-demand-service-broker/about.html#on-demand) for more information. 
-- **IsoZones##**: A single network granted to the PCF Isolation Segment tile for use to isolate Gorouters and Diego Cells into a network space independent of the PAS installation.
-- **Container-to-Container Networking**: A single network dedicated to communication between containers.
+* NSX Manager host
+* NSX Manager username and password
+* NSX Manager CA certificate
+* PAS foundation name that must match the tag added to T0 router, external NAT pool, and IP block
+* Subnet prefix, which controls the size of each org and defaults to /24, that is, 254 addresses
 
-<p class="note"><strong>Note</strong>: All of these networks are considered <em>inside</em> or <em>tenant-side</em> networks, and use non-routable RFC-1918 network space which are not advertised to the outside by the ESG to make provisioning repeatable. The ESG routes between the tenant and service provider side networks and connects traffic through using SNAT and DNAT.</p>
+You must also select **Enable SNAT for Container Networks** in the tile.
 
-For each PCF installation, you should provision an ESG with at least four routable IP addresses from the service provider:
+For more information about configuring PAS with NSX-T networking, see [Deploying PAS with NSX-T Networking](../../customizing/vsphere-nsx-t.html).
 
-* A static IP address by which NSX Manager manages the ESG
-* A static IP address for use as egress SNAT. Traffic from the tenant side exits the Edge on this IP address
-* A static IP address for DNATs to Ops Manager
-* A static IP address for the load balancer VIP that balances to a pool of PCF Gorouters (HTTP/HTTPS)
+Each new job, like an isolation segment, falls to a broadcast domain or logical switch connected to a T1 router acting as the gateway to that network.
+This approach provides a DNAT and SNAT control point and a firewall boundary.
 
-In addition to these, many more uses for IP addresses on the routed side of the ESG exist. Pivotal recommends reserving a total of ten contiguous static IP addresses per ESG for future needs and flexibility. Examples include the following:
+The one exception to this is the Services network, which shares a T1 router with any associated OD-Services# networks.
+Because these networks are considered part of the same system, inserting any NATs or firewall rules between them is not recommended.
 
-  * Load balancer VIP for TCP Routers, if deploying TCP routing for non 80/443 access to apps
-  * Load Balancer VIP for DiegoBrains, if deploying in multiples
-  * Load Balancer VIP for MySQL proxies, if deploying in multiples
-  * Monitoring or metrics endpoint for platform monitoring
+#### <a id="load-balancing"></a> Load Balancing for PAS
 
-On the tenant side, each interface defined on the ESG acts as the IP gateway for the network used. Pivotal recommends allocating the following address ranges for the networks, and defining the gateway at `192.168.zzz.1` for each:
+Without NSX-T, you need to choose a suitable load balancer to send traffic to the Gorouters and other systems. Installations approaching production level typically use external load balancing from hardware appliance vendors or other network-layer solutions.
 
-- **Infrastructure** network: 192.168.10.0/26 
-- **Deployment** network: 192.168.20.0/22
-- **Services** network: 192.168.24.0/22
-- **Dynamic Services** network: 192.168.28.0/22
-- **IsoZone##** network: 192.168.32.0/22
-- **Container-to-Container Networking** network: 10.255.0.0/16
+With NSX-T, load balancing is available in the SDN layer.
+These load balancers are a logical entity tied to the resources in the Edge Cluster and align to the network or networks represented by a T1 router.
+They function as a Layer 4 load balancer.
+There is no SSL termination available on the NSX-T load balancer at this time.
 
-<%= image_tag('vsphere-exploded-edge.png') %>
+Common deployments of load balancing in PAS are as follows:
 
-[View a larger version of this diagram](../images/vsphere-exploded-edge.png).
+* HTTP/HTTPS traffic to and from Gorouters
+* TCP traffic to and from TCP routers
+* MySQL proxies
+* Diego Brain
 
-<p class="note"><strong>Note</strong>: Review the container-to-container settings in your installation for any IP address range conflicts with the enterprise addressing scheme in use by your organization. The specified range cannot be used anywhere else in your deployment. Change the range to a non-conflicting range as needed.</p>
+NSX-T load balancers can support many VIPs, so it is best to think of deploying one load balancer per network (T1) and one-to-many VIPs on that load balancer per job.
+When designing your deployment, consider how many load balancers are needed and how much capacity is available for them.
 
-##### <a name="dist-port-group"></a> Distributed Port Groups
+### <a id="pks-nsxt"></a> PKS with NSX-T
 
-Pivotal recommends vSphere DVS for all Clusters used by PCF. NSX creates a DPG for each interface provisioned on the ESG. 
+PKS is supplied with NSX-T SDN included, along with the associated licensing.
 
-NSX Logical Switches should be used on the Tenant Side of this design, which leverages vWires, reducing the dependency on available VLAN capacity.
+To allow for dynamic constructs to be built, you need to provide the following when configuring the PKS tile:
 
-<%= image_tag('vsphere-port-groups.png') %>
+* NSX Manager host
+* NSX Manager username and password
+* NSX Manager CA certificate
+* T0 router to connect dynamically created namespace networks to
+* NSX IP block from which to pull networks for each new namespace
+* Floating IP pool ID created for externally facing IPs (NATs and VIPs)
 
-[View a larger version of this diagram](../images/vsphere-port-groups.png).
+For more information about configuring PKS with NSX-T networking, see [Installing and Configuring PKS with NSX-T Integration](https://docs.pivotal.io/runtimes/pks/1-0/installing-nsx-t.html).
 
-### <a id="highperf"></a> High Performance Variants
+<%= image_tag('../images/pks-with-nsxt.png') %>
 
-#### <a id="nsx_dlr"></a> Using the NSX DLR (Distributed Logical Router)
+New T1 routers are be spawned on-demand as new namespaces are added to PKS. Because these can grow rapidly, a large address block is desired for this use.
+The size of the address block is configurable and /24 by default.
 
-You can move the function of routing the Tenant-side networks shown on the NSX reference diagram to a different service provided by NSX. This service is the DLR, or Distributed Logical Router, a high-performance East/West routing feature.
+If you want to deploy PKS without NSX-T, see [Deploying PKS Without NSX-T](#without-nsxt) for more information.
 
-To do this, you establish a DLR instance in the NSX Manager and use it to be the gateway of each Logical Switch used by a PCF installation, in place of the ESG being that gateway. You still need a North/South gateway to the outside world, so the ESG is still required, but the jobs it's handling are now firewalling, NAT/SNAT, and Load Balancing only.
+##### <a id="pks-ingress"></a> Ingress Routing and Load Balancing for PKS
 
-You must put an interface from the DLR and one on the inside of the ESG together in order to accomplish the North/South flow; typically this is done with a very small "glue net" running OSPF. Refer to VMware's technical materials around the DLR and PCF for greater details.
+This section provides information about ingress routing (Layer 7) and  load balancing (Layer 4) for your PKS deployment.
 
-Benefits of adding the DLR include:
+##### <a id="layer-7"></a> Ingress Routing
 
-- Optimized East/West routing amongst the Tenant-side Logical Switches
-- Increased interface count for Tenant-side Logical Switches (from 9 total to 99)
+NSX-T provides a native ingress router.
+Third-party options include Istio or Nginx, running as containers in the cluster.
 
-Concerns with this approach include:
+Wildcard DNS entries are needed to point at the ingress service in the style of Gorouters in PAS.
+Domain information for ingress is defined in the manifest of the Kubernetes deployment. See the example below.
 
-- Addition of the "glue net OSPF" relationship between DLR and ESG
-- Increased management and troubleshooting burden with the addition of the above
-- Do not improve North/South network traffic; same as without DLR
+<p class="note"><strong>Note</strong>: HTTPS with NSX-T-provided ingress is not currently supported.</p>
 
-#### <a id="one_arm_lb"></a> One-Armed Load Balancing
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: music-ingress
+  namespace: music1
+spec:
+  rules:
+  - host: music1.pks.domain.com
+    http:
+      paths:
+      - path: /.*
+        backend:
+          serviceName: music-service
+          servicePort: 8080
+```
 
-The ESG can act as a stand-alone, one-armed load balancer. 
+##### <a id="layer-4"></a> Load Balancing
 
-This variant can improve performance and separate the dependence on the ESG that acts as NAT/SNAT/Firewall/Gorouter by separating the load balancing function to a separate ESG deployed exclusively for use per installation. 
+When pushing a Kubernetes deployment with `type` set to `LoadBalancer`, NSX-T automatically creates a new VIP for the deployment on the existing load balancer for that namespace.
 
-This variant divides the jobs between two ESGs per install rather than one. To implement this architecture, you place a single interface (internal) of a new ESG on the Deployment network, enable the load balancing function, and DNAT to it through the boundary ESG.
+You need to specify a listening and translation port in the service, along with a name for tagging.
+You also specify a protocol to use. See the example below.
 
+```
+apiVersion: v1
+kind: Service
+metadata:
+  ...
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: web
+```
+#### <a id="without-nsxt"></a> Deploying PKS Without NSX-T
 
-## <a id="no-nsx"></a> Reference Architecture Without VMware NSX
+You can deploy the PKS tile in Ops Manager either alongside PAS tile or without it.
 
-The reference architecture for deploying production PCF on vSphere without VMware NSX SDN technology follows the [base architecture](#base-arch), but with the following differences.
+<p class="note"><strong>Note</strong>: You should not share an Ops Manager and BOSH Director installation between PKS and PAS in a production environment.</p>
 
-### <a id="no-nsx-features"></a> Networking Features
+If you want to deploy PKS without NSX-T, select **Flannel** as your container network interface on the **Networking** tab of the PKS tile. 
 
-- Load balancing is handled by an external service, such as a hardware appliance or a VM from a third party.
-- An external service also performs SSL termination unless that is passed through to the Gorouters.
-- You must set up firewalls for each zone or network inside the installation, rather than having the ESG fence all the inside networks. 
-- There is no network fencing of the PCF installation, so RFC-1918 non-routable networks are not used, DNAT/SNAT is not used, and the address space consumed is from routable ranges already established in the datacenter.
+Select from networks already identified in Ops Manager to deploy the PKS API Gateway and the cluster or clusters.
 
-### <a id="no-nsx-design"></a> Networking Design
+If following the reference design for PAS, you can use the Services and OD-Services# networks for these jobs. If no PAS networks are available, define a network named PKS-Services and another named PKS-Cluster in Ops Manager.
 
-The more traditional approach without SDN is to deploy a single VLAN for use with all of a PCF installation, or a pair of VLANs, one for infrastructure and one for the rest of the PCF installation. As VLAN capacity can be limited and scarce, this design seeks to limit the need for VLANs to a functional minimum.
+### <a id="storage"></a> Storage Design
 
-<%= image_tag('vsphere-no-nsx.png') %>
+Shared storage is a requirement for PCF.
+You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_.
+The approach you follow should reflect how your datacenter arranges its storage and host blocks in its physical layout.
 
-[View a larger version of this diagram](../images/vsphere-no-nsx.png).
+* Horizontal: You grant all hosts access to all datastores and assign a subset to each installation. 
 
-In this example, the firewall and load balancer functions run outside of vSphere, on generic devices that most datacenters provide. The PCF installation is bound to two port groups provided by a DVS on ESXi, each of which aligns to different job types:
+    For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first PCF installation to use stores `ds01` through `ds03` and your second PCF installation to use `ds04` through `ds06`.
 
-  1. **Infra**: CPI, BOSH, and Ops Manager VMs that communicate with the IaaS layer
-  2. **PCF**: The deployment network for all tiles, including PAS
+* Vertical: You grant each cluster its own dedicated datastores, creating a cluster-aligned storage strategy. vSphere vSAN is an example of this architecture. 
 
-In a typical installation, you assign each of these port groups to a VLAN from the datacenter pool, and a routable IP address segment. Routing functions are handled by switching layers outside of vSphere, such as a top-of-rack or end-of-row switch/router appliance.
+    For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to your first cluster, `ds03` and `ds04` to your second cluster, and `ds05`, and `ds06` to your third cluster. You then provision your first PCF installation to use `ds01`, `ds03`, and `ds05` and your second PCF installation to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
-It is valid to deploy more networks than these two, up to and including those shown in the original design, so deploy them if the resources are readily available. The main thing to keep in mind is that this is a requirement per PCF installation, so keep a count of how many of those overall you will require.
+<p class="note"><strong>Note</strong>: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
+### Storage Capacity and Type
 
-## <a id="single-cluster"></a> Reference Architecture Without Multiple Clusters
+Pivotal recommends the following capacity allocation for PAS installations:
 
-If you are working with three or more ESXi hosts and want to use less resources than the [base architecture](#base-arch) requires, Pivotal recommends setting up PCF in three clusters with one host in each. The key point is to try to get to three AZs if possible, as this reduces future difficulties when increasing the size of your PCF installation. 
+* For production use, at least 8 TB of data storage, either as one 8-TB store or a number of smaller volumes adding up to 8 TB.
+Frequent development may require significantly more storage to accommodate new code and buildpacks. 
 
-To reduce resource use even further, you can place all hosts into a single cluster with VMware DRS and high availability enabled. The following is an example of that approach, using resource pools in the single cluster to emulate a three-cluster design. While the resource pools do little more that organize the VMs, it forces a habit of deploying PCF constructs in threes as recommended by Pivotal.
+* For small installations, 4-6 TB of data storage is recommended. 
 
-<%= image_tag('vsphere-single-cluster.png') %>
+The primary consumer of storage is the NFS and WebDAV blobstore. 
 
-[View a larger version of this diagram](../images/vsphere-single-cluster.png).
+<p class="note"><strong>Note</strong>: PCF does not currently support using vSphere Storage Clusters with the versions of PCF validated for this reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-You may be tempted to consider a two-cluster architecture. A two-cluster architecture may offer useful symmetry at the vSphere level, but PCF works best when it deploys resources in odd numbers. A two-cluster configuration forces the operator into aligning odd-numbered components into even numbered containers, which does not work well for PCF internal voting algorithms. If you do not want to consume three clusters for PCF, using one cluster works better than using two.
+When planning storage allocation for PKS installations based on Pod and Node needs, consider the following chart.
 
-### <a id="single-cluster-design"></a> Networking Design
+<%= image_tag('../images/storage-design.png') %>
 
-For a single-cluster deployment, follow the networking setup described in either the [base](#networking) or the [without-NSX](#no-nsx-design). architectures above. The internal compute arrangement for a production PCF deployment does not affect its networking.
+### <a id="high-availability"></a> Compute and HA Considerations
 
-Pivotal recommends mapping all datastores used by PCF to all of the hosts in a single-cluster deployment.
+In PAS, a consolidation ratio for containers should follow a conservative 4:1 ratio of vCPUs to pCPUs. A more conservative ratio is 2:1.
 
+A standard Diego cell is 4x16 (XL) by default. At a 4:1 ratio, you have a 16-vCPU budget, or about 12 containers.
 
-## <a id="multi-datacenter"></a> Multi-Datacenter Reference Architecture
+If you want to run more containers in a cell, scale the vCPUs accordingly.
+However, high core count VMs become increasingly hard to schedule on the pCPU without high physical core counts in the socket.
 
-To avoid downtime, some PCF customer scenarios demand a multi-datacenter architecture that spreads deployment resources across more than one physical location. A multi-datacenter architecture can support the hardware, power source, and geographic redundancy needed to guarantee high availability.
+HA considerations include the following:
 
-One strategy for high availability is to keep a record of how many hosts are in a cluster and deploy enough copies of a PCF component in that AZ to ensure survivability in a site loss. This means placing large, odd numbers of components in the cluster so that at least two components are left on either site in the event of a site outage. In a four host cluster, this calls for five VMs, so each site has at least two. DRS anti-affinity rules can be used here, set at the IaaS level, to force like VMs apart for best effect.
+* PAS is not considered HA until at least two AZs are defined. Pivotal recommends using three AZs for HA.
 
-The two main ways of designing a multi-datacenter PCF architecture is with [stretched clusters](#multi-datacenter-stretched), in which single logical clusters combine components in multiple physical locations, and [East/West clusters](#multi-datacenter-east-west), in which locally self-contained clusters are mirrored across multiple locations.
+    PCF achieves redundancy through the AZ construct and the loss of an AZ is not considered catastrophic.
+    BOSH Resurrector can replace lost VMs as needed to repair a foundation. Foundation backup and restoration is accomplished externally by BBR.
 
-Both of these approaches have their own caveats, and you can combine either with the [without-NSX](#no-nsx) and [single-cluster](#single-cluster) architectures described above.
+* PKS has no inherent HA capabilities to design for. To support PKS, design HA at the IaaS, storage, power, and access layers.
 
-### <a id="multi-datacenter-stretched"></a> Multi-Datacenter vSphere With Stretched Clusters
+### <a id="scaling"></a> Scaling and Capacity Management
 
-For this approach, you define logical clusters that contain components physically located in two or more sites. With four hosts, for example, build a four-host cluster with two hosts in an East datacenter and two from the West. Apply networking such that all hosts see the same networks through a stretched layer 2 application, or use NSX or another SDN solution to extend L2 networking via L3 connections.
+This section provides information about scaling and capacity management for PCF.
 
-<%= image_tag('vsphere-multi-datacenter.png') %>
+#### <a id="small"></a> Small PCF Installations
 
-[View a larger version of this diagram](../images/vsphere-multi-datacenter.png).
+A small-sized PCF v2.0 or v2.1 foundation looks as follows:
 
-PCF and BOSH treat the stretched cluster as an AZ, and make the same demands on it that they do with any other AZ. The hosting, networking, and storage components within the stretched cluster must perform with normal latency and connectivity.
+* 1 vSphere cluster/1 AZ
+* 2 resource pools: 1 for NSX-T components and 1 for PAS or PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
+* Shared storage/vSAN
+* 1 NSX Manager
+* 1 NSX Controller
+* 1 Large Edge VM = 4 small LBs
+* Ops Manager, the BOSH Director, and Small Footprint Runtime
 
-For seamless operation, hosts must share all datastores, and you need to replicate storage across sites. Otherwise, vMotion cannot move VMs freely across hosts for maintenance or DRS.
+This approach is best used as a small, development-only system or a proof of concept.
+Small Footprint Runtime has no upgrade path to the standard PAS tile.
 
-A stretched version of the base architecture splits three clusters across two sites, yielding a 4×3×3 geometry:
+#### <a id="medium"></a> Medium PCF Installations
 
-- Four hosts per cluster (two from each site)
-- Three clusters for PCF as AZs
-- Three AZs mapped to PCF clusters
+Growing to a second AZ and cluster enables HA in the PaaS and IaaS layers. For this design, Pivotal recommends replacing Small Footprint Runtime with PAS. The second AZ doubles compute consumption and expands the NSX-T footprint.
 
-You can also deploy a stretched version of the [single-cluster](#single-cluster) model. This may be the more practical approach to achieving HA, since any stretched deployment already requires so many resources from two sites.
+A medium-sized PCF v2.0 or v2.1 foundation looks as follows:
 
-As with any VMware installation, job scheduling works more efficiently when VMs have fewer cores, so you should configure many smaller Diego Cell VMs rather than a lower number of larger ones. If 2-core to 4-core VMs can handle your apps, favor them over 8- and 12-core options. This is especially important with stretched deployments.
+* 2 vSphere clusters/2 AZs
+* 3 resource pools: 1 for NSX-T components and 2 for PAS or 1 for PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN) per cluster
+* Shared storage/vSAN
+* 1 NSX Manager
+* 2 NSX Controllers
+* 1 Large Edge VM = 4 small LBs
+* Ops Manager, the BOSH Director, and PAS/PKS
 
-Network traffic is a challenge with stretched clusters, since app traffic may enter at any connection point in either location, but can only leave through a designated gateway. The architect should consider that app traffic landing in the East might have to flow out of the West, a "trombone effect" that forces additional traffic across datacenter links.
+#### <a id="production"></a> Full PCF Installations
 
-### <a id="multi-datacenter-east-west"></a> Multi-Datacenter vSphere With Combined East/West Clusters
+A production-ready PCF v2.0 or v2.1 foundation looks as follows: 
 
-For this approach, the architect assigns parallel capacity from two sites independently, and deploys clusters to PCF in matched pairs. This creates even numbers of clusters, which makes suboptimal use of resources in PCF.
+* 3 vSphere clusters/3 AZs
+* 4 resource pools: 1 for NSX-T components and 3 for PAS or for 1 PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
+* Shared Storage/vSAN
+* 1 NSX Manager
+* 3 NSX Controllers
+* 2 Large Edge VMs = 8 small LBs
+* Ops Manager, the BOSH Director, and PAS/PKS
 
-East/West mirroring the [base architecture](#base-arch) yields a deployment with six total clusters, three from each side. This may seem like a lot of gear to apply to PCF, but in a Business Continuity and Disaster Recovery (BCDR) scenario, doubling everything is the point.
+## <a id="pas-pks"></a> PAS and PKS with NSX-T
 
-Combining the East/West multi-datacenter and [single-cluster](#single-cluster) approaches creates a geometry with two clusters and pools in one cluster per site, or six AZs. Such a deployment only uses one cluster of capacity from each site, and does not scale readily. But drawing capacity from only one cluster makes it easy to provision with only a few hosts.
+A fully meshed PCF 2.1 installation designed using the recommendations provided in this topic looks as follows:
 
-A multi-datacenter architecture makes replicating storage less critical. There are enough AZs from either side to survive a point failure, and you can recover the installation without vSphere HA enabled for the clusters.
+<%= image_tag('../images/pas-and-pks.png') %>
 
+[View a larger version of this diagram](../images/pas-and-pks.png)
 
-## <a id="add-docs"></a> Additional Documentation
+Common components are the NSX T0 router and the associated T1 routers.
+This approach ensures that any cross-traffic between PKS and PAS apps stays within the bounds of the T0.
+This also provides a one-stop access point to the whole installation, which simplifies deployment automation for multiple, identical installations.
 
-* <a href="vsphere_upgrade.html" class="subnav">How to Upgrade vSphere without PCF Downtime</a>
-* <a href="vsphere_migrate_datastore.html" class="subnav">How to Migrate PCF to a New Datastore in vSphere</a>
+Note that each design, green PKS and orange PAS, has its own Ops Manager and BOSH Director installation.
+You should not share an Ops Manager and BOSH Director installation between PKS and PAS in a production environment.
+
+AZs are aligned to vSphere clusters, with resource pools as an optional organizational tool to place multiple foundations into the same capacity.
+PKS v1.0 is a single-AZ deployment.
+You can align PKS to any AZ or cluster.
+Keeping PKS and PAS in completely separate AZs is not required.
+
+You can use resource pools in vSphere clusters as AZ constructs to stack different installations of PCF. As server capacity continues to increase, the efficiency of deploying independent server clusters only for one installation is low. For example, customers are commonly deploying servers with 768-GB RAM and greater.
+
+If you want to split the PAS and PKS installations into separate network trees, behind separate T0 routers, ensure that approach meets your needs by reviewing VMware’s  recommendations for T0 to T0 routing.
