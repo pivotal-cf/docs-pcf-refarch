@@ -345,7 +345,7 @@ This section provides information about scaling and capacity management for PCF.
 A small-sized PCF v2.0 or v2.1 foundation looks as follows:
 
 * 1 vSphere cluster/1 AZ
-* 2 resource pools: 1 for NSX-T components and 1 for PAS or PKS
+* 2 resource pools: 1 for NSX-T components and 1 for PAS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
 * Shared storage/vSAN
 * 1 NSX Manager
@@ -363,13 +363,13 @@ Growing to a second AZ and cluster enables HA in the PaaS and IaaS layers. For t
 A medium-sized PCF v2.0 or v2.1 foundation looks as follows:
 
 * 2 vSphere clusters/2 AZs
-* 3 resource pools: 1 for NSX-T components and 2 for PAS or 1 for PKS
+* 3 resource pools: 1 for NSX-T components and 2 for PAS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN) per cluster
 * Shared storage/vSAN
 * 1 NSX Manager
 * 2 NSX Controllers
 * 1 Large Edge VM = 4 small LBs
-* Ops Manager, the BOSH Director, and PAS/PKS
+* Ops Manager, the BOSH Director, and PAS
 
 #### <a id="production"></a> Full PCF Installations
 
