@@ -271,18 +271,22 @@ To run PCF Pipelines, you need:
     - [Pivotal Network](https://network.pivotal.io): network.pivotal.io
     - bosh.io
 
-**BOSH Backup and Restore (BBR) Pipelines**
+**BOSH Backup and Restore (BBR) PCF Pipelines**
 
-BBR Pipelines automate PCF foundation backups. See and download the [source on Github](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks). 
+BBR PCF Pipelines automate PCF foundation backups. See and download the [source on Github](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks). 
 
-To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
+To run BBR PCF Pipelines, you need an S3 repository for storing backup artifacts.
+
+<p class="note"><strong>Note</strong>: BBR PCF Pipelines is a PCF community project not officially supported by Pivotal.</p>
 
 **Pipelines Orchestration Frameworks**
 
-Frameworks such as [Maestro](https://github.com/pivotalservices/pcf-pipelines-maestro) can help:
+[PCF Pipelines Maestro](https://github.com/pivotalservices/pcf-pipelines-maestro) uses a Maestro framework to:
 
 * Automate pipeline creation and management for multiple PCF foundations
 * Promote and audit configuration changes and version upgrades across all foundations
+
+<p class="note"><strong>Note</strong>: PCF Pipelines Maestro is a PCF community project not officially supported by Pivotal.</p>
 
 ## <a id="team"></a>Concourse Team Management Best Practices
 
