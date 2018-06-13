@@ -289,17 +289,19 @@ If following the reference design for PAS, you can use the Services and OD-Servi
 
 Shared storage is a requirement for PCF.
 You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_.
-The approach you follow should reflect how your datacenter arranges its storage and host blocks in its physical layout.
+The approach you follow should reflect how your datacenter arranges its storage and host blocks in its physical layout. Highly redundant storage systems are the best choice for a fully HA PaaS. Hyperconverged systems are a good example of sotrage that is highly redundant, scales with capacity growth and also is aligned to the AZ strategy of PCF.
 
-* Horizontal: You grant all hosts access to all datastores and assign a subset to each installation. 
-
-    For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first PCF installation to use stores `ds01` through `ds03` and your second PCF installation to use `ds04` through `ds06`.
-
-* Vertical: You grant each cluster its own dedicated datastores, creating a cluster-aligned storage strategy. vSphere vSAN is an example of this architecture. 
+* Vertical: You grant each cluster its own dedicated datastores, creating a cluster-aligned storage strategy. vSphere VSAN is an example of this architecture. This alignment is the best overall choice for PCF as it matches the AZ model of the PaaS one for one. Loss of storage in a cluster constitutes loss on an AZ, which is a recoverable failure when at least two more AZs are operational.
 
     For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to your first cluster, `ds03` and `ds04` to your second cluster, and `ds05`, and `ds06` to your third cluster. You then provision your first PCF installation to use `ds01`, `ds03`, and `ds05` and your second PCF installation to use `ds02`, `ds04`, and `ds06`. With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
+* Horizontal: You grant all hosts access to all datastores and assign a subset to each installation. This alignment is less desirable, as loss of storage would impact all the AZs in use (potentially) and cause a non-recoverable situation, depending on what was lost. For this approach, strong redundancy design at the storage array is highly encouraged.
+
+    For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first PCF installation to use stores `ds01` through `ds03` and your second PCF installation to use `ds04` through `ds06`.
+
 <p class="note"><strong>Note</strong>: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
+
+A further step towards resiliency would be to place the management plane of PCF, Ops Manager + BOSH, on storage separate from those used in the clusters/pools for AZ/app use. In addition, placing the blobstore on separate storage again ensures that storage loss at the AZ won't cripple app deployment or scale during the outage.
 
 ### Storage Capacity and Type
 
