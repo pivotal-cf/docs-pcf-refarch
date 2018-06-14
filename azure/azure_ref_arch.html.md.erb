@@ -104,10 +104,6 @@ The following table lists the components that are part of a base reference archi
  <td><strong>Service Tiles</strong></td>  
  <td>Deployed on the PCF managed services subnet. Each service tile is deployed to an availability set.</td>
 </tr> 
-<tr>
- <td><strong>Dynamic Services</strong></td>  
- <td>Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service. Pivotal recommends provisioning the multi-tenant dynamic services subnet as a /22 block.</td>
-</tr>  
 </table>
 
 ## <a id="common_network"></a> Alternative Network Layouts for Azure ##
@@ -161,8 +157,7 @@ The following table lists the network objects in PCF on Azure reference architec
    <ol>
      <li>infrastructure (Ops Manager, BOSH Director, Jumpbox),</li>
      <li>PAS,</li>
-     <li>services,</li>
-     <li>and dynamic services.</li>
+     <li>and services.</li>
    </ol>
    Using separate subnets allows you to configure different firewall rules due to your needs.
    </td>

@@ -89,15 +89,11 @@ The following table lists the components that are part of a base reference archi
  <td>Deployed on all three service subnets, one per AZ.</td>
 </tr>
 <tr>
- <td><strong>Dynamic Services</strong></td>
- <td>Reserved for future use, dynamic services are deployed on their own subnet. Dynamic services are services autoprovisioned by BOSH based on a trigger, such as a request for that service. Pivotal recommends provisioning the multi-tenant dynamic services subnet as a /22 block.</td>
-</tr>
-<tr>
 	<td><strong>Service User & Roles</strong></td>
 	<td>One IAM role and one IAM user are recommended: the IAM role for Terraform, and the IAM user for Ops Manager and BOSH. Consult the following list:<br><br>
 		<ul>
-		<li>Admin Role: Terraform will use this IAM role to provision required AWS resources as well as an IAM user.</li>
-		<li>IAM User: This IAM user with IAM security credentials (access key ID and secret access key) will be automatically provisioned with restrict access only to resources needed by PCF. See the AWS IAM Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/iam.tf">script</a> for more information.</li>
+		<li>Admin Role: Terraform uses this IAM role to provision required AWS resources as well as an IAM user.</li>
+		<li>IAM User: This IAM user with IAM security credentials (access key ID and secret access key) is automatically provisioned with restrict access only to resources needed by PCF.</li>
 		</ul>
 	</td>
 </tr>
@@ -133,12 +129,10 @@ The following table lists the network objects in this reference architecture.
      <li>3 x (/24) public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
      <li>3 x (/20) PAS subnets (Gorouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
      <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
-     <li>3 x (/22) dynamic services subnets (used for on-demand services), one per AZ</li>
      <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
    </ul>
-   For more information, see the Terraform subnets <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/subnets.tf">script</a>.
    </td>
-  <td>16</td>
+  <td>13</td>
   </tr>
   <tr>
   <td><strong>Route Tables</strong></td>
@@ -147,14 +141,13 @@ The following table lists the network objects in this reference architecture.
   	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for Ops Manager and the NAT Gateway.</li>
   	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and PAS.</li>
   	</ul>
-    For more information, see the Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_table_associations.tf">script</a> that performs the route table association. 
   	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP address, it is accessible from the Internet through the public IP address; for example, Ops Manager. PAS needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
   </td>
   <td>4</td>
   </tr>
   <tr>
   <td><strong>Security Groups</strong></td>
-  <td>The reference architecture requires 5 Security Groups. For more information, see the Terraform Security Group rules <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/security_group.tf">script</a>. The following table describes the Security Group ingress rules:
+  <td>The reference architecture requires 5 Security Groups. The following table describes the Security Group ingress rules:
   	<table>
   	<tr>
   		<th>Security Group</th>
@@ -227,7 +220,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Load Balancers</strong></td>
-  <td>PCF on AWS requires the Elastic Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Elastic Load Balancers are recommended: one to forward the traffic to the Gorouters, <code>PcfElb</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>PcfSshElb</code>. For more information, see the Terraform load balancers <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/load_balancers.tf">script</a>.
+  <td>PCF on AWS requires the Elastic Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Elastic Load Balancers are recommended: one to forward the traffic to the Gorouters, <code>PcfElb</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>PcfSshElb</code>. 
   	<br><br>
   	The following table describes the required listeners for each load balancer:
   	<table>
