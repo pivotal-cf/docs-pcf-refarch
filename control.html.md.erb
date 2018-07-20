@@ -213,7 +213,7 @@ Concourse integrates with CredHub to manage credentials in its pipelines. The pi
 
 To integrate Concourse with a CredHub server, you configure its ATC job's deployment properties with information about the CredHub server and corresponding UAA authentication credentials.
 
-You can deploy CredHub in multiple ways: as a dedicated VM, or integrated with other VMs, such as colocating the CredHub server the BOSH Director VM or Concourse's ATC/web VM.
+You can deploy CredHub in multiple ways: as a dedicated VM, or integrated with other VMs, such as colocating the CredHub server with the BOSH Director VM or Concourse's ATC/web VM.
 
 Colocating a CredHub server with Concourse’s ATC VM dedicates it to the Concourse pipelines and lets Concourse administrators manage the credentials server. This configuration also means that during Concourse upgrades, the CredHub server only goes down when the Concourse ATC job is also down, which minimizes potential credential server outages for running pipelines.
 
