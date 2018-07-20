@@ -241,7 +241,7 @@ A git server that contains configuration and pipeline code for a PCF foundation 
 
 #### <a id="s3"></a>S3 Repository
 
-In all environments Concourse requires an S3 repository to store PCF backups possibly other files. 
+In all environments Concourse requires an S3 repository to store PCF backups and possibly other files. 
 If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as [Minio S3](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) to your control plane.
 
 For air-gapped environments, an S3 repository is also the preferred method to store release files for PCF tiles, stemcells and buildpacks. Docker images can also be stored to an S3 repository as an alternative to a private Docker registry. See [Offline Pipelines for Airgapped Environments](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/offline-pipelines.md) for details.
