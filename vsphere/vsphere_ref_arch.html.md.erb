@@ -138,7 +138,7 @@ The recommended address space is `172.20.0.0/16`.
 
 Routable external IPs on the provider side, for example, for NATs, PAS orgs, and load balancers, are assigned to the T0 router, which is located in front of the PCF installation. There are two approaches to assigning address space blocks to this job:
 
-* Without PKS or with PKS Ingress: The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs, one job is advertised as a route for traffic and the other job is for aligning T0 DNATs and SNATs, load balancers, and other jobs. Unlike with NSX-V, SNATs consume much more address space than before.
+* Without PKS or with PKS Ingress: The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs: one job is advertised as a route for traffic, and the other job is for aligning T0 DNATs and SNATs, load balancers, and other jobs. Unlike with NSX-V, SNATs consume much more address space than before.
 
 * With PKS No Ingress: Relative to above, this approach has much higher address space consumption for load balancer VIPs. Therefore, allow for 4x the address space due to the fact that Kubernetes service types allocate addresses frequently.
 
