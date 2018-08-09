@@ -11,6 +11,7 @@ Azure does not provide resources in a way that translates directly to PCF availa
 
 All reference architectures described in this topic are validated for production-grade PCF deployments using fault domains and availability sets that include multiple job instances. 
 
+
 ## <a id="arch_diagram"></a> Base Reference Architecture 
 
 The following diagram provides an overview of a reference architecture deployment of PCF on Azure.
@@ -34,18 +35,18 @@ The following table lists the components that are part of a base reference archi
      <li>a route for Ops Manager (required),</li>
      <li>a route for Doppler (required),</li>
      <li>a route for Loggregator (required),</li>
-     <li>a route for ssh access to app containers (optional),</li>
-     <li>and a route for TCP routing to apps (optional). </li>          
+     <li>a route for SSH access to app containers (optional),</li>
+     <li>and a route for TCP routing to apps (optional).</li>          
    </ul>
  </td>
 </tr>
 <tr>
  <td><strong>Ops Manager</strong></td>  
- <td>Deployed on the infrastructure subnet and accessible by FQDN or through an optional Jumpbox.</td>
+ <td>Deployed on the management subnet and accessible by FQDN or through an optional Jumpbox.</td>
 </tr> 
 <tr>
  <td><strong>BOSH</strong></td>  
- <td>Deployed on the infrastructure subnet.</td>
+ <td>Deployed on the management subnet.</td>
 </tr> 
 <tr>
  <td><strong>Azure Load Balancer - API & Apps</strong></td>  
@@ -65,7 +66,7 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Gorouter(s)</strong></td>  
- <td>Accessed through the API & Apps load balancer. Deployed on the ERT subnet, one job per Azure availability set. </td>
+ <td>Accessed through the API & Apps load balancer. Deployed on the ERT subnet, one job per Azure availability set.</td>
 </tr> 
 <tr>
  <td><strong>Diego Brain(s)</strong></td>  
@@ -89,7 +90,7 @@ The following table lists the components that are part of a base reference archi
 </tr> 
 <tr>
  <td><strong>Service Tiles</strong></td>  
- <td>Deployed on the PCF managed services subnet. Each service tile is deployed to an availability set.</td>
+ <td>Deployed on the services subnet. Each service tile is deployed to an availability set.</td>
 </tr> 
 <tr>
  <td><strong>Dynamic Services</strong></td>  
@@ -97,7 +98,8 @@ The following table lists the components that are part of a base reference archi
 </tr>  
 </table>
 
-## <a id="common_network"></a> Alternative Network Layouts for Azure ##
+
+## <a id="common_network"></a> Alternative Network Layouts for Azure
 
 This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on Azure. 
 
@@ -190,7 +192,7 @@ To use multiple resource groups, you need to provide the BOSH Service Principal 
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-multi-resgroup.png).
 
-###<a id="multi-resgroup-notes"></a> Multiple Resource Groups Deployment Notes
+### <a id="multi-resgroup-notes"></a> Multiple Resource Groups Deployment Notes
 
 To deploy PCF on Azure with multiple resource groups, you can define custom roles to grant resource group access to your BOSH Service Principal. For example, you might develop the following:
 
@@ -230,7 +232,8 @@ To deploy PCF on Azure with multiple resource groups, you can define custom role
   }
   </pre>
 
-## DNS Delegation
+
+## <a id='dns-delegation'></a> DNS Delegation
 
 Azure DNS supports DNS delegation, allowing for sub-level domains to be hosted within Azure. This functionality is fully supported within Pivotal Cloud Foundry. 
 
