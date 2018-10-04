@@ -29,19 +29,19 @@ This document does not replace the installation instructions provided in the [PC
     </tr>
     <tr>
       <td>VMware NSX-T</td>
-      <td>2.1</td>
+      <td>2.2</td>
     </tr>
     <tr>
       <td>Pivotal Cloud Foundry Operations Manager</td>
-      <td>2.0, 2.1</td>
+      <td>2.2 or later</td>
     </tr>
     <tr>
       <td>PAS</td>
-      <td>2.0, 2.1</td>
+      <td>2.2 or later</td>
     </tr>
     <tr>
       <td>PKS</td>
-      <td>1.0</td>
+      <td>1.1.5 or later</td>
     </tr>
   </tbody>
 </table>
@@ -98,11 +98,12 @@ For more information about PKS without NSX-T, see [Installing PKS on vSphere](ht
 
 ### <a id="sdn-deployments"></a> SDN-Enabled Deployments With NSX-T
 
-This section provides information about network requirements, routing, and load balancing for PAS and PKS deployments that rely on SDN.
+This section provides information about network requirements, routing, and load balancing for PAS and PKS deployments that use SDN.
 
 #### <a id="network-pas"></a> Network Requirements for PAS
 
-PAS requires a number of statically defined networks to host the main components it is composed of. If you consider the “inside” of an NSX-T deployment, a series of non-routable address banks that the NSX-T routers manage is defined as follows:
+PAS requires a number of statically defined networks to host the main components it is composed of.
+For the Tenant side of an NSX-T deployment, a series of non-routable address banks that the NSX-T routers will manage is defined as follows:
 
 <p class="note"><strong>Note</strong>: These static networks have a smaller host address space assigned than reference designs for PCF v1.xx.</p>
 
@@ -110,29 +111,48 @@ PAS requires a number of statically defined networks to host the main components
 * Deployment: `192.168.2.0/24`
 * Services: `192.168.3.0/24`
 
-    The Services network can be used with Ops Manager tiles that you might install in addition to PAS.
-    Some of these tiles may require on-demand network capacity. Pivotal recommends that you consider adding a network per tile that needs such resources and pair them up in the tile’s configuration.
+    The Services network can be used with other Ops Manager tiles that you install in addition to PAS.
+    Some of these tiles may require on-demand network capacity. Pivotal recommends that you consider adding a network per tile that needs on-demand resources and pair them up in the tile’s configuration.
+    For more information, see _OD-Services#_ below.
+* OD-Services#: `192.168.4.0` - `192.168.9.0` in /24 segments
 
-* OD#-Services: `192.168.4.0` - `192.168.9.0` in /24 segments
+    For example, the Redis for PCF tile asks for **Network** and **Services Network**.
+    The first one is for placing the broker, and the second one is for deploying worker VMs to support the service.
+    In this scenario, you can deploy a new network **OD-Services1** and instruct Redis for PCF to use the Services network for the broker and the OD-Services1 network for the workers.
+    The next tile can use the Services network for the broker and a new **OD-Services2** network for workers and so on.
 
-    For example, the Redis for PCF tile asks for Network and Services Network. The first one is for placing the broker, and the second one is for deploying worker VMs to support the service. In this scenario, you can deploy a new network OD-Services1 and instruct Redis for PCF to use the Services network for the broker and the OD-Services1 network for the workers. The next tile can also use the Services network for the broker and a new OD-Services2 network for workers and so on.
+* Isolation Segments: `192.168.10.0` - `192.168.63.0` in /24 segments
 
-* Isolation Segment##: `192.168.10.0`- `192.168.63.0` in /24 segments
+    Isolation segments can be added to an existing PAS installation. This range of address space is used when you add one or more segments. A /24-network in this range should be deployed for each new isolation segment.
+    The capacity of this address bank is sufficient for more than 50 isolation segments, each having more than 250 VMs.
 
-    Isolation segments can be added to an existing PAS installation. This range of address space is designated for use when adding one or more segments. A /24-network in this range should be deployed for each new isolation segment.
-    There is reserved capacity for more than 50 isolation segments, each having more than 250 VMs, in this address bank.
+* PAS Dynamic Orgs: `192.168.128.0/17` = 128 orgs/foundation
 
-* On-Demand-Org##: `192.168.128.0/17` = 128 orgs/foundation
-
-    New to the PCF v2.x reference design is the concept of dynamically assigned org networks that are attached to automatically generated NSX T1 routers.
-    The operator does not define these networks in Ops Manager, but rather allows for them to be built by supplying a non-overlapping block of address space for this purpose. This is configurable in the NCP pane of the VMware NSX-T Container Plug-In for PCF tile in Ops Manager. The default is /24. A new /24 is assigned to every org.
+    Dynamically assigned Org networks are attached to automatically generated NSX-T Tier-1 routers.
+    Instead of defining these networks in Ops Manager, the operator provides a non-overlapping block of address space. This is configurable in the NCP pane of the VMware NSX-T Container Plug-In for PCF tile in Ops Manager.
 
 This reference uses a pattern that follows previous references. However, all networks now break on the /24 boundary, and the network octet is numerically sequential (1-2-3).
 
 #### <a id="network-pks"></a> Network Requirements for PKS
 
-When deploying PKS using Ops Manager, you must allow for a block of address space for dynamic networks that PKS deploys per namespace.
-The recommended address space is `172.20.0.0/16`.
+Network requirements for PKS are as follows:
+
+* PKS Clusters: `172.24.0.0/14`
+* PKS Pods: `172.28.0.0/14`
+
+#### <a id="summary"></a> Summary
+
+The complete addressing strategy for both PAS and PKS is as follows:
+
+* Infrastructure: `192.168.1.0/24`
+* Deployment: `192.168.2.0/24`
+* Services: `192.168.3.0/24`
+* OD-Services#: `192.168.4.0` - `192.168.9.0` in /24 segments
+* Isolation Segments: `192.168.10.0` - `192.168.63.0` in /24 segments
+* Undefined: `192.168.64.0` - `192.168.127.0`
+* PAS Dynamic Orgs: `192.168.128.0/17`
+* PKS Clusters: `172.24.0.0/14`
+* PKS Pods: `172.28.0.0/14`
 
 #### <a id="external-routing"></a> Network Requirements for External Routing
 
