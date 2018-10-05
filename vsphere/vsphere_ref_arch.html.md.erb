@@ -66,9 +66,9 @@ This section provides information about VLAN and container-to-container networki
 
 Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool. For this approach, you need to deploy PAS and PKS in a particular alignment.
 
-<%= image_tag('../images/load-balancing.png') %>
+<%= image_tag('../images/pas-without-nsxt.png') %>
 
-[View a larger version of this diagram](../images/load-balancing.png)
+[View a larger version of this diagram](../images/pas-without-nsxt.png)
 
 If you are designing a non-SDN environment, ensure that VLANs and address space for PAS and PKS do not overlap.
 In addition, keep in mind that non-SDN PCF environments have the following characteristics: 
@@ -412,9 +412,9 @@ If you deploy PKS alongside PAS, add 1 vSphere cluster/AZ and 1 resource pool fo
 
 A fully meshed PCF 2.1 installation designed using the recommendations provided in this topic looks as follows:
 
-<%= image_tag('../images/pas-and-pks.png') %>
+<%= image_tag('../images/pas-pks-nsxt.png') %>
 
-[View a larger version of this diagram](../images/pas-and-pks.png)
+[View a larger version of this diagram](../images/pas-pks-nsxt.png)
 
 Common components are the NSX T0 router and the associated T1 routers.
 This approach ensures that any cross-traffic between PKS and PAS apps stays within the bounds of the T0.
