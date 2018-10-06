@@ -224,21 +224,35 @@ When designing your deployment, consider how many load balancers are needed and 
 
 PKS is supplied with NSX-T SDN included, along with the associated licensing.
 
-To allow for dynamic constructs to be built, you need to provide the following when configuring the PKS tile:
+To allow for dynamic constructs to be built, you need to provide the following when configuring PKS:
 
 * NSX Manager host
-* NSX Manager username and password
+* Username and password
 * NSX Manager CA certificate
 * T0 router to connect dynamically created namespace networks to
-* NSX IP block from which to pull networks for each new namespace
+* NSX IP block from which to pull networks for pods per namespace
+* NSX IP block from which to pull networks for each new cluster
 * Floating IP pool ID created for externally facing IPs (NATs and VIPs)
 
 For more information about configuring PKS with NSX-T networking, see [Installing and Configuring PKS with NSX-T Integration](https://docs.pivotal.io/runtimes/pks/1-0/installing-nsx-t.html).
 
 <%= image_tag('../images/pks-with-nsxt.png') %>
 
-New T1 routers are spawned on-demand as new namespaces are added to PKS. Because these can grow rapidly, a large address block is desired for this use.
-The size of the address block is configurable and /24 by default.
+New T1 routers are spawned on-demand as new namespaces are added to PKS.
+Because these can grow rapidly, a large address block is desired for this use.
+
+Allocate a large POD IP block such as /14 in NSX-T, and NSX-T carves out an address block of /24 by default.
+Reference the POD IP block from your PKS tile configuration.
+
+PKS v1.1.5 and later supports multiple master nodes.
+The number of master nodes is defined per plan in the PKS tile.
+You must use an odd number of master nodes to allow etcd to form a quorum.
+Pivotal recommends using at least 1 master node per AZ for HA.
+
+With the dynamic creation of networks for both PKS clusters and pods,
+multi-tenancy becomes a discussion topic.
+Pivotal recommends using multiple clusters instead of a single cluster with multiple namespaces.
+Multiple clusters provide security, customization per cluster, privileged containers, failure domains, and version choice.
 
 If you want to deploy PKS without NSX-T, see [Deploying PKS Without NSX-T](#without-nsxt) for more information.
 
@@ -410,7 +424,7 @@ If you deploy PKS alongside PAS, add 1 vSphere cluster/AZ and 1 resource pool fo
 
 ## <a id="pas-pks"></a> PAS and PKS with NSX-T
 
-A fully meshed PCF 2.1 installation designed using the recommendations provided in this topic looks as follows:
+A fully meshed PCF 2.2 installation designed using the recommendations provided in this topic looks as follows:
 
 <%= image_tag('../images/pas-pks-nsxt.png') %>
 
@@ -421,13 +435,16 @@ This approach ensures that any cross-traffic between PKS and PAS apps stays with
 This also provides a one-stop access point to the whole installation, which simplifies deployment automation for multiple, identical installations.
 
 Note that each design, green PKS and orange PAS, has its own Ops Manager and BOSH Director installation.
-You should not share an Ops Manager and BOSH Director installation between PKS and PAS in a production environment.
+You should not share an Ops Manager and BOSH Director installation between PKS and PAS.
 
 AZs are aligned to vSphere clusters, with resource pools as an optional organizational tool to place multiple foundations into the same capacity.
-PKS v1.0 is a single-AZ deployment.
 You can align PKS to any AZ or cluster.
 Keeping PKS and PAS in completely separate AZs is not required.
 
 You can use resource pools in vSphere clusters as AZ constructs to stack different installations of PCF. As server capacity continues to increase, the efficiency of deploying independent server clusters only for one installation is low. For example, customers are commonly deploying servers with 768-GB RAM and greater.
 
+To allow for max capacity growth, consider using an NSX-T installation per foundation.
+
 If you want to split the PAS and PKS installations into separate network trees, behind separate T0 routers, ensure that approach meets your needs by reviewing VMware’s  recommendations for T0 to T0 routing.
+For more information,
+see [Reference Design Guide for PAS and PKS with VMware NSX-T Data Center](https://communities.vmware.com/docs/DOC-38609) in the VMware documentation.
