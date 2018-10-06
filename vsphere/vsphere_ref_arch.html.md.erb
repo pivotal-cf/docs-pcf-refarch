@@ -378,16 +378,16 @@ This section provides information about scaling and capacity management for PCF.
 
 #### <a id="small"></a> Small PCF Installations
 
-A small-sized PCF v2.0 or v2.1 foundation looks as follows:
+A small-sized PCF v2.2 or later foundation looks as follows:
 
 * 1 vSphere cluster/1 AZ
-* 2 resource pools: 1 for NSX-T components and 1 for PAS
+* 2 resource pools: 1 for NSX-T components and 1 for PAS or PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
 * Shared storage/vSAN
 * 1 NSX Manager
-* 1 NSX Controller
-* 1 Large Edge VM = 4 small LBs
-* Ops Manager, the BOSH Director, and Small Footprint Runtime
+* 3 NSX Controllers
+* 2 large edge VMs in a cluster
+* PCF: Ops Manager, the BOSH Director, and Small Footprint Runtime
 
 This approach is best used as a small, development-only system or a proof of concept.
 Small Footprint Runtime has no upgrade path to the standard PAS tile.
@@ -396,29 +396,29 @@ Small Footprint Runtime has no upgrade path to the standard PAS tile.
 
 Growing to a second AZ and cluster enables HA in the PaaS and IaaS layers. For this design, Pivotal recommends replacing Small Footprint Runtime with PAS. The second AZ doubles compute consumption and expands the NSX-T footprint.
 
-A medium-sized PCF v2.0 or v2.1 foundation looks as follows:
+A medium-sized PCF v2.2 or later foundation looks as follows:
 
 * 2 vSphere clusters/2 AZs
-* 3 resource pools: 1 for NSX-T components and 2 for PAS
+* 3 resource pools: 1 for NSX-T components and 2 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN) per cluster
 * Shared storage/vSAN
 * 1 NSX Manager
-* 2 NSX Controllers
-* 1 Large Edge VM = 4 small LBs
-* Ops Manager, the BOSH Director, and PAS
+* 3 NSX Controllers
+* 2 large edge VMs in a cluster
+* PCF: Ops Manager, the BOSH Director, and PAS/PKS
 
 #### <a id="production"></a> Full PCF Installations
 
-A production-ready PCF v2.0 or v2.1 foundation looks as follows: 
+A production-ready PCF v2.2 and later foundation looks as follows: 
 
 * 3 vSphere clusters/3 AZs
-* 4 resource pools: 1 for NSX-T components and 3 for PAS
+* 4 resource pools: 1 for NSX-T components and 3 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
 * Shared Storage/vSAN
 * 1 NSX Manager
 * 3 NSX Controllers
-* 2 Large Edge VMs = 8 small LBs
-* Ops Manager, the BOSH Director, and PAS
+* 3 large edge VMs in a cluster
+* PCF: Ops Manager, the BOSH Director, and PAS/PKS
 
 If you deploy PKS alongside PAS, add 1 vSphere cluster/AZ and 1 resource pool for PKS to your design.
 
