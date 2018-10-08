@@ -117,10 +117,10 @@ For the Tenant side of an NSX-T deployment, a series of non-routable address ban
     For more information, see _OD-Services#_ below.
 * OD-Services#: `192.168.4.0` - `192.168.9.0` in /24 segments
 
-    For example, the Redis for PCF tile asks for **Network** and **Services Network**.
+    For example, the Redis for PCF tile asks for Network and Services Network.
     The first one is for placing the broker, and the second one is for deploying worker VMs to support the service.
-    In this scenario, you can deploy a new network **OD-Services1** and instruct Redis for PCF to use the Services network for the broker and the OD-Services1 network for the workers.
-    The next tile can use the Services network for the broker and a new **OD-Services2** network for workers and so on.
+    In this scenario, you can deploy a new network OD-Services1 and instruct Redis for PCF to use the Services network for the broker and the OD-Services1 network for the workers.
+    The next tile can use the Services network for the broker and a new OD-Services2 network for workers and so on.
 
 * Isolation Segments: `192.168.10.0` - `192.168.63.0` in /24 segments
 
@@ -227,9 +227,9 @@ BOSH can manage the members of the server pools for the NSX-T load balancers usi
 
 ### <a id="pks-nsxt"></a> PKS with NSX-T
 
-PKS is supplied with NSX-T SDN included, along with the associated licensing.
-
-To allow for dynamic constructs to be built, you need to provide the following when configuring PKS:
+NSX-T SDN is included in PKS by default, along with the associated licensing.
+To use NSX-T SDN and its dynamic constructs,
+you need to provide the following information when configuring PKS:
 
 * NSX Manager host
 * Username and password
@@ -239,23 +239,25 @@ To allow for dynamic constructs to be built, you need to provide the following w
 * NSX IP block from which to pull networks for each new cluster
 * Floating IP pool ID created for externally facing IPs (NATs and VIPs)
 
-For more information about configuring PKS with NSX-T networking, see [Installing and Configuring PKS with NSX-T Integration](https://docs.pivotal.io/runtimes/pks/1-0/installing-nsx-t.html).
+For more information about configuring PKS with NSX-T networking,
+see [Installing and Configuring PKS with NSX-T Integration](https://docs.pivotal.io/runtimes/pks/1-1/installing-nsx-t.html).
 
 <%= image_tag('../images/pks-with-nsxt.png') %>
 
-New T1 routers are spawned on-demand as new namespaces are added to PKS.
-Because these can grow rapidly, a large address block is desired for this use.
+[View a larger version of this diagram](../images/pks-with-nsxt.png)
 
-Allocate a large POD IP block such as /14 in NSX-T, and NSX-T carves out an address block of /24 by default.
-Reference the POD IP block from your PKS tile configuration.
+New T1 routers are spawned on-demand as new namespaces are added to PKS.
+Because these can grow rapidly,
+allocate a large Pod IP block such as /14 in NSX-T,
+and then NSX-T provisions /24 address blocks for new namespaces.
+Reference the Pod IP block from your PKS tile configuration.
 
 PKS v1.1.5 and later supports multiple master nodes.
 The number of master nodes is defined per plan in the PKS tile.
 You must use an odd number of master nodes to allow etcd to form a quorum.
-Pivotal recommends using at least 1 master node per AZ for HA.
+Pivotal recommends using at least 1 master node per AZ for HA and disaster recovery.
 
-With the dynamic creation of networks for both PKS clusters and pods,
-multi-tenancy becomes a discussion topic.
+With NSX-T SDN, networks for both PKS clusters and pods are created dynamically.
 Pivotal recommends using multiple clusters instead of a single cluster with multiple namespaces.
 Multiple clusters provide security, customization per cluster, privileged containers, failure domains, and version choice.
 
