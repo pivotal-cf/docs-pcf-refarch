@@ -11,7 +11,6 @@ including Pivotal Application Service (PAS) and Pivotal Container Service (PKS),
 ## <a id="overview"></a> Overview
 
 Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios.
-These designs are sized for up to 1500 app instances.
 
 This document does not replace the installation instructions provided in the [PCF on vSphere Requirements](../../customizing/vsphere.html) topic. Instead, it gives examples of how to apply those instructions to real-world production environments.
 
@@ -50,11 +49,13 @@ This document does not replace the installation instructions provided in the [PC
 
 This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
 
-To use all features listed in this topic, you must have **Advanced** or above licensing from VMware for NSX-T.
+To use all features listed in this topic for your PAS installation, you must have **Advanced** or above licensing from VMware for NSX-T.
 If you are not using NSX-T, see [Non-SDN Deployments](#non-sdn).
 
+For PKS, the required licensing is included by default.
+
 This reference design supports capacity growth at the vSphere and PCF levels as well as installation security through the NSX-T firewall.
-It allocates a minimum of three or more servers to each cluster, as recommended by vSphere, and spreads PAS components across three clusters for [High Availability](../../concepts/high-availability.html).
+It allocates a minimum of three servers to each cluster as recommended by VMware and spreads PCF components across three clusters for [High Availability](../../concepts/high-availability.html).
 
 If you want to deploy PCF without NSX-T, see [vSphere Reference Architecture](https://docs.pivotal.io/pivotalcf/2-0/refarch/vsphere/vsphere_ref_arch.html), which includes NSX-V design considerations.
 
@@ -170,7 +171,7 @@ NSX-T handles the routing between a T0 router and any T1 routers associated with
 
 Expanding PAS with SDN features is best considered as a greenfield effort. Inserting an SDN layer under a working PAS installation is non-trivial and likely triggers a rebuild. NSX-T constructs that can be used by PAS include the following:
 
-* Logical networks (vWires), encapsulated broadcast domains
+* Logical networks, encapsulated broadcast domains
 * VLAN exhaustion avoidance through the use of logical networks
 * Routing services and NAT/SNAT to network fence the PCF installation
 * Load balancing services to pool systems such as Gorouters
@@ -208,7 +209,8 @@ Without NSX-T, you need to choose a suitable load balancer to send traffic to th
 With NSX-T, load balancing is available in the SDN layer.
 These load balancers are a logical entity tied to the resources in the Edge Cluster and align to the network or networks represented by a T1 router.
 They function as a Layer 4 load balancer.
-There is no SSL termination available on the NSX-T load balancer at this time.
+SSL termination is available on the NSX-T load balancer.
+However, Pivotal recommends passing the SSL through to your Gorouters.
 
 Common deployments of load balancing in PAS are as follows:
 
@@ -218,7 +220,10 @@ Common deployments of load balancing in PAS are as follows:
 * Diego Brain
 
 NSX-T load balancers can support many VIPs, so it is best to think of deploying one load balancer per network (T1) and one-to-many VIPs on that load balancer per job.
+Edge Cluster resources are consumed for load balancing.
 When designing your deployment, consider how many load balancers are needed and how much capacity is available for them.
+
+BOSH can manage the members of the server pools for the NSX-T load balancers using NS Groups.
 
 ### <a id="pks-nsxt"></a> PKS with NSX-T
 
