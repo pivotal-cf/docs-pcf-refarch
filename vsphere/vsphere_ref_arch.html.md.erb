@@ -11,9 +11,10 @@ including Pivotal Application Service (PAS) and Pivotal Container Service (PKS),
 ## <a id="overview"></a> Overview
 
 Pivotal validates the reference architectures described in this topic against multiple production-grade usage scenarios.
-These designs are sized for up to 1500 app instances.
 
-This document does not replace the installation instructions provided in the [PCF on vSphere Requirements](../../customizing/vsphere.html) topic. Instead, it gives examples of how to apply those instructions to real-world production environments.
+This document does not replace the installation instructions provided in the
+[PCF on vSphere Requirements](../../customizing/vsphere.html) topic.
+Instead, it gives examples of how to apply those instructions to real-world production environments.
 
 <table border="1" class="nice">
   <thead>
@@ -48,23 +49,31 @@ This document does not replace the installation instructions provided in the [PC
 
 ## <a id="base-arch"></a> Base vSphere Reference Architecture
 
-This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
+This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform
+that runs on VMware ESXi virtual hosts.
 
-To use all features listed in this topic, you must have **Advanced** or above licensing from VMware for NSX-T.
+To use all features listed in this topic for your PAS installation, you must have **Advanced** or above licensing from VMware for NSX-T.
 If you are not using NSX-T, see [Non-SDN Deployments](#non-sdn).
 
-This reference design supports capacity growth at the vSphere and PCF levels as well as installation security through the NSX-T firewall.
-It allocates a minimum of three or more servers to each cluster, as recommended by vSphere, and spreads PAS components across three clusters for [High Availability](../../concepts/high-availability.html).
+This reference design supports capacity growth at the vSphere and PCF levels as well as
+installation security through the NSX-T firewall.
+It allocates a minimum of three or more servers to each cluster, as recommended by vSphere,
+and spreads PAS components across three clusters for high availability.
+For information about HA in PCF, see [High Availability in Cloud Foundry](../../concepts/high-availability.html).
 
-If you want to deploy PCF without NSX-T, see [vSphere Reference Architecture](https://docs.pivotal.io/pivotalcf/2-0/refarch/vsphere/vsphere_ref_arch.html), which includes NSX-V design considerations.
+If you want to deploy PCF without NSX-T,
+see [vSphere Reference Architecture](https://docs.pivotal.io/pivotalcf/2-0/refarch/vsphere/vsphere_ref_arch.html),
+which includes NSX-V design considerations.
 
 ### <a id="non-sdn"></a> Non-SDN Deployments
 
-This section provides information about VLAN and container-to-container networking considerations for PCF deployments that do not rely on software-defined networking (SDN).
+This section provides information about VLAN and container-to-container networking considerations for PCF deployments
+that do not rely on software-defined networking (SDN).
 
 #### <a id="vlan-condiderations"></a> VLAN Considerations
 
-Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool. For this approach, you need to deploy PAS and PKS in a particular alignment.
+Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
+For this approach, you need to deploy PAS and PKS in a particular alignment.
 
 <%= image_tag('../images/load-balancing.png') %>
 
@@ -347,46 +356,45 @@ This section provides information about scaling and capacity management for PCF.
 A small-sized PCF v2.0 or v2.1 foundation looks as follows:
 
 * 1 vSphere cluster/1 AZ
-* 2 resource pools: 1 for NSX-T components and 1 for PAS
-* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
-* Shared storage/vSAN
+* 2 resource pools: 1 for NSX components and 1 for PAS or PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN)
+* Shared storage/VSAN
 * 1 NSX Manager
 * 1 NSX Controller
-* 1 Large Edge VM = 4 small LBs
-* Ops Manager, the BOSH Director, and Small Footprint Runtime
+* 1 Large edge VM = 4 small LBs
+* PCF: Ops Manager, the BOSH Director, and Small Footprint Runtime
 
-This approach is best used as a small, development-only system or a proof of concept.
+This approach is intended for designing a proof of concept or development-only system.
 Small Footprint Runtime has no upgrade path to the standard PAS tile.
 
 #### <a id="medium"></a> Medium PCF Installations
 
-Growing to a second AZ and cluster enables HA in the PaaS and IaaS layers. For this design, Pivotal recommends replacing Small Footprint Runtime with PAS. The second AZ doubles compute consumption and expands the NSX-T footprint.
-
 A medium-sized PCF v2.0 or v2.1 foundation looks as follows:
 
 * 2 vSphere clusters/2 AZs
-* 3 resource pools: 1 for NSX-T components and 2 for PAS
-* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN) per cluster
-* Shared storage/vSAN
+* 3 resource pools: 1 for NSX components and 2 for PAS/1 PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN) per cluster
+* Shared storage/VSAN
 * 1 NSX Manager
 * 2 NSX Controllers
-* 1 Large Edge VM = 4 small LBs
-* Ops Manager, the BOSH Director, and PAS
+* 1 Large edge VM = 4 small LBs
+* PCF: Ops Manager, the BOSH Director, and PAS/PKS
 
-#### <a id="production"></a> Full PCF Installations
+For this design, Pivotal recommends replacing Small Footprint Runtime with PAS.
+The second AZ doubles compute capacity and expands the NSX-T footprint.
+
+#### <a id="production"></a> Production-Ready PCF Installations
 
 A production-ready PCF v2.0 or v2.1 foundation looks as follows: 
 
 * 3 vSphere clusters/3 AZs
-* 4 resource pools: 1 for NSX-T components and 3 for PAS
-* 3 hosts minimum for vSphere HA (4 hosts for vSphere vSAN)
-* Shared Storage/vSAN
+* 4 resource pools: 1 for NSX components and 3 for PAS/1 PKS
+* 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN)
+* Shared Storage/VSAN
 * 1 NSX Manager
 * 3 NSX Controllers
-* 2 Large Edge VMs = 8 small LBs
-* Ops Manager, the BOSH Director, and PAS
-
-If you deploy PKS alongside PAS, add 1 vSphere cluster/AZ and 1 resource pool for PKS to your design.
+* 2 Large edge VMs = 8 small LBs
+* PCF: Ops Manager, the BOSH Director, and PAS/PKS
 
 ## <a id="pas-pks"></a> PAS and PKS with NSX-T
 
