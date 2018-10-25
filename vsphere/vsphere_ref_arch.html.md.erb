@@ -403,7 +403,7 @@ This section provides information about scaling and capacity management for PCF.
 A small-sized PCF foundation looks as follows:
 
 * 1 vSphere cluster/1 AZ
-* 2 resource pools: 1 for NSX-T components and 1 for PAS or PKS
+* 2 resource pools: 1 for NSX components and 1 for PAS or PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN)
 * Shared storage/VSAN
 * 1 NSX Manager
@@ -419,7 +419,7 @@ Small Footprint Runtime has no upgrade path to the standard PAS tile.
 A medium-sized PCF foundation looks as follows:
 
 * 2 vSphere clusters/2 AZs
-* 3 resource pools: 1 for NSX-T components and 2 for PAS/1 for PKS
+* 3 resource pools: 1 for NSX components and 2 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN) per cluster
 * Shared storage/VSAN
 * 1 NSX Manager
@@ -428,14 +428,14 @@ A medium-sized PCF foundation looks as follows:
 * PCF: Ops Manager, the BOSH Director, and PAS/PKS
 
 For this design, Pivotal recommends replacing Small Footprint Runtime with PAS.
-The second AZ doubles compute consumption and expands the NSX-T footprint.
+The second AZ doubles compute capacity and expands the NSX-T footprint.
 
 #### <a id="production"></a> Production-Ready PCF Installations
 
 A production-ready PCF foundation looks as follows: 
 
 * 3 vSphere clusters/3 AZs
-* 4 resource pools: 1 for NSX-T components and 3 for PAS/1 for PKS
+* 4 resource pools: 1 for NSX components and 3 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN)
 * Shared Storage/VSAN
 * 1 NSX Manager
