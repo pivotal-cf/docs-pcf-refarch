@@ -372,7 +372,7 @@ Small Footprint Runtime has no upgrade path to the standard PAS tile.
 A medium-sized PCF v2.0 or v2.1 foundation looks as follows:
 
 * 2 vSphere clusters/2 AZs
-* 3 resource pools: 1 for NSX components and 2 for PAS/1 PKS
+* 3 resource pools: 1 for NSX components and 2 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN) per cluster
 * Shared storage/VSAN
 * 1 NSX Manager
@@ -388,7 +388,7 @@ The second AZ doubles compute capacity and expands the NSX-T footprint.
 A production-ready PCF v2.0 or v2.1 foundation looks as follows: 
 
 * 3 vSphere clusters/3 AZs
-* 4 resource pools: 1 for NSX components and 3 for PAS/1 PKS
+* 4 resource pools: 1 for NSX components and 3 for PAS/1 for PKS
 * 3 hosts minimum for vSphere HA (4 hosts for vSphere VSAN)
 * Shared Storage/VSAN
 * 1 NSX Manager
@@ -406,7 +406,8 @@ A fully meshed PCF 2.1 installation designed using the recommendations provided 
 
 Common components are the NSX T0 router and the associated T1 routers.
 This approach ensures that any cross-traffic between PKS and PAS apps stays within the bounds of the T0.
-This also provides a one-stop access point to the whole installation, which simplifies deployment automation for multiple, identical installations.
+This also provides a one-stop access point to the whole installation,
+which simplifies deployment automation for multiple, identical installations.
 
 Note that each design, green PKS and orange PAS, has its own Ops Manager and BOSH Director installation.
 You should not share an Ops Manager and BOSH Director installation between PKS and PAS in a production environment.
@@ -416,6 +417,9 @@ PKS v1.0 is a single-AZ deployment.
 You can align PKS to any AZ or cluster.
 Keeping PKS and PAS in completely separate AZs is not required.
 
-You can use resource pools in vSphere clusters as AZ constructs to stack different installations of PCF. As server capacity continues to increase, the efficiency of deploying independent server clusters only for one installation is low. For example, customers are commonly deploying servers with 768-GB RAM and greater.
+You can use resource pools in vSphere clusters as AZ constructs to stack different installations of PCF.
+As server capacity continues to increase, the efficiency of deploying independent server clusters only for one installation is low.
+For example, customers commonly deploy servers with 768-GB RAM and greater.
 
-If you want to split the PAS and PKS installations into separate network trees, behind separate T0 routers, ensure that approach meets your needs by reviewing VMware’s  recommendations for T0 to T0 routing.
+If you want to split your PAS and PKS installations into separate network trees, behind separate T0 routers,
+ensure that approach meets your needs by reviewing VMware’s  recommendations for T0 to T0 routing.
