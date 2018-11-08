@@ -23,9 +23,25 @@ A PCF reference architecture must meet the following requirements:
 
 Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
 
+## <a id="shared-vs-standalone"></a> Shared vs Standalone VPCs
+
+A [shared VPC](#shared-vpc) installation requires configuring more granular and complex account privileges and resource allocations than on a standalone VPC. But the architecture allows network assets to be centrally located, which can simplify auditing and security. Pivotal recommends this model for:
+
+* Deployments with auditing and security requirements
+* When networks hosting the foundation need to connect back to an internal network via VPN or interconnect.
+
+A [standalone VPC](#standalone-vpc) lets the platform architect give PCF full access to the VPC and its resources, which makes configuration easier. Pivotal recommends standalone VPC architecture for:
+
+* Single deployments that do not connect to an internal network
+* Test and experimental deployments, and for projects which do not belong to an organization
+
 ## <a id="shared-vpc"></a> Shared VPC GCP Reference Architecture
 
-The following diagram provides an overview of a reference architecture deployment of PCF as a [host and service project](#host-service) on a [shared VPC](https://cloud.google.com/vpc/docs/shared-vpc).
+The following diagram provides an overview of a reference architecture deployment of PCF on a shared VPC on GCP. This architecture requires an organization on the VPC that contains a host project and a service project.
+
+For more information about shared VPCs on GCP, see [Shared VPC Overview](https://cloud.google.com/vpc/docs/shared-vpc) in the Google Cloud documentation.
+
+For more information about how this architecture divides resources between projects, see [Host / Service Architecture](#host-service).
 
 <%= image_tag('gcp-overview-shared-vpc.png') %>
 
@@ -171,9 +187,3 @@ PCF deployments on GCP use two load balancers to handle Gorouter traffic because
 ### ICMP
 
 GCP routers do not respond to ICMP; therefore, Pivotal recommends disabling ICMP checks in [BOSH Director network configuration](../../om/gcp/config-manual.html#network).
-
-## <a id="shared-vs-standalone"></a> Shared vs Standalone VPCs
-
-Enterprise infrastructure is often structured into separate VPCs that limit the computing resources, network resources, and access privileges of resident software.  This effectively creates corporate-internal firewalls that restrict the scope of admin and project control.
-
-When PCF runs in a [standalone VPC](#standalone-vpc), the platform architect can give PCF full access to the VPC and its resources. But installing PCF on a [shared VPC](#shared-vpc) adds a level of complexity that may require more granular account privileges and resource allocations.
