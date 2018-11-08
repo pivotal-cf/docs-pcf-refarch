@@ -25,10 +25,10 @@ Pivotal provides reference architectures to help you determine the best configur
 
 ## <a id="shared-vs-standalone"></a> Shared vs Standalone VPCs
 
-A [shared VPC](#shared-vpc) installation requires configuring more granular and complex account privileges and resource allocations than on a standalone VPC. But the architecture allows network assets to be centrally located, which can simplify auditing and security. Pivotal recommends this model for:
+A [shared VPC](#shared-vpc) installation is harder to configure than a PCF deployment on a standalone VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. Pivotal recommends the shared VPC model for:
 
-* Deployments with auditing and security requirements
-* When networks hosting the foundation need to connect back to an internal network via VPN or interconnect.
+* Deployments with deep auditing and security requirements
+* When networks hosting the foundation need to connect back to an internal network via VPN or interconnect
 
 A [standalone VPC](#standalone-vpc) lets the platform architect give PCF full access to the VPC and its resources, which makes configuration easier. Pivotal recommends standalone VPC architecture for:
 
