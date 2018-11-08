@@ -5,7 +5,7 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This topic presents two reference architectures for installing Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP): on a [shared virtual private cloud](#shared-vpc) (VPC) and on a [standalone VPC](#standalone-vpc). This topic also outlines multiple networking variants for a standalone VPC deployment. The architectures are validated for production-grade PCF deployments using multiple AZs.
+This topic presents two reference architectures for installing Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP): on a [shared virtual private cloud](#shared-vpc) (VPC) and on a [single-project VPC](#single-vpc). This topic also outlines multiple networking variants for VPC deployment. The architectures are validated for production-grade PCF deployments using multiple AZs.
 
 See [PCF on GCP Requirements](../../customizing/gcp.html) for general requirements for running PCF and specific requirements for running PCF on GCP.
 
@@ -23,16 +23,16 @@ A PCF reference architecture must meet the following requirements:
 
 Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
 
-## <a id="shared-vs-standalone"></a> Shared vs Standalone VPCs
+## <a id="shared-vs-single"></a> Shared vs Single-Project VPCs
 
-A [shared VPC](#shared-vpc) installation is harder to configure than a PCF deployment on a standalone VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. Pivotal recommends the shared VPC model for:
+A [shared VPC](#shared-vpc) installation is harder to configure than a PCF deployment on a single-project VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. Pivotal recommends the shared VPC model for:
 
 * Deployments with deep auditing and security requirements
 * When networks hosting the foundation need to connect back to an internal network via VPN or interconnect
 
-A [standalone VPC](#standalone-vpc) lets the platform architect give PCF full access to the VPC and its resources, which makes configuration easier. Pivotal recommends standalone VPC architecture for:
+A [single-project VPC](#single-vpc) lets the platform architect give PCF full access to the VPC and its resources, which makes configuration easier. Pivotal recommends single-project VPC architecture for:
 
-* Single deployments that do not connect to an internal network
+* Standalone deployments that do not connect to an internal network
 * Test and experimental deployments, and for projects which do not belong to an organization
 
 ## <a id="shared-vpc"></a> Shared VPC GCP Reference Architecture
@@ -101,9 +101,9 @@ The PCF service project manages the following resources:
 * Internal/External Load Balancer
 * Google Cloud SQL instances, for internal databases
 
-## <a id="standalone-vpc"></a> Standalone VPC Base GCP Reference Architecture
+## <a id="single-vpc"></a> Single-Project VPC Base GCP Reference Architecture
 
-The following diagram provides an overview of a reference architecture deployment of PCF on a standalone [VPC](https://cloud.google.com/vpc/docs/vpc) on GCP.
+The following diagram provides an overview of a reference architecture deployment of PCF on a single-project [VPC](https://cloud.google.com/vpc/docs/vpc) on GCP.
 
 <%= image_tag('gcp-overview-single-vpc.png') %>
 
