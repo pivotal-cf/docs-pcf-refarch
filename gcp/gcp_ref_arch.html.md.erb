@@ -5,25 +5,105 @@ owner: Customer0
 
 <strong><%= modified_date %></strong>
 
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP). This document also outlines multiple networking solutions. All these architectures are validated for production-grade PCF deployments using multiple (3+) AZs. 
+This topic presents two reference architectures for installing Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP): on a [shared virtual private cloud](#shared-vpc) (VPC) and on a [standalone VPC](#standalone-vpc). This topic also outlines multiple networking variants for a standalone VPC deployment. The architectures are validated for production-grade PCF deployments using multiple AZs.
 
 See [PCF on GCP Requirements](../../customizing/gcp.html) for general requirements for running PCF and specific requirements for running PCF on GCP.
 
 
 ## <a id="refarchs"></a> PCF Reference Architectures
 
-A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as GC, that meets the following requirements:
+A PCF reference architecture describes a proven approach for deploying PCF on a specific IaaS, such as GCP.
 
-* Secure
-* Publicly-accessible
-* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-* Can host at least 100 app instances, or far more
+A PCF reference architecture must meet the following requirements:
+
+* Be secure
+* Be publicly-accessible
+* Include common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Be able to host at least 100 app instances
 
 Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
 
-## <a id="arch_diagram"></a> Base GCP Reference Architecture
+## <a id="shared-vs-standalone"></a> Shared vs Standalone VPCs
 
-The following diagram provides an overview of a reference architecture deployment of PCF on GCP.
+A [shared VPC](#shared-vpc) installation requires configuring more granular and complex account privileges and resource allocations than on a standalone VPC. But the architecture allows network assets to be centrally located, which can simplify auditing and security. Pivotal recommends this model for:
+
+* Deployments with auditing and security requirements
+* When networks hosting the foundation need to connect back to an internal network via VPN or interconnect.
+
+A [standalone VPC](#standalone-vpc) lets the platform architect give PCF full access to the VPC and its resources, which makes configuration easier. Pivotal recommends standalone VPC architecture for:
+
+* Single deployments that do not connect to an internal network
+* Test and experimental deployments, and for projects which do not belong to an organization
+
+## <a id="shared-vpc"></a> Shared VPC GCP Reference Architecture
+
+The following diagram provides an overview of a reference architecture deployment of PCF on a shared VPC on GCP. This architecture requires an organization on the VPC that contains a host project and a service project.
+
+For more information about shared VPCs on GCP, see [Shared VPC Overview](https://cloud.google.com/vpc/docs/shared-vpc) in the Google Cloud documentation.
+
+For more information about how this architecture divides resources between projects, see [Host / Service Architecture](#host-service).
+
+<%= image_tag('gcp-overview-shared-vpc.png') %>
+
+[View a larger version of this diagram](../images/gcp-overview-shared-vpc.png).
+
+### <a id="shared-vpc-nat"></a> NAT Network Topology
+
+To expose a minimal number of public IP addresses, set up your NAT as shown in this diagram.
+
+<%= image_tag('gcp-nat-flow.png') %>
+
+[View a larger version of this diagram](../images/gcp-nat-flow.png).
+
+### <a id="shared-vpc-interconnect"></a> Cloud Interconnect
+
+To speed communication between data centers, use Google Cloud Interconnect as shown in this diagram.
+
+<%= image_tag('gcp-cloud-interconnect.png') %>
+
+[View a larger version of this diagram](../images/gcp-cloud-interconnect.png).
+
+### <a id="host-service"></a> Host / Service Architecture
+
+GCP allocates resources using a hierarchy that centers around projects. To create a VPC, architects define a _host project_ that allocates network resources for the VPC, such as address space and firewall rules. Then they can define one or more _service projects_ to run within the VPC, which share the network resources allocated by the host project and include their own non-network resources, such as VMs and storage buckets.
+
+To install PCF in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running PCF.
+
+#### <a id="host-resources"></a>Host Project Resources
+
+The host project centrally manages the following shared VPC network resources for PCF:
+
+* Infra subnet (Ops Manager and BOSH Director)
+* PAS subnet 
+* Services subnet
+* Isolation Segments
+* Firewall rules
+* NAT instances and gateway
+* VPN/interconnect 
+* Routes, e.g. egress internet through NAT or egress on-premises through VPN
+
+#### <a id="service-resources"></a>Service Project Resources
+
+The PCF service project manages the following resources:
+
+* Google Cloud Compute instances (VMs)
+    - BOSH
+    - Ops Manager
+    - VMs deployed by BOSH, such as PCF and service components
+* Google Cloud Storage buckets, for blobstore
+    - BOSH Director
+    - Resources
+    - Buildpacks
+    - Droplets
+    - Packages
+* Service account and a service account key for PCF to access the storage buckets
+* A service account for PCF
+* Internal/External Load Balancer
+* Google Cloud SQL instances, for internal databases
+
+## <a id="standalone-vpc"></a> Standalone VPC Base GCP Reference Architecture
+
+The following diagram provides an overview of a reference architecture deployment of PCF on a standalone [VPC](https://cloud.google.com/vpc/docs/vpc) on GCP.
 
 <%= image_tag('gcp-overview-single-vpc.png') %>
 
@@ -46,7 +126,7 @@ The following table lists the components that are part of a reference architectu
 |**Services**|Deployed on the PCF managed services subnet. Each service is deployed to each availability zone. |
 
 
-## <a id="common_network"></a> Alternative GCP Network Layouts for PCF
+### <a id="common_network"></a> Alternative GCP Network Layouts for PCF
 
 This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on GCP. 
 
@@ -61,7 +141,7 @@ Providing each PCF VM with a public IP address is the most recommended architect
 
 However, if you require NATs, you may refer to the following section.
 
-### <a id="nat_network_diagram"></a> NAT-based Solution
+#### <a id="nat_network_diagram"></a> NAT-based Solution
 
 This diagram illustrates the case where you want to expose only a minimal number of public IP addresses.
 
@@ -69,11 +149,11 @@ This diagram illustrates the case where you want to expose only a minimal number
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/gcp-net-topology-base.png).
 
-### <a id="no_nat"></a> Public IP addresses Solution
+#### <a id="no_nat"></a> Public IP addresses Solution
 
 If you prefer not to use a NAT solution, you can configure PCF on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between Cloud Foundry components are routed through the front end load balancer and the Gorouter.
 
-### <a id="network_components"></a> Network Objects
+#### <a id="network_components"></a> Network Objects
 
 The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NATs).
 
@@ -88,11 +168,11 @@ The following table lists the network objects expected for each type of referenc
 | **Load balancers**| Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
 | **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox. | (1) | (1)|
 
-### <a id="network_comm"></a> Network Communication in GCP Deployments
+## <a id="network_comm"></a> Network Communication in GCP Deployments
 
 This section provides more background on the reasons behind certain network configuration decisions, specifically for the Gorouter.
 
-#### Load Balancer to Gorouter Communications and TLS Termination
+### Load Balancer to Gorouter Communications and TLS Termination
 
 In a PCF on GCP deployment, the Gorouter receives two types of traffic:
 
@@ -104,6 +184,6 @@ TLS is terminated for HTTPS on the HTTP load balancer and is terminated for WebS
 
 PCF deployments on GCP use two load balancers to handle Gorouter traffic because HTTP load balancers currently do not support WebSockets.
 
-#### ICMP
+### ICMP
 
 GCP routers do not respond to ICMP; therefore, Pivotal recommends disabling ICMP checks in [BOSH Director network configuration](../../om/gcp/config-manual.html#network).
