@@ -53,14 +53,12 @@ This section describes the possible network layouts for PCF deployments as cover
 
 At a high level, there are currently two possible ways of granting public Internet access to PCF as described by the reference architecture:
 
-* NATs provide public access to PCF internals.
+* NAT provides connectivity from PCF internals to the public Internet.
 	* The instructions for [Installing PCF on GCP Manually](../../customizing/gcp-manual.html) use this method. 
 * Every PCF VM receives its own public IP address (no NAT).
 	* The instructions for [Installing PCF on GCP using Terraform](../../customizing/gcp-terraform.html) use this method.
 
-Providing each PCF VM with a public IP address is the most recommended architecture, because of increased latency due to NATs as well as extra maintenance required for NAT instances that cannot be deployed with BOSH. 
-
-However, if you require NATs, you may refer to the following section.
+However, if you require NAT, you may refer to the following section.
 
 ### <a id="nat_network_diagram"></a> NAT-based Solution
 
@@ -76,12 +74,12 @@ If you prefer not to use a NAT solution, you can configure PCF on GCP to assign 
 
 ### <a id="network_components"></a> Network Objects
 
-The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NATs).
+The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NAT).
 
 |**Network Object**| **Notes**| **Minimum Number: NAT-based** | **Minimum Number: Public IP Addresses**|
 |--------------------|------------|----------------------|---------------------------|
 | **External IPs** | For a NAT solution, use global IP address for apps and system access, and Ops Manager or optional jumpbox | 2 | 30+ |
-| **NATs** | One NAT per availability zone. | 3 | 0 |
+| **NAT** | One NAT per availability zone. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of PCF will likely only ever require one GCP Network object | 1 | 1 |
 | **Subnets** | Separate subnets for infrastructure (Ops Manager, BOSH Director, Jumpbox), PAS, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy PCF without public IP addresses. | 3+ | 3|
