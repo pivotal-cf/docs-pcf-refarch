@@ -33,6 +33,16 @@ It's important to understand that the Azure Virtual Datacenter (VDC) is **NOT** 
 
 More information on the Azure Virtual Datacenter can be found in the [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/vdc/).
 
+### Azure Virtual Datacenter Terminology
+
+Here are some definitions which can assist with consuming these architecture patterns.
+
+* VDC: Azure Virtual Datacenter
+* UDR: User-Defined Routing
+* Hub: A hub is the central network zone that controls and inspects ingress or egress traffic between different zones: internet, on-premises, and the spokes. The hub and spoke topology gives the IT department an effective way to enforce security policies in a central location. It also reduces the potential for misconfiguration and exposure.
+* Spoke: Highly interconnected node of a Hub where workloads are run.
+* Foundation: One deployment of Pivotal Cloud Foundry and it's associated tiles.
+
 ### Azure Virtual Datacenter Networking
 
 Some of the core networking components of the Azure Virtual Datacenter:
@@ -49,3 +59,47 @@ There are also some optional components that can assist with shared service and 
 * Azure DNS
 * Azure Front Door 
 * Azure Virtual WAN
+
+As the Azure VDC is deployed in a hub-and-spoke model, there are some separation of responsibilities for each aspect.
+
+The hub contains the common service components consumed by the spokes. The following examples are common central services:
+
+* A DNS service to resolve naming for the workload in the spokes, to access resources on-premises and on the internet if Azure DNS isn't used.
+* A public key infrastructure (PKI), to implement single sign-on on workloads.
+* Flow control of TCP and UDP traffic between the spoke network zones and the internet.
+* Flow control between the spokes and on-premises.
+* If needed, flow control between one spoke and another.
+* The VDC reduces overall cost by using the shared hub infrastructure between multiple spokes.
+
+Spokes can also be interconnected to a spoke that acts as a hub. This approach creates a two-level hierarchy: the spoke in the higher level (level 0) become the hub of lower spokes (level 1) of the hierarchy. The spokes of a VDC implementation are required to forward the traffic to the central hub so that the traffic can transit to its destination in either the on-premises network or public internet. An architecture with two levels of hub introduces complex routing that removes the benefits of a simple hub-spoke relationship.
+
+You can find a deep dive on some of the interconnectivity for networking patterns on the [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/vdc/networking-virtual-datacenter).
+
+### Azure Virtual Datacenter Roles
+
+As good practice in general, access rights and privileges should be group-based. Dealing with groups rather than individual users eases maintenance of access policies by providing a consistent way to manage it across teams. and aids in minimizing configuration errors. Assigning and removing users to and from appropriate groups helps keeping the privileges of a specific user up-to-date.
+
+* The central IT group, **Corp**, has the ownership rights to control infrastructure components. Examples are networking and security. The group needs to have the role of contributor on the subscription, control of the hub, and network contributor rights in the spokes. Large organizations frequently split up these management responsibilities between multiple teams. Examples are a network operations **CorpNetOps** group with exclusive focus on networking and a security operations **CorpSecOps** group responsible for the firewall and security policy. In this specific case, two different groups need to be created for assignment of these custom roles.
+* The dev-test group, **AppDevOps**, has the responsibility to deploy app or service workloads. This group takes the role of virtual machine contributor for IaaS deployments or one or more PaaS contributor’s roles. See Built-in roles for Azure resources. Optionally, the dev-test team might need visibility on security policies, NSGs, and routing policies, UDRs, inside the hub or a specific spoke. In addition to the role of contributor for workloads, this group would also need the role of network reader.
+The operation and maintenance group, **CorpInfraOps** or **AppInfraOps**, has the responsibility of managing workloads in production. This group needs to be a subscription contributor on workloads in any production subscriptions. Some organizations might also evaluate if they need an additional escalation support team group with the role of subscription contributor in production and the central hub subscription. The additional group fixes potential configuration issues in the production environment.
+
+## Pivotal Cloud Foundry in the Azure Virtual Datacenter
+
+### Pivotal Cloud Foundry Roles with Azure VDC Roles
+
+As Pivotal Cloud Foundry is a Platform-as-a-Service, it has higher-order roles and controls, which are defined in two ways:
+
+* **Operators**: IT groups and teams responsible for core IaaS configurations, security, and Foundation deployments.
+* **Developers/AppDevs**: Generally application developers responsible for designing and deploying applications onto Pivotal Cloud Foundry.
+
+Mapping the PCF roles with the Azure VDC roles isn't inherently a 1:1 relationship as PCF does automate and control certains aspects of it's underlying Azure configurations, but there is overlap.
+
+| PCF Role | Azure VDC Role |
+| --- | --- |
+| **Operators** | * **Corp**<br>* **CorpNetOps**<br>* **CorpSecOps**<br>* **CorpInfraOps** |
+| **Developers/AppDevs** | **AppDevOps**<br>**AppInfraOps** |
+
+#### TODO: provide more detail here.
+
+With this overlap comes a much higher level of simplicity.
+
