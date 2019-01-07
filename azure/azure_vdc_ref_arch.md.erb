@@ -1,0 +1,51 @@
+---
+title: Pivotal Cloud Foundry on Azure for Enterprises
+owner: MicrosoftAlliances
+---
+
+<strong><%= modified_date %></strong>
+
+This guide is designed to provide a baseline reference for architecting Pivotal Cloud Foundry deployments to Azure within a greater enterprise architecture. This architecture pattern is designed to be very portable while pluggable as it is a hub-and-spoke model.
+
+## Pivotal Cloud Foundry on Azure for Enterprises
+
+The requirements driving this architecture pattern:
+
+* Secure
+* Privately accessible
+* Migrate workloads from an on-premises environment to Azure
+* Implement shared or centralized security and access requirements across workloads
+* Mix Pivotal Cloud Foundry and centralized IT appropriately for a large enterprise
+
+## Azure Virtual Datacenter
+
+### What is the Azure Virtual Datacenter?
+
+Deploying workloads to the cloud introduces the need to develop and maintain trust in the cloud to the same degree you trust your existing datacenters. The first model of the Azure Virtual Datacenter guidance is designed to bridge that need through a locked-down approach to virtual infrastructures. This approach isn’t for everyone. It’s specifically designed to guide enterprise IT groups in extending their on-premises infrastructure to the Azure public cloud. We call this approach the trusted datacenter extension model. Over time, several other models will be offered, including those that allow secure Internet access directly from a virtual datacenter.
+
+These four components make the Azure Virtual Datacenter possible: identity, encryption, software-defined networking, and compliance (including logs and reporting):
+
+<%= image_tag('azure-vdc-components.svg') %>
+
+In the Azure Virtual Datacenter model, you can apply isolation policies, make the cloud more like the physical datacenters you know, and achieve the levels of security and trust you need. Four components any enterprise IT team would recognize make it possible: software-defined networking, encryption, identity management, and the Azure platform's underlying compliance standards and certifications. These four are key to making a virtual datacenter a trusted extension of your existing infrastructure investment.
+
+It's important to understand that the Azure Virtual Datacenter (VDC) is **NOT** a discrete Azure product, but the combination of various features and capabilities to meet your requirements. The VDC is a way of thinking about your workloads and how to leverage Azure services to maximize your resources and abilities in the cloud. It's a modular approach to building up IT services in Azure while respecting the enterprise's organizational roles and responsibilities.
+
+More information on the Azure Virtual Datacenter can be found in the [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/vdc/).
+
+### Azure Virtual Datacenter Networking
+
+Some of the core networking components of the Azure Virtual Datacenter:
+
+* Azure Virtual Network
+* Network security groups
+* Virtual network peering
+* User-Defined Routes (UDR)
+* Azure Identity with Role-Based Access Control (RBAC)
+
+There are also some optional components that can assist with shared service and external network services:
+
+* Azure Firewall
+* Azure DNS
+* Azure Front Door 
+* Azure Virtual WAN
