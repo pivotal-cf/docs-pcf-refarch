@@ -96,10 +96,49 @@ Mapping the PCF roles with the Azure VDC roles isn't inherently a 1:1 relationsh
 
 | PCF Role | Azure VDC Role |
 | --- | --- |
-| **Operators** | * **Corp**<br>* **CorpNetOps**<br>* **CorpSecOps**<br>* **CorpInfraOps** |
-| **Developers/AppDevs** | **AppDevOps**<br>**AppInfraOps** |
+| **Operators** | Corp<br>CorpNetOps<br>CorpSecOps<br>CorpInfraOps |
+| **Developers/AppDevs** | AppDevOps<br>AppInfraOps |
 
-#### TODO: provide more detail here.
+With this overlap comes a much higher level of simplicity for most Operators and ease of consumption for Developers.
 
-With this overlap comes a much higher level of simplicity.
+### Identity and Directory Services
 
+Access to every resource type in Azure is controlled by an identity stored in a directory service. The directory service stores not only the list of users, but also the access rights to resources in a specific Azure subscription. These services can exist cloud-only, or they can be synchronized with on-premises identity stored in Active Directory.
+
+### Virtual Networks
+
+Virtual Networks are one of main components of the VDC, and enable you to create a traffic isolation boundary between one or more Foundations. VMs (and PaaS services) in one virtual network cannot communicate directly to VMs (and PaaS services) in a different virtual network, even if both virtual networks are created by the same customer, under the same subscription. Isolation is a critical property that ensures customer VMs and communication remains private within a virtual network. In this model, each Foundation deployed to an Azure VDC Spoke will leverage it's own Virtual Network and be completely isolated from other Foundations. Through Virtual Network isolation practices, it's very easy to have a private-only Foundation with no Public IPs.
+
+### User-Defined Routing
+
+Traffic in a Virtual Network is routed by default based on the system routing table. A User Defined Route is a custom routing table that network administrators can associate to one or more subnets to overwrite the behavior of the system routing table and define a communication path within a virtual network. The presence of UDRs guarantees that egress traffic from the spoke transit through the Foundation and load balancers present in the hub and in the spokes. The output of this is all Foundation components and tiles route their traffic directly to the Hub, and then out to other Spokes instead of going directly from Spoke to Spoke. This allows network administrators to have more fine controls over which Foundations are allowed to talk to specific internal services.
+
+#picture
+
+### Network Security Groups
+
+A Network Security Group is a list of security rules that act as traffic filtering on IP Sources, IP Destination, Protocols, IP Source Ports, and IP Destination ports. The NSGs are essential to implement a correct flow control in the hub and in the spokes. In the VDC model, Foundations leverage an "internal-only" traffic policy - e.g. any traffic on the local Virtual Network or coming from the Intermediate Load Balancer is considered safe. PCF leverages hairpinning for a lot of it's internal traffic between various components, but not for all components, so it's much easier to allow all local traffic to allow for any platform changes as the Virtual Network is an entirely private IP space that can be hidden away from other Spokes through firewalls and NSGs.
+
+### Domain Name Services
+
+The name resolution of resources in the Virtual Networks of a VDC implementation is provided through DNS. Azure provides DNS services for both Public and Private name resolution. Private zones provide name resolution both within a virtual network and across virtual networks. You can have private zones not only span across virtual networks in the same region, but also across regions and subscriptions. For public resolution, Azure DNS provides a hosting service for DNS domains, providing name resolution using Microsoft Azure infrastructure. By hosting your domains in Azure, you can manage your DNS records using the same credentials, APIs, tools, and billing as your other Azure services.
+
+### Subscription and Resource Group Management
+
+A subscription defines a natural boundary to create multiple groups of resources in Azure. Resources in a subscription are assembled together in logical containers named Resource Groups. The Resource Group represents a logical group to organize the resources of a VDC implementation. PCF is capable of leveraging multiple Resource Groups for a single Foundation.
+
+#picture
+
+Pivotal and Microsoft recommend splitting a single Foundation into two fundamental Resource Groups: Networking and Compute. The Networking Resource Group shoudl contain the Virtual Network, UDR, and the NSGs. In the Compute Resource Group, you should deploy Ops Mananger, Pivotal Application Service, and other products and tiles. This allows Network Administrators to have separate access control rights without having to grant them access to the Compute Resource Group.
+
+### Role-Base Access Control
+
+Through RBAC, it is possible to map organizational role along with rights to access specific Azure resources, allowing you to restrict users to only a certain subset of actions. With RBAC, you can grant access by assigning the appropriate role to users, groups, and applications within the relevant scope. The scope of a role assignment can be an Azure subscription, a resource group, or a single resource. RBAC allows inheritance of permissions. A role assigned at a parent scope also grants access to the children contained within it. Using RBAC, you can segregate duties and grant only the amount of access to users that they need to perform their jobs. PCF leverages Service Principals which have RBAC roles. This Service Principal can be locked down extensively, but will need these minimum access rights:
+
+```bash
+todo
+```
+
+### Virtual Network Peering
+
+The fundamental feature used to create the infrastructure of the VDC is VNet Peering, a mechanism that connects two Virtual Networks in the same region through the Azure datacenter network, or using the Azure world-wide backbone across regions. Virtual Network Peering allows multiple disparate Virtual Networks to form one congruent network layer so traffic is easily routable and controllable.
