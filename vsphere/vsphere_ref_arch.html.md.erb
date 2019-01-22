@@ -51,8 +51,10 @@ Instead, it gives examples of how to apply those instructions to real-world prod
 This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
 
 The reference architecture supports capacity growth at the vSphere and PCF levels as well as installation security through the NSX-T firewall.
-It allocates a minimum of three servers to each cluster and spreads PCF components across three clusters for high availability (HA).
+It allocates a minimum of three servers to each vSphere cluster and spreads PCF components across three clusters for high availability (HA). Each vSphere cluster corresponds to an Availability Zone (AZ).
 For information about HA in PCF, see [High Availability in Cloud Foundry](../../concepts/high-availability.html).
+
+<p class="note"><strong>Note</strong>: Small and non-critical deployments can maintain high availability with two vSphere clusters instead of three, provided that the PAS system databases are <a href="../../customizing/config-er-vmware.html#create-dbs">configured as external</a>.</p>
 
 To use all features listed in this topic for your PAS installation, you must have **Advanced** or above licensing from VMware for NSX-T.
 For PKS, the required licensing is included by default.
@@ -385,14 +387,18 @@ However, high core count VMs become increasingly hard to schedule on the pCPU wi
 
 HA considerations include the following:
 
-* PAS is not considered HA until at least two AZs are defined. Pivotal recommends using three AZs for HA.
+* For non-production environments, PAS is HA when it runs across two AZs with [external system databases](../../customizing/config-er-vmware.html#create-dbs), or runs across three AZs when its system databases are [internal](../../customizing/config-er-vmware.html#internal-db).
 
-    PCF achieves redundancy through the AZ construct and the loss of an AZ is not considered catastrophic.
-    BOSH Resurrector can replace lost VMs as needed to repair a foundation.
-    Foundation backup and restoration is accomplished externally by BOSH Backup and Restore (BBR).
-    For information about BBR, see [Backing Up and Restoring Pivotal Cloud Foundry](../../customizing/backup-restore/index.html).
+* For any production environment, Pivotal recommends using three AZs for HA.
 
 * PKS has no inherent HA capabilities to design for. To support PKS, design HA at the IaaS, storage, power, and access layers.
+
+PCF achieves redundancy through the AZ construct, and the loss of an AZ is not considered catastrophic.
+BOSH Resurrector replaces lost VMs as needed to repair a foundation.
+
+Foundation backup and restoration is accomplished externally by BOSH Backup and Restore (BBR).
+For information about BBR, see [Backing Up and Restoring Pivotal Cloud Foundry](../../customizing/backup-restore/index.html).
+
 
 ### <a id="scaling"></a> Scaling and Capacity Management
 
