@@ -1,0 +1,108 @@
+---
+title: Managing Global DNS Load Balancers
+---
+
+This topic describes global DNS load balancers (GLBs) and how to manage and configure them
+for multiple Pivotal Cloud Foundry (PCF) foundations.
+
+The PCF foundations are deployed in an active-active or active-passive pattern.
+
+<p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated
+to one PCF foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for PAS</a>.</p>
+
+## <a id="configure-glb"></a> Configure Your GLB
+
+The typical setup for foundation failover requires the GLB be authoritative for a wildcard
+app domain. The wildcard app domain is not the same domain as the foundation-default app domain.
+
+To configure your GLB, do the following:
+
+1. Find and record your wildcard app domain. For Pivotal Application Service
+(PAS), your wildcard app domain is typically the **Apps Domain** you configure in
+the **Domains** pane of the PAS tile.
+
+1. Add the domain you recorded to both PCF foundations using a shared
+domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf
+CLI). For more information about the cf CLI command to create shared domains, see
+[create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in
+the cf CLI reference guide.
+
+1. To support failover, set the time-to-live (TTL) in the wildcard DNS record. Set the TTL to about 30 to
+180 seconds. When determining your TTL, consider the tradeoff between the negative app
+performance impacts and the resulting time for failover to occur.
+
+
+## <a id="foundation-affinity"></a> About Foundation Affinity
+
+_Foundation Affinity_ occurs when the GLB favors one
+foundation over another during a route request. For example, users experience less latency
+if they are routed to foundations that are geographically closer, so the GLB may favor
+that foundation.
+
+Different GLBs have their own mechanisms to achieve this. See the following table for common concepts:
+
+<table>
+  <tr>
+  <th colspan="2">Foundation Affinity Concepts</th>
+  <tr>
+  <tr>
+    <th>Term</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+  <td><strong>Topology/geographically-based affinity</strong></td>
+    <td>The GLB attempts to direct traffic to the
+graphically nearest foundation based on IP geolocation or provided topology for private
+networks of the LDNS server performing the lookup.
+</td>
+  </tr>
+  <tr>
+  <td><strong>Static-persist/member-hashing affinity</strong></td>
+    <td>The GLB attempts to direct traffic to the
+graphically nearest foundation based on IP geolocation or provided topology for private
+networks of the LDNS server performing the lookup.</td>
+  </tr>
+  <td><strong>Active/passive foundations</strong></td>
+  <td>If one foundation is usually idle, you can always pick
+the active foundation IP as long as it remains available.
+</td>
+</table>
+
+</table>
+
+<p class="note"><strong>Note:</strong> For microservice apps, you typically use a Services
+Registry to manage traffic between microservices. If the microservices are using the
+domain which maps to the GLB, then their traffic is routed through the GLBV. You could
+also have configured your microservices to communicate directly using IP address or
+internal domains, which then not pass through the GEP, for example, if using Envoy.</p>
+
+
+## <a id="healthchecks"></a> About Healthchecks
+
+_Healthchecks_ determine whether a foundation for an app is healthy or not.
+
+See the following table for the levels at which you can check the health of your foundation:
+
+<table>
+  <tr>
+    <th>Level</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>Foundation</td>
+    <td>GLB relies on a local load balancer in front of the PCF Gorouters to determine the
+    overall health of the foundation. GLB can perform healthchecks on TCP port 443 or 80 or on the local load balancer.
+    The local load balancer healthchecks the Gorouter on port 8080.</td>
+  </tr>
+  <tr>
+    <td>App *</td>
+    <td>Healthchecks are set only for apps which have instances on both
+    foundations. Each app instance has canary DNS records. The canary DNS records are
+    the same for the app instances on each foundation. You would also need to add more VIPs dedicated to these canary apps that
+would be used to check their health. </td>
+  </tr>
+</table>
+<strong>*</strong> Pivotal does not recommend setting healthchecks at the app level. Configuring
+healthchecks in this way can cause more frequent failover and delays while pushing apps.
+Complete failover of a foundation affects all apps on the platform.
+
