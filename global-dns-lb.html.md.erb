@@ -1,11 +1,10 @@
 ---
-title: Managing Global DNS Load Balancers
+title: Using Global DNS Load Balancers for Multi-Foundation
 ---
 
-This topic describes global DNS load balancers (GLBs) and how to manage and configure them
-for multiple Pivotal Cloud Foundry (PCF) foundations.
+This topic describes global DNS load balancers (GLBs) for multi-foundation deployments. This topic also describes concepts such as foundation affinity and healthchecks.
 
-The PCF foundations are deployed in an active-active or active-passive pattern.
+Multi-foundation deployments are commonly deployed in an active-active or active-passive pattern.
 
 <p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated
 to one PCF foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for PAS</a>.</p>
@@ -17,26 +16,26 @@ app domain. The wildcard app domain is not the same domain as the foundation-def
 
 To configure your GLB, do the following:
 
-1. Find and record your wildcard app domain. For Pivotal Application Service
+- Find and record your wildcard app domain. For Pivotal Application Service
 (PAS), your wildcard app domain is typically the **Apps Domain** you configure in
 the **Domains** pane of the PAS tile.
 
-1. Add the domain you recorded to both PCF foundations using a shared
+- Add the domain you recorded to both PCF foundations using a shared
 domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf
 CLI). For more information about the cf CLI command to create shared domains, see
 [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in
 the cf CLI reference guide.
 
-1. To support failover, set the time-to-live (TTL) in the wildcard DNS record. Set the TTL to about 30 to
-180 seconds. When determining your TTL, consider the tradeoff between the negative app
-performance impacts and the resulting time for failover to occur.
+- To support failover, set the time-to-live (TTL) in the wildcard DNS record. Set the TTL to about 30 to
+180 seconds. When determining your TTL, consider the tradeoff between the app
+performance impact and the resulting time for failover to occur.
 
 
 ## <a id="foundation-affinity"></a> About Foundation Affinity
 
-_Foundation Affinity_ occurs when the GLB favors one
+_Foundation affinity_ occurs when the GLB favors one
 foundation over another during a route request. For example, users experience less latency
-if they are routed to foundations that are geographically closer, so the GLB may favor
+if they are routed to a foundation that is geographically closer, so the GLB may favor
 that foundation.
 
 Different GLBs have their own mechanisms to achieve this. See the following table for common concepts:
@@ -62,19 +61,28 @@ networks of the LDNS server performing the lookup.
 graphically nearest foundation based on IP geolocation or provided topology for private
 networks of the LDNS server performing the lookup.</td>
   </tr>
-  <td><strong>Active/passive foundations</strong></td>
-  <td>If one foundation is usually idle, you can always pick
-the active foundation IP as long as it remains available.
-</td>
-</table>
+  <tr>
+    <td><strong>Active/passive foundations</strong></td>
+    <td>If one foundation is usually idle, you can always pick
+  the active foundation IP as long as it remains available.
+    </td>
+  </tr>
+    <tr>
+    <td><strong>Microservice-to-microservice affinity</strong></td>
+    <td>
+      For microservice apps, you typically use a Services
+  Registry to manage traffic between microservices. There are two ways to do this:
+    <ol>
+      <li style="margin:0"> If the microservices are using the
+      domain which maps to the GLB, then their traffic is routed through the GLB.</li>
+
+      <li>If the microservices are communicating using IP address or internal domains, such as when using Envoy, then the traffic does not pass through the GLB.</li>
+    </ol>
+    </td>
+  </tr>
 
 </table>
 
-<p class="note"><strong>Note:</strong> For microservice apps, you typically use a Services
-Registry to manage traffic between microservices. If the microservices are using the
-domain which maps to the GLB, then their traffic is routed through the GLBV. You could
-also have configured your microservices to communicate directly using IP address or
-internal domains, which then not pass through the GEP, for example, if using Envoy.</p>
 
 
 ## <a id="healthchecks"></a> About Healthchecks
@@ -92,17 +100,17 @@ See the following table for the levels at which you can check the health of your
     <td>Foundation</td>
     <td>GLB relies on a local load balancer in front of the PCF Gorouters to determine the
     overall health of the foundation. GLB can perform healthchecks on TCP port 443 or 80 or on the local load balancer.
-    The local load balancer healthchecks the Gorouter on port 8080.</td>
+    The local load balancer healthchecks the backend pool of Gorouters on port 8080.</td>
   </tr>
   <tr>
-    <td>App *</td>
+    <td>App</td>
     <td>Healthchecks are set only for apps which have instances on both
     foundations. Each app instance has canary DNS records. The canary DNS records are
     the same for the app instances on each foundation. You would also need to add more VIPs dedicated to these canary apps that
 would be used to check their health. </td>
   </tr>
 </table>
-<strong>*</strong> Pivotal does not recommend setting healthchecks at the app level. Configuring
+<p class="note warning"><strong>WARNING</strong> Pivotal does not recommend setting healthchecks at the app level. Configuring
 healthchecks in this way can cause more frequent failover and delays while pushing apps.
-Complete failover of a foundation affects all apps on the platform.
+Complete failover of a foundation affects all apps on the platform. Healthchecks on a per-app basis can require additional overhead beyond the control of an app developer.</p>
 
