@@ -1,13 +1,38 @@
 ---
-title: Using Global DNS Load Balancers for Multi-Foundation
+title: Global DNS Load Balancers for Multi-Foundation Installations
 ---
 
-This topic describes global DNS load balancers (GLBs) for multi-foundation deployments. This topic also describes concepts such as foundation affinity and healthchecks.
-
-Multi-foundation deployments are commonly deployed in an active-active or active-passive pattern.
+This topic describes global DNS load balancers (GLBs) for multi-foundation installations.
+This topic also describes concepts such as foundation affinity and healthchecks.
 
 <p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated
 to one PCF foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for PAS</a>.</p>
+
+### <a id="multi-foundation"> About Multi-Foundation Installations
+
+Multi-foundation installations are multiple instances of BOSH and Ops Manager that can 
+communicate with each other. Each foundation can use different infrastructures to fit 
+your preferences.
+
+Multi-foundation installations are commonly deployed in an active-active or active-passive
+pattern. See below for descriptions of each term:
+
+<table>
+  <tr>
+    <th>Term</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><strong>Active-active pattern</strong></td>
+    <td>Instance so fapps run on two foundations and they are both in use.</td>
+  </tr>
+  <tr>
+    <td><strong>Active-passive pattern</strong></td>
+    <td>Instances of apps run on both foundations, but the instances may only be active
+    on one foundation. The other foundation becomes active only in the event of a
+    failover.</td>
+  </tr>
+</table>
 
 ## <a id="configure-glb"></a> Configure Your GLB
 
