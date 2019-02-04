@@ -54,7 +54,7 @@ The reference architecture supports capacity growth at the vSphere and PCF level
 It allocates a minimum of three servers to each vSphere cluster and spreads PCF components across three clusters for high availability (HA). Each vSphere cluster corresponds to an Availability Zone (AZ).
 For information about HA in PCF, see [High Availability in Cloud Foundry](../../concepts/high-availability.html).
 
-<p class="note"><strong>Note</strong>: Small and non-critical deployments can maintain high availability with two vSphere clusters instead of three, provided that the PAS system databases are configured as external. For more information, see <a href="../../customizing/config-er-vmware.html#create-dbs">External Database Configuration</a> in <em>Deploying PAS on vSphere</em>.</p>
+<p class="note"><strong>Note</strong>: Small and non-critical deployments can maintain high availability with two vSphere clusters instead of three, provided that the PAS system databases are configured as external. For more information, see <a href="../../customizing/configure-pas.html">Configuring PAS</a>.</p>
 
 To use all features listed in this topic for your PAS installation, you must have **Advanced** or above licensing from VMware for NSX-T.
 For PKS, the required licensing is included by default.
@@ -388,8 +388,8 @@ However, high core count VMs become increasingly hard to schedule on the pCPU wi
 HA considerations include the following:
 
 * For non-production environments, the number of AZs that PAS requires for HA depends on the location of its system databases.
-  - With external databases, PAS requires at least two AZs for HA. For more information, see <a href="https://docs-pcf-staging.cfapps.io/pivotalcf/2-5/customizing/config-er-vmware.html#create-dbs">External Database Configuration</a> in <em>Deploying PAS on vSphere</em>.
-  - With internal system databases, PAS requires at least three AZs for HA. For more information, see <a href="../../customizing/config-er-vmware.html#internal-db">Internal Database Configuration</a> in <em>Deploying PAS on vSphere</em>.
+  - With external databases, PAS requires at least two AZs for HA. 
+  - With internal system databases, PAS requires at least three AZs for HA.
 
 * For any production environment, Pivotal recommends using at least three AZs for HA.
 
