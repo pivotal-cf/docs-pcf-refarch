@@ -337,7 +337,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 1. Create a new Virtual Server named `TCPRtrs` and select Application Profile `PCF-TCP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (TCP) and set **Port** to match the protocol (5000).
-	*	Set **Default Pool** to the pool name set in [Step 2.6b: Create Pool for `tcp-routers`](tcp_router_pools) (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in [Step 2.6b: Create Pool for `tcp-routers`](#tcp_router_pools) (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
     <%= image_tag('vsphere-tcprouter-vip.png') %>
 
