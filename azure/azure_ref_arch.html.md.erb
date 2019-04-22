@@ -275,7 +275,7 @@ As Azure DNS does not support recursion, in order to properly configure Azure DN
 
 You do not need to make any configuration changes in PCF to support Azure DNS.
 
-### <a id='azure-blob-storage'></a> Azure Blob Storage
+## <a id='azure-blob-storage'></a> Azure Blob Storage
 
 Due to limitations in PCF, it is not possible to support a high-availability deployment of the backing NFS store needed for droplets, buildpacks, and other resources. Azure Blob Storage provides fully-redundant holt, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availability deployments of PCF.
 
