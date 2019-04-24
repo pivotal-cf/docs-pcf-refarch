@@ -345,7 +345,7 @@ Loss of storage in a cluster constitutes loss on an AZ, which is a recoverable f
 
     For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores.
     You then instruct your first PCF installation to use stores `ds01` through `ds03` and your second PCF installation to use `ds04` through `ds06`.
-    <p class="note warning"><b>Warning:</b> For the horizontal storage design approach, storage loss could affect datastores in all AZs. This could result in downtime and unrecoverable loss of data. To avoid downtime and data loss, Pivotal recommends implementing the vertical storage design approach or implementing strong redundancy design at the storage array.</p>
+    <p class="note warning"><b>Warning:</b> If you use the horizontal storage design approach, any storage loss could affect datastores in all AZs. This could result in downtime and unrecoverable loss of data. To avoid downtime and data loss, Pivotal recommends implementing the vertical storage design approach or implementing strong redundancy design at the storage array.</p>
 
 Highly redundant storage systems, such as hyperconverged systems, are the optimal choice for a fully HA PaaS.
 In addition, hyperconverged systems scale with capacity growth and are aligned to the AZ strategy of PCF.
