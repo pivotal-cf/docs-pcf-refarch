@@ -4,21 +4,25 @@ title: PCF Base Reference Architecture
 owner: Customer0
 ---
 
-This topic describes the base reference architecture for running Pivotal Application Service (PAS) or Pivotal Container Service (PKS) on any infrastructure.
+This topic describes the base reference architectures for installing Pivotal Cloud Foundry (PCF) on any infrastructure, to support the following runtimes:
 
-The following topics build upon this base architecture by describing proven architectures for specific IaaSes:
+- Pivotal Application Service (PAS)
+- Pivotal Container Service (PKS)
 
-- [AWS](./aws/aws_ref_arch.html)
-- [Azure](./azure/azure_ref_arch.html)
-- [GCP](./gcp/gcp_ref_arch.html)
-- [OpenStack](./openstack/openstack_ref_arch.html)
-- [vSphere](./vsphere/vsphere_ref_arch.html)
+For infrastructure-specific reference architectures that build on this common base architecture, see the following topics:
+
+- [Reference Architecture for PCF on AWS](./aws/aws_ref_arch.html)
+- [Reference Architecture for PCF on Azure](./azure/azure_ref_arch.html)
+- [Reference Architecture for PCF on GCP](./gcp/gcp_ref_arch.html)
+- [Reference Architecture for PCF on OpenStack](./openstack/openstack_ref_arch.html)
+- [Reference Architecture for PCF on vSphere](./vsphere/vsphere_ref_arch.html)
 
 ## <a id="overview"></a>Overview
 
 A Pivotal Cloud Foundry (PCF) reference architecture describes a proven
-approach for deploying Pivotal Cloud Foundry on a specific IaaS, such
-as AWS, Azure, GCP, or vSphere, that meets the following requirements:
+approach for deploying PCF on a specific IaaS, such
+as AWS, Azure, GCP, OpenStack, or vSphere.
+PCF reference architectures meet the following requirements:
 
   - Secure
   - Publicly-accessible
@@ -26,45 +30,48 @@ as AWS, Azure, GCP, or vSphere, that meets the following requirements:
     Spring Cloud Services
   - Can host at least 100 app instances, or far more
 
-These documents detail PCF reference architectures for different IaaSes
-to help you determine the best configuration for your PCF deployment.
+You can use PCF reference architectures to help plan the best configuration for your PCF deployment on your IaaS.
 
 Pivotal has validated the following PCF products on its own deployments
 based on these reference architectures:
 
-  - Pivotal Application Service (PAS)
   - Pivotal Cloud Foundry Ops Manager
+  - Pivotal Application Service (PAS)
   - Pivotal Container Services (PKS)
 
-The PCF Base Reference Architecture is structured to cover common
-reference architecture base components of PCF.
+## <a id="pas"></a>PAS Architecture
 
-## <a id="pas"></a>PAS Topology
+The following diagram shows a base architecture for PAS, and how its network topology places and replicates PCF and PAS components across subnets and Availability Zones.
 
+<%# Image from PAS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
 ![PAS Base Deployment Topology](./images/v2/export/PAS_Base.png)
 
-### <a id="pas-components"></a>Infrastructure Components
+[View a larger version of this diagram](./images/v2/export/PAS_Base.png)
 
-| **Component**           | **Notes**                                                                                                                                         |
+### <a id="pas-components"></a>Internal Components
+
+The following table describes the internal component placements shown in the diagram above:
+
+| **Component**           | **Placement and Access Notes**                                                                                                                                         |
 |---------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ops Manager**         | Deployed on one of the three public subnets and accessible by FQDN or through an optional jumpbox.                                                                       |
+| **Ops Manager**         | Deployed on one of the three public subnets.  Accessible by FQDN or through an optional jumpbox.                                                                       |
 | **BOSH Director**       | Deployed on the infrastructure subnet.                                                                                                                                   |
-| **Jump Box**            | Optional. Deployed on the infrastructure subnet for accessing PAS management components such as Opsmanager and CF CLI access.                                            |
-| **Gorouters** (HTTP routers in CF)          | Accessed through the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three Pivotal Application Service (PAS) subnets, one per AZ.                           |
-| **Diego Brains**        | Required. However, the SSH container access functionality is optional and enabled through the SSH Elastic Load Balancers. Deployed on all three PAS subnets, one per AZ. |
-| **TCP Routers**         | Optional feature for TCP routing. Deployed on all three PAS subnets, one per AZ.                                                                                         |
-| **Service Tiles**       | Service brokers and shared services instances are deployed on Services subnet. Dedicated on-demand service instances are deployed on On-demand services subnet.          |
-| **Isolation Segments**  | Isolation segments deployed on Isolation subnet includes Gorouter and Diego Cells for running application containers.                                                    |
+| **Jumpbox**            | Optional. Deployed on the infrastructure subnet for accessing PAS management components such as Ops Manager and the Cloud Foundry command-line interface (cf CLI).                                            |
+| **Gorouters** (HTTP routers in CF)          | Deployed on all three PAS subnets, one per Availability Zone (AZ).<br \>  Accessed through the HTTP, HTTPS, and SSL load balancers.                          |
+| **Diego Brain**        | Deployed on all three PAS subnets, one per AZ.<br \>  The Diego Brain component is required, but SSH container access support through the Diego Brain is optional, and enabled through the SSH load balancers.  |
+| **TCP Routers**         | Optional. Deployed on all three PAS subnets, one per AZ, to support TCP routing.                                                                                         |
+| **Service Tiles**       | Service brokers and shared services instances are deployed to the Services subnet.<br \>  Dedicated on-demand service instances are deployed to an On-demand services subnet.          |
+| **Isolation Segments**  | Deployed on an Isolation Segment subnet.  Includes Diego Cells and Gorouters for running and accessing apps hosted within isolation segments.                             |
 
-### <a id="pas-network"></a>Network Considerations
+### <a id="pas-network"></a>Networks
 
-#### <a id="pas-subnets"></a>Subnets Requirements
+#### <a id="pas-subnets"></a>Required Subnets
 
 PAS requires a number of statically-defined networks to host the main
 elements it’s composed of.
 
   - Infrastructure subnet - `/24` segment  
-    This subnet contains VMs that require access only for Platform Administrators, for example Ops Manager, the BOSH Director and a Jumpbox (optional).
+    This subnet contains VMs that require access only for Platform Administrators, for example Ops Manager, the BOSH Director and an optional jumpbox.
   - PAS subnet - `/24` segment  
     This subnet contains PAS runtime VMs, such as Gorouters, Diego Cells and Cloud Controllers.
   - Services subnet - `/24` segment  
@@ -91,7 +98,7 @@ elements it’s composed of.
     reserved capacity for \>50 Isolation Segments of \>250 VMs per in
     this address bank.
 
-#### <a id="pas-lb"></a>Load Balancing For PAS
+#### <a id="pas-lb"></a>Load Balancing
 
 In general, a suitable load balancer must be found to send incoming
 HTTP, HTTPS,SSH and SSL traffic to the Gorouters and application
@@ -114,27 +121,25 @@ vendor specific Global Traffic Manager or Global DNS load balancer.
 
 For additional information, see [Global DNS Load Balancers for Multi-Foundation Environments](./global-dns-lb.html).
 
-### <a id="pas-ha"></a>HA Considerations
+### <a id="pas-ha"></a>High Availability
 
-PAS isn’t considered HA until at least two Availability Zones are
-defined (three are recommended). Using vSphere HA capabilities in
-conjunction with PCF HA capabilities is the best of all worlds. PCF
-gains redundancy thru the AZ construct and the loss of an AZ isn’t
-considered catastrophic. Using Bosh Resurrector can replace lost VMs as
-needed to repair a foundation.
+PAS isn’t considered High Availability (HA) until it runs across at least two Availability Zones (AZs).
+Pivotal recommends defining three AZs.
 
-Foundation backup and restoration is
-accomplished externally by [BOSH Backup and Restore](https://docs.cloudfoundry.org/bbr/) (BBR).
+On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a PCF HA topology provides the best of both worlds.
+Multiple AZs give PCF redundancy, so that losing an AZ isn’t catastrophic.
+The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
 
-### <a id="pas-storage"></a>Storage Considerations
+To back up and restore a foundation externally, use [BOSH Backup and Restore](https://docs.cloudfoundry.org/bbr/) (BBR).
+
+### <a id="pas-storage"></a>Storage
 
 PAS requires persistent storage disks to store its state (database) and to allocated as ephemeral disks to its components.
 For details on storage configuration and capacity planning, refer to the corresponding chapter for the specific IaaS.
 
 The platform also requires the configuration of file storage. For more details refer to [Configuring File Storage for PAS](../customizing/pas-file-storage.html).
 
-
-### <a id="pas-security"></a>Security Considerations
+### <a id="pas-security"></a>Security
 
 See the topics below for how PAS implements security:
 
@@ -145,61 +150,49 @@ See the topics below for how PAS implements security:
 
 * [Certificates and TLS in PCF](../security/pcf-infrastructure/certificates-index.html)
 
-* [Network Communication Paths in PCF](../security/networking/#net_commpaths) - Includes firewall ports
+* [Network Communication Paths in PCF](../security/networking/#net_commpaths) - includes firewall ports
 
 ### <a id="pas-domains"></a>Domain Names
 
-PAS requires following domain names to be registered when creating a
-wildcard certificate and also
+PAS requires following domain names to be registered:
 
-PAS tile configurations
+- System domain, for PAS and other tiles: `sys.domain.name`
+- App domain, for your applications: `app.domain.name`
 
-System domain, for PAS and accompanying tiles: `sys.domain.name`
-
-App domain, for your applications: `app.domain.name`
-
-Following wildcard domain names must be included when requesting
-certificates in addition to app and system domains.
+You must also define the following wildcard domain names and include them when creating certificates that access PAS and its hosted apps:
 
   - \*.SYSTEM-DOMAIN
   - \*.APPS-DOMAIN
   - \*.login.SYSTEM-DOMAIN
   - \*.uaa.SYSTEM-DOMAIN
 
-### <a id="pas-scaling"></a>Scaling Considerations
+### <a id="pas-scaling"></a>Component Scaling
 
 See [Scaling PAS](../opsguide/scaling-ert-components.html) for recommendations on how to scale PAS for different deployment scenarios.
 
-## <a id="pks-topology"></a>PKS Topology
+## <a id="pks-topology"></a>PKS Architecture
 
-![PKS Base Deployment Topology](./images/v2/export/PKS_Base.png)
+The following diagram shows a base architecture for PKS, and how its network topology places and replicates PCF and PKS components across subnets and Availability Zones.
 
-### <a id="pks-components"></a>Infrastructure Components
+<%# Image from PKS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
+![PAS Base Deployment Topology](./images/v2/export/PKS_Base.png)
 
-PKS is deployed as a tile by PCF Ops Manager and the BOSH Director.
+[View a larger version of this diagram](./images/v2/export/PKS_Base.png)
 
-A PKS API server is deployed as a service broker VM on a PKS Services
-subnet. The API server deploys and managers PKS clusters. It also
-provides an API endpoint for the client to authenticate and manage PKS
-cluster and a service adapter.- more information - see
-[Pivotal Container Service (PKS)](https://docs.pivotal.io/runtimes/pks/index.html#components)
+### <a id="pks-components"></a>Internal Components
 
-PKS Clusters are usually deployed to a dedicated subnet which includes
-the worker VMs and one or more Master nodes per cluster.
+The following table describes the internal component placements shown in the diagram above:
 
-Other service tiles, e.g. Harbor Docker Registry, are usually deployed
-as part of the Services subnet.
-
-| **Component**           | **Notes**                                                                                                                                         |
+| **Component**           | **Placement and Access Notes**                                                                                                                                         |
 |---------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ops Manager**         | Deployed on one of the subnets and accessible by FQDN or through an optional jumpbox.   |
+| **Ops Manager**         | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox.   |
 | **BOSH Director**         | Deployed on the infrastructure subnet.   |
-| **Jump Box**         | Optional. Deployed on the infrastructure subnet for accessing PKS management components such as Opsmanager and PKS + Kubectl CLI access.   |
-| **PKS API**         | Deployed on the Services subnet, provides API services for PKS clusters management.   |
+| **Jumpbox**         | Optional. Deployed on the infrastructure subnet for accessing PKS management components such as Ops Manager and the PKS + Kubectl command-line interface.   |
+| **PKS API**         | Deployed as a service broker VM on the PKS Services subnet.  Handles PKS API and service adapter requests, and manages PKS clusters.  For more information, see [Pivotal Container Service (PKS)](https://docs.pivotal.io/runtimes/pks/index.html#components) |
 | **Harbor Tile**         | Optional container images registry, typically deployed to the Services subnet.   |
-| **PKS Cluster**         | Deployed to a dynamically created PKS cluster subnet. It consists of master and worker nodes. Workloads (applications) run on worker nodes.   |
+| **PKS Cluster**         | Deployed to a dynamically-created, dedicated PKS cluster subnet. Each cluster consists of worker nodes that run the workloads (applications) and one or more master nodes.   |
 
-### <a id="pks-network"></a>Network Considerations
+### <a id="pks-network"></a>Networks
 
 #### <a id="pks-subnets"></a>Subnets Requirements
 
@@ -207,24 +200,24 @@ PKS requires two defined networks to host the main elements it’s
 composed of.
 
   - Infrastructure subnet - `/24`  
-    Contains VMs that require access only for Platform Administrators, for example Ops Manager, BOSH Director and a Jumpbox (optional).
+    Contains VMs that require access only for Platform Administrators, for example Ops Manager, BOSH Director and an optional jumpbox.
   - PKS Services subnet - `/24`  
     Hosts PKS API VM and other optional service tiles such as
     Harbor.
   - PKS Clusters subnets - each one a `/24` from a pool of pre-allocated IPs  
     Hosts PKS clusters.
 
-#### <a id="pks-lb"></a>Load Balancing For PKS
+#### <a id="pks-lb"></a>Load Balancing
 
 Load balancers can be used to manage traffic across master nodes of a PKS cluster or for deployed workloads. For more information on how to configure load balancers for PKS, refer to the corresponding documentation for the specific IaaS.
 
-### <a id="pks-ha"></a>HA Considerations
+### <a id="pks-ha"></a>High Availability
 
 PKS has no inherent HA capabilities to design for. Make the best efforts
 to have HA design at the IaaS, storage, power and access layers to
 support PKS.
 
-### <a id="pks-storage"></a>Storage considerations
+### <a id="pks-storage"></a>Storage
 
 PKS requires shared storage across all Availability Zones for the
 deployed workloads to appropriately allocate their required storage.
@@ -234,15 +227,13 @@ deployed workloads to appropriately allocate their required storage.
 TBD: any generic notes on storage and capacity planning? Or leave it to
 IaaS specific sections only?
 
-### <a id="pks-security"></a>Security Considerations
+### <a id="pks-security"></a>Security
 
 See the topics below for how PKS implements security:
 
 * [Enterprise PKS Security](https://docs.pivotal.io/runtimes/pks/security.html)
 
 * [Firewall Ports](https://docs.pivotal.io/runtimes/pks/ports-protocols-nsx-t.html)
-
-#### <a id="pks-roles-users"></a>IAM Roles and Users
 
 ### <a id="pks-domains"></a>Domain Names
 
