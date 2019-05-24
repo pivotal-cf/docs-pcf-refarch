@@ -1,15 +1,12 @@
 ---
 breadcrumb: Pivotal Cloud Foundry Documentation
-title: PCF Base Reference Architecture
+title: PCF Base Reference Architectures
 owner: Customer0
 ---
 
-This topic describes the base reference architectures for installing Pivotal Cloud Foundry (PCF) on any infrastructure, to support the following runtimes:
+This topic describes the base reference architectures for installing Pivotal Cloud Foundry (PCF) on any infrastructure to support the runtime environments Pivotal Application Service (PAS) and Pivotal Container Service (PKS).
 
-- Pivotal Application Service (PAS)
-- Pivotal Container Service (PKS)
-
-For infrastructure-specific reference architectures that build on this common base architecture, see the following topics:
+For infrastructure-specific reference architectures that build on these two common base architectures, see the following topics:
 
 - [Reference Architecture for PCF on AWS](./aws/aws_ref_arch.html)
 - [Reference Architecture for PCF on Azure](./azure/azure_ref_arch.html)
@@ -65,59 +62,49 @@ The following table describes the internal component placements shown in the dia
 
 ### <a id="pas-network"></a>Networks
 
+Pivotal recommends defining your networks and load-balancing their incoming requests as follows.
+
 #### <a id="pas-subnets"></a>Required Subnets
 
-PAS requires a number of statically-defined networks to host the main
-elements it’s composed of.
+PAS requires the following statically-defined networks to host its main component systems.
 
   - Infrastructure subnet - `/24` segment  
-    This subnet contains VMs that require access only for Platform Administrators, for example Ops Manager, the BOSH Director and an optional jumpbox.
+    This subnet contains VMs that require access only for Platform Administrators, for example Ops Manager, the BOSH Director, and an optional jumpbox.
   - PAS subnet - `/24` segment  
     This subnet contains PAS runtime VMs, such as Gorouters, Diego Cells and Cloud Controllers.
   - Services subnet - `/24` segment  
-    The Services network is handy for use with Ops Manager tiles that
-    you might add in addition to PAS. You can think of the Services
-    network as the “everything else not PAS” network. Some of these
-    tiles can call for additional network capacity to grow into on
-    demand, so it is recommended that you consider adding an “On-Demand”
-    network per tile that would need this and pair them up in the tile’s
-    config.
-  - On-demand Services subnet(s) - `/24` segments  
-    Example: Redis tile asks for “Network” and “Services Network”. The
-    first one is for placing the broker and the second one is for
-    deploying worker VMs to support the service. For this, we would
-    deploy a new network “OD-Services1” and tell Redis to use the
-    “Services” network for the broker and the “OD-Services1” network
-    for the workers. The next tile can also use “Services” for the
-    broker and a new “OD-Services2” network for workers, and so on.
+    The Services and On-Demand Services networks support Ops Manager tiles that
+    you might add in addition to PAS.
+    You can think of them as the the “everything not PAS” networks.
+    Some services tiles can call for additional network capacity to grow into on-demand.
+    If you use services with this capability, Pivotal recommends that you add an On-Demand Services network for each on-demand service, as described below.
+  - On-Demand Services subnet(s) - `/24` segments  
+    This is for services that can allocate network capacity on-demand from BOSH for their worker VMs; see the Services subnet above.  
+    Pivotal recommends allocating a dedicated subnet to each on-demand service. For example, you can configure the Redis tile as follows:
+      - **Network**: enter the existing `Services` network, to host the service broker
+      - **Services Network**: deploy a new network `OD-Services1`, to host the Redis worker VMs
+
+    Another on-demand service tile can then also use `Services` for its broker and a new `OD-Services2` network for its workers, and so on.
   - Isolation Segments subnet(s) - `/24` segments  
-    Example: Isolation Segments can be added quickly and easily to an
-    existing PAS installation. This range of address space is designated
-    for use when adding one of more of them. A new /24 network for this
-    range should be deployed for each new Isolation Segment. There’s
-    reserved capacity for \>50 Isolation Segments of \>250 VMs per in
-    this address bank.
+    You can add one or more Isolation Segment tiles to an PAS installation to compartmentalize hosting and routing resources.
+    Each Isolation Segment has its own range of address space that requires a `/24` network.
+    Each `/24` network has the capacity for \>50 Isolation Segments hosting \>250 VMs each.
 
 #### <a id="pas-lb"></a>Load Balancing
 
-In general, a suitable load balancer must be found to send incoming
-HTTP, HTTPS,SSH and SSL traffic to the Gorouters and application
-containers when applicable. All installations approaching Production
-level use with make use of external load balancing from hardware
-appliance vendors or other network-layer solutions.
+Any PAS installation needs a suitable load balancer to send incoming HTTP, HTTPS, SSH and SSL traffic to its Gorouters and application containers.
+All installations approaching Production level use rely on external load balancing from hardware appliance vendors or other network-layer solutions.
 
-The load balancer can also function as Layer 4 or Layer 7 load balancing
-function. SSL can be terminated at the load balancer or used as a
-pass-through to Gorouter.
+The load balancer can also perform Layer 4 or Layer 7 load balancing functions.
+SSL can be terminated at the load balancer or used as a pass-through to the Gorouter.
 
 Common deployments of load balancing in PAS are:
 
-  - HTTP/HTTPS traffic to/from Gorouters
-  - TCP traffic to/from TCP routers
-  - Diego Brains for when application container SSH access is desired
+  - HTTP/HTTPS traffic to and from Gorouters
+  - TCP traffic to and from TCP routers
+  - Traffic from the Diego Brain, when developers access app containers via SSH
 
-Global Load Balancer for multiple PAS foundations can be achieved with
-vendor specific Global Traffic Manager or Global DNS load balancer.
+To balance load across multiple PAS foundations, use an IaaS- or vendor-specific Global Traffic Manager or Global DNS load balancer.
 
 For additional information, see [Global DNS Load Balancers for Multi-Foundation Environments](./global-dns-lb.html).
 
@@ -134,10 +121,10 @@ To back up and restore a foundation externally, use [BOSH Backup and Restore](ht
 
 ### <a id="pas-storage"></a>Storage
 
-PAS requires persistent storage disks to store its state (database) and to allocated as ephemeral disks to its components.
+PAS requires persistent storage disks for its components to store their state. You allocate these in the PAS tile's **Resource Config** pane.
 For details on storage configuration and capacity planning, refer to the corresponding chapter for the specific IaaS.
 
-The platform also requires the configuration of file storage. For more details refer to [Configuring File Storage for PAS](../customizing/pas-file-storage.html).
+The platform also requires you to configure external or internal file storage, also called the blobstore. For details, see [Configuring File Storage for PAS](../customizing/pas-file-storage.html).
 
 ### <a id="pas-security"></a>Security
 
