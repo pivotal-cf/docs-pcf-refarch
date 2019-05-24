@@ -114,23 +114,7 @@ vendor specific Global Traffic Manager or Global DNS load balancer.
 
 For additional information, see [Global DNS Load Balancers for Multi-Foundation Environments](./global-dns-lb.html).
 
-### <a id="pas-compute"></a>Compute Considerations
-
-Considering PAS, a consolidation ratio for containers should follow a
-conservative 4:1 ratio of vCPUs to pCPUs. An even more conservative,
-meaning safe, consideration is 2:1. While this may seem “light” compared
-to standard practice, keep in mind that standard modeling is based on
-one OS and one (or only a few) apps per VM. With PAS, you will quickly
-get to a dozen apps per VM.
-
-A standard Diego cell by default is 4x16 (XL). At a 4:1 ratio you have a
-16 vCPU budget, or about 12 containers after some waste running the OS.
-If you want to get to more containers in a cell, be sure to scale the
-vCPUs accordingly, with the caveat that high core count VMs become
-increasingly hard to schedule on the pCPU without high physical core
-counts in the socket.
-
-#### <a id="pas-ha"></a>HA Considerations
+### <a id="pas-ha"></a>HA Considerations
 
 PAS isn’t considered HA until at least two Availability Zones are
 defined (three are recommended). Using vSphere HA capabilities in
