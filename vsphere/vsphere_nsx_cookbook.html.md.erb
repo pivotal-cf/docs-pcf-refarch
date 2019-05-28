@@ -3,7 +3,7 @@ title: Using Edge Services Gateway on VMware NSX
 owner: Customer0
 ---
 
-<strong><%= modified_date %></strong>
+
 <html class="list-style-none"></html>
 
 This cookbook provides guidance on how to configure the NSX firewall, load balancing, and NAT/SNAT services for Pivotal Cloud Foundry (PCF) on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in PCF. 
@@ -17,11 +17,11 @@ If you are using NSX, the specific configurations described here supersede any g
 
 This document assumes that the reader has the level of skill required to install and configure the following products:
 
--	VMware vSphere 5.5 or greater
--	NSX 6.1.x or greater
--	PCF 1.6 or greater
+-	VMware vSphere v5.5 or greater
+-	NSX v6.1.x or greater
+-	PCF v1.6 or greater
 
-For detailed installation and configuration information about these products, refer to the following documents:
+For detailed installation and configuration information about these products, see the following:
 
 -	[vSphere Documentation](https://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html)
 -	[NSX Installation and Upgrade Guide](https://pubs.vmware.com/NSX-6/topic/com.vmware.ICbase/PDF/nsx_6_install.pdf)
@@ -80,7 +80,7 @@ The following diagram illustrates container-to-container networking. The overlay
 [View a larger version of this diagram](../images/vsphere-pcf-c2c-networking.png).
 
 
-## <a id="prereq"></a>Prep Step: Configure DNS and Network Prerequisites
+## <a id="prereq"></a> Prep Step: Configure DNS and Network Prerequisites
 
 As a prerequisite, create wildcard DNS entries for system and apps domains in PCF. Map these domains to the selected IP address on the uplink (outside) interface of the ESG in your DNS server. 
 
@@ -92,7 +92,8 @@ In addition, assign the following IP addresses and address ranges within your ne
   *	Typically you have one SNAT and three DNATs per ESG.
   *	IP associated for SNAT use: All PCF internal IP addresses appear to be coming from this IP address at the ESG.
   *	IP associated with Ops Manager DNAT: This IP address is the publicly routable interface for Ops Manager UI and SSH access.
-2.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
+
+1.	Assign "Internal" Interface IP Address Space to the Edge Gateway.
   *	192.168.10.0/26 = PCF Deployment Network (Logical Switch or Port Group)
   *	192.168.20.0/22 = Deployment Network for PAS tile
   *	192.168.24.0/22 = CF Tiles Network for all Tiles besides PAS
@@ -102,7 +103,7 @@ In addition, assign the following IP addresses and address ranges within your ne
   You must update the security group and load balancer information for your PCF deployments using NSX-V on vSphere through the Ops Manager API. See [Updating NSX Security Group and Load Balancer Information](../../customizing/update-nsx.html) for more information.
 
 
-## <a id="firewall"></a>Step 1: Configure Firewall
+## <a id="firewall"></a> Step 1: Configure Firewall
 
 This procedure populates the ESG internal firewall with rules to protect a PCF installation. 
 
@@ -129,7 +130,7 @@ To configure the ESG firewall, navigate to **Edge**, **Manage**, **Firewall** an
 |Default Rule|any|any|any|Deny|
 
 
-## <a id="load_balancer"></a>Step 2: Configure Load Balancer
+## <a id="load_balancer"></a> Step 2: Configure Load Balancer
 
 The ESG provides software load balancing functionality, equivalent to the bundled HAProxy that is included with PCF, or hardware appliances such as an F5 or A10 load balancer.
 
@@ -138,11 +139,17 @@ This step is required for the installation to function properly.
 There are seven high level steps to this procedure:
 
 1. Import SSL certificates to the Edge for SSL termination.
+
 1. Enable the load balancer.
+
 1. Create Application Profiles in the Load Balancing tab of NSX.
-1. Create Application Rules in the Load Balancer.
+
+1. Create Application Rules in the load balancer.
+
 1. Create Service Monitors for each pool type.
+
 1. Create Application Pools for the multiple groups needing load balancing.
+
 1. Create a virtual server (also known as a VIP) to pool balanced IP addresses.
 
 What you will need:
@@ -157,30 +164,37 @@ These IP addresses can be pre-selected or reserved prior to deployment (recommen
 
 PCF requires SSL termination at the load balancer.
 
-<p class="note"><strong>Note</strong>: If you intend to pass SSL termination through the load balancer directly to the Gorouters, you can skip the step below and select <strong>Enable SSL Passthru</strong> on the <strong>HTTPS Application Profile</strong>.</p>
+<p class="note"><strong>Note:</strong> If you intend to pass SSL termination through the load balancer directly to the Gorouters, you can skip the step below and select <strong>Enable SSL Passthru</strong> on the <strong>HTTPS Application Profile</strong>.</p>
 
-To enable SSL termination at the load balancer in ESG, access the ESG UI and perform the following steps:
+To enable SSL termination at the load balancer in ESG, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Settings**, and then **Certificates**.
+
 1. Click Green Plus button to Add Certificate.
+
 1. Insert PEM file contents from the Networking configuration screen of PAS.
+
 1. Save the results.
 
 ### <a id="enable_lb"></a> Step 2.2: Enable the Load Balancer
 
-To enable the load balancer, access the ESG UI and perform the following steps:
+To enable the load balancer, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Global Configuration**.
+
 1. Edit load balancer global configuration.
+
 1. Enable load balancer.
+
 1. Enable acceleration.
+
 1. Set logging to desired level (**Info** or greater).
 
 ### <a id="create_app"></a> Step 2.3: Create Application Profiles
 
 The Application Profiles allow advanced `x-forwarded` options as well as linking to the SSL Certificate.  You must create three Profiles: **PCF-HTTP**, **PCF-HTTPS** and **PCF-TCP**.
 
-To create the application profiles, access the ESG UI and perform the following steps:
+To create the application profiles, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Global Application Profiles**.
 
@@ -200,9 +214,10 @@ To create the application profiles, access the ESG UI and perform the following 
 
 In order for the ESG to perform proper `x-forwarded` requests, you need to add a few HAProxy directives to the ESG Application Rules. NSX supports most directives that HAProxy supports.
 
-To create the application rules, access the ESG UI and perform the following steps:
+To create the application rules, access the ESG UI and do the following:
 
-1. Select **Edge**, **Manage**, **Load Balancer**, and then **Application Rules**. 
+1. Select **Edge**, **Manage**, **Load Balancer**, and then **Application Rules**.
+
 1. Copy and paste the table entries below into each field, one per rule.
 
     |Rule Name|Script|
@@ -217,107 +232,119 @@ To create the application rules, access the ESG UI and perform the following ste
 
 NSX ships with several load balancing monitoring types pre-defined. These types are for HTTP, HTTPS and TCP. For this installation, operators build new monitors matching the needs of each pool to ensure correct 1:1 monitoring for each pool type.
 
-To create monitors for pools, access the ESG UI and perform the following steps:
+To create monitors for pools, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Service Monitoring**.
+
 1. Create a new monitor for `http-routers`, and keep the defaults.
+
 1. Set the Type to `HTTP`.
+
 1. Set the Method to `GET`.
+
 1. Set the URL to `/health`.
+
 1. Create a new monitor for `tcp-routers`, and keep the defaults.
+
 1. Set the type to `HTTP`.
+
 1. Set the Method to `GET`.
+
 1. Set the URL to `/health`.
+
 1. Create a new monitor for `diego-brains`, and keep the defaults.
-1. Set the type to `TCP`.
-1. Create a new monitor for `ert-mysql-proxy`, and keep the defaults.
+
 1. Set the type to `TCP`.
 
 These monitors are selected during the next step when pools are created. A pool and a monitor are matched 1:1.
 
 ### <a id="pools"></a> Step 2.6: Create Pools of Multi-Element PCF Targets
 
-The following steps creates the pools of resources that ESG load balances to: the Gorouter, TCP Router, Diego Brain, and PAS MySQL Proxy jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
+The following steps creates the pools of resources that ESG load-balances to: the Gorouter, TCP Router, and Diego Brain jobs deployed by BOSH Director. If the IP addresses specified in the configuration do not exactly match the IP addresses reserved or used for the resources, then the pool will not effectively load balance.
 
 #### <a id="http_router_pools"></a> Step 2.6a: Create Pool for `http-routers`
 
-To create pool for `http-routers`, access the ESG UI and perform the following steps:
+To create pool for `http-routers`, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+
 1. Enter ALL the IP addresses reserved for the Gorouters into this pool. If you reserved more addresses than you have Gorouters, enter the addresses anyway and the load balancer ignores the missing resources as "down".
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
+    <p class="note"><strong>Note:</strong> If your deployment matches the <a href="./vsphere_ref_arch.html">Reference Architecture for PCF on vSphere</a>, these IP addresses are in the 192.168.20.0/22 address space.</p>
+
 1. Set the **Port** to 80 and **Monitor Port** to 8080. The assumption is that internal traffic from the ESG load balancer to the Gorouters is trusted because it is on a VXLAN secured within NSX. If using encrypted TLS traffic to the Gorouter inside the VXLAN, set the **Port** to 443.
+
 1. Set the **Algorithm** to `ROUND-ROBIN`.
+
 1. Set **Monitors** to `http-routers`.
     <%= image_tag('vsphere-edit-pool-bordered.png') %>
 
 #### <a id="tcp_router_pools"></a> Step 2.6b: Create Pool for `tcp-routers`
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+
 1. Enter ALL the IP addresses reserved for TCP Routers into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer ignores the missing resources as "down".
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
+    <p class="note">strong>Note:</strong> If your deployment matches the <a href="./vsphere_ref_arch.html">Reference Architecture for PCF on vSphere</a>, these IP addresses are in the 192.168.20.0/22 address space.</p>
+
 1. Set the **Port** to empty (these numbers vary) and the **Monitor Port** to 80.
+
 1. Set the **Algorithm** to `ROUND-ROBIN`.
+
 1. Set the **Monitors** to `tcp-routers`.
 
 #### <a id="diego_brain_pools"></a> Step 2.6c: Create Pool for `diego-brains`
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
+
 1. Enter ALL the IP addresses reserved for Diego Brains into this pool. If you reserved more addresses than you have VMs, enter the addresses anyway and the load balancer will just ignore the missing resources as "down".
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
+    <p class="note">strong>Note:</strong> If your deployment matches the <a href="./vsphere_ref_arch.html">Reference Architecture for PCF on vSphere</a>, these IP addresses are in the 192.168.20.0/22 address space.</p>
+
 1. Set the **Port** to 2222 and the **Monitor Port** to 2222.
+
 1. Set the Algorithm to `ROUND-ROBIN`.
+
 1. Set the Monitors to `diego-brains`.
-
-#### <a id="ert_mysql_proxy_pools"></a> Step 2.6d: Create Pool for `ert-mysql-proxy`
-
-1. Select **Edge**, **Manage**, **Load Balancer**, and then **Pools**.
-1. Enter the two IP addresses reserved for MySQL-proxy into this pool.
-    <p class="note"><strong>Note</strong>: If your deployment matches the [Reference Architecture for PCF on vSphere](./vsphere_ref_arch.html), these IP addresses are in the 192.168.20.0/22 address space.</p>
-1. Set the **Port** to 3306 and the **Monitor Port** to 1936.
-1. Set the **Algorithm** to `ROUND-ROBIN`.
-1. Set the **Monitors** to `ert-mysql-proxies`.
 
 ### <a id="create_virtual_servers"></a> Step 2.7: Create Virtual Servers
 
 This is the Virtual IP (VIP) that the load balancer uses to represent the pool of Gorouters to the outside world. This also links the Application Policy, Application Rules, and backend pools to provide PCF load balancing services.  This is the interface that the load balancer balances **from**. You create three Virtual Servers.
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Virtual Servers**.
-1. Select an IP address from the available routable address space allocated to the ESG. For information about reserved IP addresses, see <a href="#overview">General Overview</a>.
+
+1. Select an IP address from the available routable address space allocated to the ESG. For information about reserved IP addresses, see [General Overview](#overview).
+
 1. Create a new Virtual Server named `GoRtr-HTTP` and select Application Profile `PCF-HTTP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (HTTP) and set **Port** to match the protocol (80).
-	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a>. This connects this VIP to the pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in [Step 2.6a: Create Pool for `http-routers`](#http_router_pools). This connects this VIP to the pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
 	*	Switch to **Advanced Tab** on this Virtual Server.
 	*	Use the green plus to add/attach three Application Rules to this Virtual Server: 
      * option httplog
      * reqadd X-Forwarded-Proto:\ http
-    <p class="note"><strong>Note</strong>: Be careful to match protocol rules to the protocol `VIP- HTTP` to `HTTP` and `HTTPS` to `HTTPS`.</p>
+    <p class="note"><strong>Note:</strong> Be careful to match protocol rules to the protocol <code>VIP- HTTP</code> to <code>HTTP</code> and <code>HTTPS</code> to <code>HTTPS</code>.</p>
 
 1. Create a new Virtual Server named `GoRtr-HTTPS` and select Application Profile `PCF-HTTPS`.
 	*	Use **Select IP Address** to select the **same IP address** to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (`HTTPS`) and set **Port** to match the protocol (443).
-	*	Set **Default Pool** to the pool name set in the <a href="#http_router_pools">above procedure</a> (`http-routers`). This connects this VIP to that pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in [Step 2.6a: Create Pool for `http-routers`](#http_router_pools) (`http-routers`). This connects this VIP to that pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
 	*	Switch to **Advanced Tab** on this Virtual Server.
 	* Use the green plus to add/attach three Application Rules to this Virtual Server: 
      * option httplog
      * reqadd X-Forwarded-Proto:\ https
-    <p class="note"><strong>Note</strong>: Be careful to match protocol rules to the protocol `VIP- HTTP` to `HTTP` and `HTTPS` to `HTTPS`.</p>
-
+    <p class="note"><strong>Note:</strong> Be careful to match protocol rules to the protocol <code>VIP- HTTP</code> to <code>HTTP</code> and <code>HTTPS</code> to <code>HTTPS</code>.</p>
 
 1. Create a new Virtual Server named `TCPRtrs` and select Application Profile `PCF-TCP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (TCP) and set **Port** to match the protocol (5000).
-	*	Set **Default Pool** to the pool name set in the <a href="#tcp_router_pools">above procedure</a> (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in [Step 2.6b: Create Pool for `tcp-routers`](#tcp_router_pools) (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
     <%= image_tag('vsphere-tcprouter-vip.png') %>
 
 1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `PCF-HTTPS`.
 	*	Use **Select IP Address** to select the same IP address to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP address to use as the VIP.
 	*	Set **Protocol** to TCP and set **Port** to 2222.
-	*	Set **Default Pool** to the pool name set in the <a href="#diego_brain_pools">above procedure</a> (`diego-brains`). This connects this VIP to that pool of resources being balanced to.
+	*	Set **Default Pool** to the pool name set in [Step 2.6c: Create Pool for `diego-brains`](#diego_brain_pools) (`diego-brains`). This connects this VIP to that pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
     <%= image_tag('vsphere-vip-3.png') %>
 
@@ -326,7 +353,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 
 The ESG obfuscates the PCF installation through network translation. The PCF installation is placed entirely on non-routable RFC-1918 network address space, so you must translate routable IP addresses to non-routable IP addresses to make connections.
 
-<p class="note"><strong>Note</strong>: Correct NAT/SNAT configuration is required for the PCF installation to function as expected.</p>
+<p class="note"><strong>Note:</strong> Correct NAT/SNAT configuration is required for the PCF installation to function as expected.</p>
 
 |Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
 |---|---|---|---|---|---|---|---|
@@ -335,11 +362,11 @@ The ESG obfuscates the PCF installation through network translation. The PCF ins
 |SNAT|infra|192.168.10.OpsMgr|any|IP\_of\_OpsMgr|any|tcp|OpsMgr Mask for internal use|
 |DNAT|infra|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for internal use|
 
-<p class="note"><strong>Note</strong>: The NAT/SNAT on the <code>infra</code> network in this table is an example of an optional <strong>Hairpin NAT</strong> rule to allow VMs within the <strong>Infrastructure</strong> network to access the Ops Manager API. This is because the Ops Manager hostname and the API HTTPS endpoint are registered to the Ops Manager external IP address. A pair of Hairpin NAT rules are necessary on <strong>each</strong> internal network interface that requires API access to Ops Manager. You should create these rules only if the network must access the Ops Manager API.</p>
+<p class="note"><strong>Note:</strong> The NAT/SNAT on the <code>infra</code> network in this table is an example of an optional <strong>Hairpin NAT</strong> rule to allow VMs within the <strong>Infrastructure</strong> network to access the Ops Manager API. This is because the Ops Manager hostname and the API HTTPS endpoint are registered to the Ops Manager external IP address. A pair of Hairpin NAT rules are necessary on <strong>each</strong> internal network interface that requires API access to Ops Manager. You should create these rules only if the network must access the Ops Manager API.</p>
 
 NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the ESG. At that point, the ESG simply performs routing between the address segments.
 
-<p class="note"><strong>Note</strong>: NSX generates a number of DNAT rules based on load balancing configs. You can safely ignore these.</p>
+<p class="note"><strong>Note:</strong> NSX generates a number of DNAT rules based on load balancing configs. You can safely ignore these.</p>
 
 
 ## <a id="notes"></a> Additional Notes
