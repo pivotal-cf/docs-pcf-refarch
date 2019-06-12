@@ -3,8 +3,6 @@ title: AWS Reference Architecture
 owner: Customer0
 ---
 
-
-
 This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Amazon Web Services (AWS). This architecture is valid for most production-grade PCF deployments using three availability zones (AZs).
 
 See [PCF on AWS Requirements](../../customizing/aws.html) for general requirements for running PCF and specific requirements for running PCF on AWS.
@@ -99,7 +97,7 @@ The following table lists the components that are part of a base reference archi
 </tr>
 <tr>
 	<td><strong>EC2 Instance Quota</strong></td>
-	<td>The default EC2 instance quota on a new AWS subscription only has around 20 EC2 instances, which is not enough to host a multi-AZ deployment. The recommended quota for EC2 instances is 100. AWS requires the instances quota tickets to include Primary Instance Types, which should be t2.micro.</td>
+	<td>The default EC2 instance quota on a new AWS subscription only has around 20 EC2 instances, which is not enough to host a multi-AZ deployment. The recommended quota for EC2 instances is 100. AWS requires the instances quota tickets to include Primary Instance Types, which should be t3.micro.</td>
 </tr>
 </table>
 
