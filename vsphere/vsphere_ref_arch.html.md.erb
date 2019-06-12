@@ -28,8 +28,8 @@ Instead, it gives examples of how to apply those instructions to real-world prod
       <td>6.5</td>
     </tr>
     <tr>
-      <td>VMware NSX-T</td>
-      <td>2.2</td>
+      <td>VMware NSX-T Data Center</td>
+      <td>2.2 or later</td>
     </tr>
     <tr>
       <td>Pivotal Cloud Foundry Operations Manager</td>
@@ -48,7 +48,7 @@ Instead, it gives examples of how to apply those instructions to real-world prod
 
 ## <a id="base-arch"></a> Base vSphere Reference Architecture
 
-This reference architecture includes VMware vSphere and NSX-T, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
+This reference architecture includes VMware vSphere and NSX-T Data Center, a software-defined network virtualization platform that runs on VMware ESXi virtual hosts.
 
 The reference architecture supports capacity growth at the vSphere and PCF levels as well as installation security through the NSX-T firewall.
 It allocates a minimum of three servers to each cluster and spreads PCF components across three clusters for high availability (HA).
@@ -82,7 +82,7 @@ Ensure your certificates can accomplish this.
 
 #### <a id="c2c-cni"></a> Container-to-Container Networking and CNI Considerations
 
-Changing your container-to-container networking strategy after deployment is possible. However, with NSX-T, you need both the VMware NSX-T Container Plug-In for PCF tile and NSX-T infrastructure.
+Changing your container-to-container networking strategy after deployment is possible. However, with NSX-T, you need both the VMware NSX-T Container Plug-In for PCF tile and NSX-T Data Center.
 For information about deploying PAS on vSphere with NSX-T internal networking using the VMware NSX-T Container Plug-In for PCF tile, see [Deploying PAS with NSX-T Networking](../../customizing/vsphere-nsx-t.html).
 
 Migrating from a non-SDN environment to an SDN-enabled solution is possible but best considered as a greenfield deployment. Inserting an SDN layer under an active PCF installation is disruptive.
