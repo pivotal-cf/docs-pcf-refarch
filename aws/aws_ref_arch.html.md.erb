@@ -7,7 +7,8 @@ This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on 
 
 See [PCF on AWS Requirements](../../customizing/aws.html) for general requirements for running PCF and specific requirements for running PCF on AWS.
 
-## <a id="refarchs"></a>PCF Reference Architectures ##
+
+## <a id='overview'></a> Overview
 
 A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as AWS, that meets the following requirements:
 
@@ -16,9 +17,12 @@ A PCF reference architecture describes a proven approach for deploying Pivotal C
 * Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
 * Can host at least 100 app instances, or far more
 
-Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
+These documents detail PCF reference architectures for different IaaSes to help you determine the best configuration for your PCF deployment.
 
-##<a id='base'></a> Base AWS Reference Architecture ##
+For more information, see [Platform Architecture and Planning](./index.html).
+
+
+## <a id='base'></a> Base AWS Reference Architecture
 
 The following diagram provides an overview of a reference architecture deployment of PCF on AWS using three AZs.
 
@@ -26,7 +30,7 @@ The following diagram provides an overview of a reference architecture deploymen
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/aws-overview-arch.png).
 
-<p class="note"><strong>Note</strong>: Each AWS subnet must reside entirely within one AZ. As a result, a multi-AZ deployment topology requires a subnet for each AZ.</p>
+<p class="note"><strong>Note:</strong> Each AWS subnet must reside entirely within one AZ. As a result, a multi-AZ deployment topology requires a subnet for each AZ.</p>
 
 ### <a id="base_components"></a> Base Reference Architecture Components
 
@@ -277,7 +281,7 @@ The following table lists the network objects in this reference architecture.
 </tr>
 </table>
 
-### <a id="vpn_peering"></a> Integrate PCF with Customer Data Center through VPN
+### <a id="vpn_peering"></a> Integrate PCF with Customer Data Center Through VPN
 
 At times, applications on PCF need to access on-premise data. The connection between an AWS VPC and an on-premise datacenter is made through [VPN peering](http://docs.aws.amazon.com/AmazonVPC/latest/NetworkAdminGuide/Introduction.html). When employing non-VPN peering, there are several points to consider:
 
@@ -287,8 +291,9 @@ At times, applications on PCF need to access on-premise data. The connection bet
   * Only make the load balancer, NAT devices, and Ops Manager routable.
   * PCF components can route egress through a NAT instance. As a result, operators do not need to assign routable IP addresses to PCF components.
 
-2. Inbound traffic from the datacenter should come through an <a href="http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-internal-load-balancers.html">internal load balancer</a>.
-3. Outbound traffic to the datacenter should go through AWS NAT instances.
+1. Inbound traffic from the datacenter should come through an <a href="http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-internal-load-balancers.html">internal load balancer</a>.
+
+1. Outbound traffic to the datacenter should go through AWS NAT instances.
 
 <%= image_tag('aws-vpn.png') %>
 
