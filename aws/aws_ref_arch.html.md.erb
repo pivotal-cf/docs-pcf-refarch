@@ -3,298 +3,122 @@ title: AWS Reference Architecture
 owner: Customer0
 ---
 
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Amazon Web Services (AWS). This architecture is valid for most production-grade PCF deployments using three availability zones (AZs).
+
+
+This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Amazon Web Services (AWS). 
 
 See [PCF on AWS Requirements](../../customizing/aws.html) for general requirements for running PCF and specific requirements for running PCF on AWS.
 
+![PCF on AWS Reference Architecture Diagram](PAS_AWS.png)
 
-## <a id='overview'></a> Overview
+##<a id="lb-types"></a>  LB types
 
-A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as AWS, that meets the following requirements:
-
-* Secure
-* Publicly-accessible
-* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-* Can host at least 100 app instances, or far more
-
-These documents detail PCF reference architectures for different IaaSes to help you determine the best configuration for your PCF deployment.
-
-For more information, see [Platform Architecture and Planning](index.html).
+AWS offers Application Load Balancer (ALB) and Network Load Balancers (NLB). We recommend using Network Load Balancers for the added simplicity and security of leaving all encrypted traffic in place until the go routers. If you need to use Amazon Certificate Management or require more complex Layer 7 routing rules, the Network Load Balancer can be fronted or replaced by an ALB. 
 
 
-## <a id='base'></a> Base AWS Reference Architecture
+##<a id="dns"></a> DNS
 
-The following diagram provides an overview of a reference architecture deployment of PCF on AWS using three AZs.
+AWS provides route 53 for DNS resolution which can be used to host your PCF domains. 
 
-<%= image_tag('aws-overview-arch.png') %>
 
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/aws-overview-arch.png).
+##<a id="subnets"></a> Networks / Subnets / IP spacing planning
 
-<p class="note"><strong>Note:</strong> Each AWS subnet must reside entirely within one AZ. As a result, a multi-AZ deployment topology requires a subnet for each AZ.</p>
+In AWS each AZ requires its own subnet of which the first 5 IPs are reserved. In addition to the standard networks in the reference architecture, if you are planning on using the AWS Service Broker you may want to create an additional set of networks to place RDS instances and other AWS managed instances. 
 
-### <a id="base_components"></a> Base Reference Architecture Components
+When building a VPC that is only public facing no special consideration is necessary for the use of IPs. However, when you want either the front-end of PCF to be accessible from the corporate network or the services running in PCF to be able to access corporate resources, you will need to either provide routable IPs to your VPC or utilize NAT.
 
-The following table lists the components that are part of a base reference architecture deployment on AWS with three AZs.
+In most cases organizations do not have the IP space necessary to allow PCF to be deployed in a consistent manner, we recommend utilizing a nat instance in the 100.64 address space to deploy a NAT instance and router so that the PCF deployment can use few IP addresses.
 
-<table class="nice">  
-<th><strong>Component</strong></th>
-<th><strong>Reference Architecture Notes</strong></th>
-<tr>
- <td><strong>Domains & DNS</strong></td>  
- <td>CF Domain Zones and routes in use by the reference architecture include:<br><br>
-   <ul>
-     <li>domains for *.apps and *.sys (required)</li>
-     <li>a route for Ops Manager (required)</li>
-     <li>a route for ssh access to app containers (optional)</li>
-   </ul>
-   Using Route 53 to manage domains is optional.
- </td>
-</tr>
-<tr>
- <td><strong>Ops Manager</strong></td>  
- <td>Deployed on one of the three public subnets and accessible by FQDN or through an optional jumpbox.</td>
-</tr>
-<tr>
- <td><strong>BOSH Director</strong></td>  
- <td>Deployed on the infrastructure subnet.</td>
-</tr>
-<tr>
- <td><strong>Elastic Load Balancers - HTTP, HTTPS, and SSL</strong></td>  
- <td>Required. Load balancer that handles incoming HTTP, HTTPS, and SSL traffic and forwards them to the Gorouters. Deployed on all three public subnets.</td>
-</tr>
-<tr>
- <td><strong>Elastic Load Balancers - SSH</strong></td>  
- <td>Optional. Load balancer that provides SSH access to app containers. Deployed on all three public subnets, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>Gorouters</strong></td>  
- <td>Accessed through the HTTP, HTTPS, and SSL Elastic Load Balancers. Deployed on all three Pivotal Application Service (PAS) subnets, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>Diego Brains</strong></td>  
- <td>Required. However, the SSH container access functionality is optional and enabled through the SSH Elastic Load Balancers. Deployed on all three PAS subnets, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>TCP Routers</strong></td>  
- <td>Optional feature for TCP routing. Deployed on all three PAS subnets, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>CF Database</strong></td>  
- <td>Reference architecture uses AWS RDS. Deployed on all three RDS subnets, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>Storage Buckets</strong></td>  
- <td>Reference architecture uses 4 S3 buckets: buildpacks, droplets, packages, and resources.</td>
-</tr>
-<tr>
- <td><strong>Service Tiles</strong></td>
- <td>Deployed on all three service subnets, one per AZ.</td>
-</tr>
-<tr>
-	<td><strong>Service User & Roles</strong></td>
-	<td>One IAM role and one IAM user are recommended: the IAM role for Terraform, and the IAM user for Ops Manager and BOSH. Consult the following list:<br><br>
-		<ul>
-		<li>Admin Role: Terraform uses this IAM role to provision required AWS resources as well as an IAM user.</li>
-		<li>IAM User: This IAM user with IAM security credentials (access key ID and secret access key) is automatically provisioned with restrict access only to resources needed by PCF.</li>
-		</ul>
-	</td>
-</tr>
-<tr>
-	<td><strong>EC2 Instance Quota</strong></td>
-	<td>The default EC2 instance quota on a new AWS subscription only has around 20 EC2 instances, which is not enough to host a multi-AZ deployment. The recommended quota for EC2 instances is 100. AWS requires the instances quota tickets to include Primary Instance Types, which should be <code>t3.micro</code>.</td>
-</tr>
-</table>
 
-### <a id="network_components"></a> Network Objects
 
-The following table lists the network objects in this reference architecture.
+*   If you want internet ingress,  create the load balancers with Elastic IPs
+*   If you want internet egress,  create the NAT Gateway towards the internet
+*   If you want Corporate Ingress, create Load Balancers on Corporate Subnet
+*   If you want Corporate Egress (access corporate resources), create the nat instance in the corporate subnet or if business requirements dictate make the entire VPC corporate routable
 
-<table class="nice">
-  <th><strong>Network Object</strong></th>
-  <th><strong>Notes</strong></th>
-  <th><strong>Estimated Number</strong></th>
-  <tr>
-  <td><strong>External Public IPs</strong></td>
-  <td>One per deployment, assigned to Ops Manager.</td>
-  <td>1</td>
-  </tr>
-  <tr>
-  <td><strong>Virtual Private Network (VPC)</strong></td>
-  <td>One per deployment. A PCF deployment exists within a single VPC and a single AWS region, but should distribute PCF jobs and instances across 3 AWS AZs to ensure a high degree of availability.</td>
-  <td>1</td>
-  </tr>
-  <tr>
-  <td><strong>Subnets</strong></td>
-  <td>The reference architecture requires the following subnets:
-   <ul>
-     <li>1 x (/24) infrastructure (BOSH Director) subnet</li>
-     <li>3 x (/24) public subnets (Ops Manager, Elastic Load Balancers, NAT instances), one per AZ</li>
-     <li>3 x (/20) PAS subnets (Gorouters, Diego Cells, Cloud Controllers, etc.), one per AZ</li>
-     <li>3 x (/20) services subnets (RabbitMQ, MySQL, Spring Cloud Services, etc.), one per AZ</li>
-     <li>3 x (/24) RDS subnets (Cloud Controller DB, UAA DB, etc.), one per AZ.</li>
-   </ul>
-   </td>
-  <td>13</td>
-  </tr>
-  <tr>
-  <td><strong>Route Tables</strong></td>
-  <td>This reference architecture requires 4 route tables: one for the public subnet, and one each for all 3 private subnets across 3 AZs. Consult the following list:<br><br>
-  	<ul>
-  	<li><strong>PublicSubnetRouteTable</strong>: This routing table enables the ingress/egress routes from/to Internet through the Internet gateway for Ops Manager and the NAT Gateway.</li>
-  	<li><strong>PrivateSubnetRouteTable</strong>: This routing table enables the egress routing to the Internet through the NAT Gateway for the BOSH Director and PAS.</li>
-  	</ul>
-    For more information, see the Terraform <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_tables.tf">script</a> that creates the route tables and the <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/route_table_associations.tf">script</a> that performs the route table association.
-  	<p class="note"><strong>Note</strong>: If an EC2 instance sits on a subnet with an Internet gateway attached as well as a public IP address, it is accessible from the Internet through the public IP address; for example, Ops Manager. PAS needs Internet access due to the access needs of using an S3 bucket as a blobstore.</p>
-  </td>
-  <td>4</td>
-  </tr>
-  <tr>
-  <td><strong>Security Groups</strong></td>
-  <td>The reference architecture requires 5 Security Groups. For more information, see the Terraform Security Group rules <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/security_group.tf">script</a>. The following table describes the Security Group ingress rules:
-  	<table>
-  	<tr>
-  		<th>Security Group</th>
-  		<th>Port</th>
-  		<th>From CIDR</th>
-  		<th>Protocol</th>
-  		<th>Description</th>
-  	</tr>
-  	<tr>
-  		<td>OpsMgrSG</td>
-  		<td>22</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>Ops Manager SSH access</td>
-  	</tr>
-  	<tr>
-  		<td>OpsMgrSG</td>
-  		<td>443</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>Ops Manager HTTP access</td>
-  	</tr>
-  	<tr>
-  		<td>VmsSG</td>
-  		<td>ALL</td>
-  		<td>VPC_CIDR</td>
-  		<td>ALL</td>
-  		<td>Open up connections among BOSH-deployed VMs</td>
-  	</tr>
-  	<tr>
-  		<td>MysqlSG</td>
-  		<td>3306</td>
-  		<td>VPC_CIDR</td>
-  		<td>TCP</td>
-  		<td>Enable network access to RDS</td>
-  	</tr>
-  	<tr>
-  		<td>ElbSG</td>
-  		<td>80</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>HTTP to PAS</td>
-  	</tr>
-  	<tr>
-  		<td>ElbSG</td>
-  		<td>443</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>HTTPS to PAS</td>
-  	</tr>
-  	<tr>
-  		<td>ElbSG</td>
-  		<td>4443</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>WebSocket connection to Loggregator endpoint</td>
-  	</tr>
-  	<tr>
-  		<td>SshElbSG</td>
-  		<td>2222</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>SSH connection to containers</td>
-  	</tr>
 
-  	<p class="note"><strong>Note</strong>: The extra port of 4443 with the Elastic Load Balancer is due to the limitation that the Elastic Load Balancer does not support WebSocket connections on HTTP/HTTPS.</p>
-  </table>
-  </td>
-  <td>5</td>
-  </tr>
-  <tr>
-  <td><strong>Load Balancers</strong></td>
-  <td>PCF on AWS requires the Elastic Load Balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two Elastic Load Balancers are recommended: one to forward the traffic to the Gorouters, <code>PcfElb</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>PcfSshElb</code>. For more information, see the Terraform load balancers <a href="https://github.com/pivotal-cf/pcf-pipelines/blob/master/install-pcf/aws/terraform/load_balancers.tf">script</a>.
-  	<br><br>
-  	The following table describes the required listeners for each load balancer:
-  	<table>
-  		<tr>
-  			<th>ELB</th>
-  			<th>Instance/Port</th>
-  			<th>LB Port</th>
-  			<th>Protocol</th>
-  			<th>Description</th>
-  		</tr>
-  		<tr>
-  			<td>PcfElb</td>
-  			<td>gorouter/80</td>
-  			<td>80</td>
-  			<td>HTTP</td>
-  			<td>Forward traffic to Gorouters
-  		</tr>
-  		<tr>
-  			<td>PcfElb</td>
-  			<td>gorouter/80</td>
-  			<td>443</td>
-  			<td>HTTPS</td>
-  			<td>SSL termination and forward traffic to Gorouters</td>
-  		</tr>
-  		<tr>
-  			<td>PcfElb</td>
-  			<td>gorouter/80</td>
-  			<td>4443</td>
-  			<td>SSL</td>
-  			<td>SSL termination and forward traffic to Gorouters</td>
-  		</tr>
-  		<tr>
-  			<td>PcfSshElb</td>
-  			<td>diego-brain/2222</td>
-  			<td>2222</td>
-  			<td>TCP</td>
-  			<td>Forward traffic to Diego Brain for container SSH connections</td>
-  		</tr>
-  	</table>
-  Each ELB binds with a health check to check the health of the back-end instances:
-  <ul>
-  	<li><code>PcfElb</code> checks the health on Gorouter port 80 with TCP</li>
-  	<li><code>PcfSshElb</code> checks the health on Diego Brain port 2222 with TCP</li>
-  </ul>
-</td>
-<td>
-2
-</td>
-</tr>
-<tr>
-<td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox.
-</td>
-<td>1</td>
-</tr>
-</table>
+##<a id="c2c"></a>  C2C considerations
 
-### <a id="vpn_peering"></a> Integrate PCF with Customer Data Center Through VPN
+None
 
-At times, applications on PCF need to access on-premise data. The connection between an AWS VPC and an on-premise datacenter is made through [VPN peering](http://docs.aws.amazon.com/AmazonVPC/latest/NetworkAdminGuide/Introduction.html). When employing non-VPN peering, there are several points to consider:
 
-1. Assign routable IP addresses with the following in mind:
-  * It may not be realistic to request multiple routable /22 address spaces, due to IP exhaustion.
-  * Using different VPC address spaces can cause snowflakes deployments and present difficulties in automation.
-  * Only make the load balancer, NAT devices, and Ops Manager routable.
-  * PCF components can route egress through a NAT instance. As a result, operators do not need to assign routable IP addresses to PCF components.
+##<a id="ha"></a>  HA (how AZs are implemented)
 
-1. Inbound traffic from the datacenter should come through an <a href="http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-internal-load-balancers.html">internal load balancer</a>.
+None.
 
-1. Outbound traffic to the datacenter should go through AWS NAT instances.
 
-<%= image_tag('aws-vpn.png') %>
+##<a id="storage-considerations"></a> Storage Considerations
 
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/aws-vpn.png).
+
+##<a id="rds"></a> RDS/DBaaS
+
+A single RDS Instance should be created for BOSH and PAS. After the instance is created, databases will need to be created for BOSH and PAS.
+
+
+##<a id="blobstore"></a>  Blobstore storage accounts
+
+Need buckets  created for:
+
+
+
+*   BOSH Blobstore
+*   Build Packs
+*   Droplets
+*   Packages
+*   Resources
+
+These bucket should have an associated role for read/write access.
+
+
+##<a id="security"></a> Security Considerations
+
+None
+
+
+##<a id="identity-management"></a> Identity management
+
+We recommend using Instance Profiles whenever possible   
+
+
+##<a id="pas-components"></a> PAS components considerations  
+
+None
+
+
+##<a id="alternatives"></a> Alternative/variations of deployment and network layouts    
+
+The following options are available for choosing your network topology:
+
+
+Internet Egress
+
+
+How do you want to allow the foundation to access the internet?
+
+
+
+*   Corporate (or no internet)
+*   NAT Gateway
+
+Internet Ingress (Load Balancers associated with Elastic IPs)
+
+
+
+*   Yes
+*   No
+
+Peering:
+
+
+
+*   Isolated (normally internet-only facing)
+*   Peered with corporate or other VPCs via Transit Gateway
+*   Peered directly with other VPCs and corporate connections
+
+Corporate Peering:
+
+
+
+*   SNAT for Corporate Resources (3 corporate IPs necessary)
+*   Routable IP Addresses for VPC (/20 or larger CIDR block necessary)
+
