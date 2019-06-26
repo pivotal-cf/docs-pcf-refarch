@@ -5,303 +5,149 @@ owner: Customer0
 
 This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Azure.
 
-Azure does not provide resources in a way that translates directly to PCF availability zones. Instead, Azure provides high availability through fault domains and [availability sets](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability).
 
-All reference architectures described in this topic are validated for production-grade PCF deployments using fault domains and availability sets that include multiple job instances.
+## <a id="network-considerations"></a>  Introduction
 
-See [Azure on PCF Requirements](../../customizing/azure.html) for general requirements for running PCF and specific requirements for running PCF on Azure.
+Azure Virtual Data Center (VDC) defines a new approach for extending on-premises data centers through a hub and spoke model. When installing PCF, you can use this model to place resources in resource groups. For example, a PCF installation contains the following:
 
+* **Hub**: A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies. 
+* **Spokes**: Resource groups such as the following:
+  * A Network resource group for all network resource
+  * PAS/PKS resource groups for all PAS/PKS resources
 
-## <a id="refarchs"></a> PCF Reference Architectures
+See the following architecture diagram, which illustrates this model: 
 
-A PCF reference architecture describes a proven approach for deploying PCF on a specific IaaS, such as Azure, that meets the following requirements:
+![alt_text](../images/PAS_Azure_with_AZs.png) 
 
-* Secure
-* Publicly-accessible
-* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-* Can host at least 100 app instances, or far more
+[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure_with_AZs.png).
 
-Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
-
-For more information, see [Platform Architecture and Planning](index.html).
+For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
 
-## <a id="arch_diagram"></a> Base Azure Reference Architecture
+## <a id="lb-types"></a>  Load Balancer Type
 
-The following diagram provides an overview of a reference architecture deployment of PCF on Azure.
+Use Standard Azure Load Balancers (ALBs). 
 
-<%= image_tag('azure-overview-arch.png') %>
+Consider the following:
 
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-overview-arch.png).
-
-### <a id="base_components"></a> Base Reference Architecture Components
-
-The following table lists the components that are part of a base reference architecture deployment on Azure using a single resource group.
-
-<table class="nice">
-<th><strong>Component</strong></th>
-<th><strong>Reference Architecture Notes</strong></th>
-<tr>
- <td><strong>Domains and DNS</strong></td>
- <td>CF Domain Zones and routes in use by the reference architecture include:
-   <ul>
-     <li>domains for *.apps and *.system (required),</li>
-     <li>a route for Ops Manager (required),</li>
-     <li>a route for Doppler (required),</li>
-     <li>a route for Loggregator (required),</li>
-     <li>a route for SSH access to app containers (optional),</li>
-     <li>and a route for TCP routing to apps (optional). </li>
-   </ul>
- </td>
-</tr>
-<tr>
- <td><strong>Ops Manager</strong></td>
- <td>Deployed on the management subnet and accessible by FQDN or through an optional jumpbox.</td>
-</tr>
-<tr>
- <td><strong>BOSH</strong></td>
- <td>Deployed on the management subnet.</td>
-</tr>
-<tr>
- <td><strong>Azure Load Balancer - API and Apps</strong></td>
- <td>Required. Load balancer that handles incoming API and apps requests and forwards them to the Gorouters.</td>
-</tr>
-<tr>
- <td><strong>Azure Load Balancer - ssh-proxy</strong></td>
- <td>Optional. Load balancer that provides SSH access to app containers.</td>
-</tr>
-<tr>
- <td><strong>Azure Load Balancer - tcp-router</strong></td>
- <td>Optional. Load balancer that handles TCP routing requests for apps.</td>
-</tr>
-<tr>
- <td><strong>Azure Load Balancer - MySQL</strong></td>
- <td>Required to provide high availability for MySQL backend to Pivotal Application Service (PAS).</td>
-</tr>
-<tr>
- <td><strong>Gorouters</strong></td>
- <td>Accessed through the API and Apps load balancer. Deployed on the PAS subnet, one job per Azure availability set.</td>
-</tr>
-<tr>
- <td><strong>Diego Brains</strong></td>
- <td>Required. However, the SSH container access functionality is optional and enabled through the SSH Proxy load balancer. Deployed on the PAS subnet, one job per Azure availability set.</td>
-</tr>
-<tr>
- <td><strong>TCP Routers</strong></td>
- <td>Optional feature for TCP routing. Deployed on the PAS subnet, one job per availability zone.</td>
-</tr>
-<tr>
- <td><strong>MySQL</strong></td>
- <td>Reference architecture uses internal MySQL provided with PCF. Deployed on the PAS subnet, one job per Azure availability set.</td>
-</tr>
-<tr>
- <td><strong>PAS</strong></td>
- <td>Required. Deployed on the PAS subnet, one job per Azure availability set.</td>
-</tr>
-<tr>
- <td><strong>Storage Accounts</strong></td>
- <td>PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three PAS storage accounts. Each account comes with a set amount of disk. Reference architecture recommends using 5 storage accounts because Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally relates to a BOSH JOB/VM limit of approximately 20 VMs each.</td>
-</tr>
-<tr>
- <td><strong>Service Tiles</strong></td>
- <td>Deployed on the Services subnet. Each service tile is deployed to an availability set.</td>
-</tr>
-</table>
+* The ALBs must be configured for PAS Gorouters. 
+* The PAS system and applications domains should resolve to this ALB and have either a private or a public IP address assigned to it. 
+* When applicable, TCP Routers and SSH Proxies also require load balancers.
 
 
-## <a id="common_network"></a> Alternative Network Layouts for Azure
+## <a id="dns"></a> DNS
 
-This section describes the possible network layouts for PCF deployments as covered by the reference architecture of PCF on Azure.
+You can use Azure DNS zones for PCF domains. Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. Pivotal recommends that you use a sub-zone for your PCF deployment. For example, if your company’s domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`.
 
-At a high level, there are currently two possible ways of deploying PCF as described by the reference architecture:
+Azure DNS does not support recursion. To properly configure Azure DNS, do the following:
 
-1. Single resource group, or
-1. Multiple resource groups.
-
-The first scenario is outlined in [Installing PCF on Azure](../../customizing/azure.html). It models a single PCF deployment in a single Azure Resource Group.
-
-If you require multiple resource groups, refer to the [Multiple Resource Group deployment](#multiple_resource_groups) section of this topic.
-
-### <a id="base-network-layout"></a> Network Layout
-
-This diagram illustrates the network topology of the base reference architecture for PCF on Azure. In this deployment, you expose only a minimal number of public IP addresses and deploy only one resource group.
-
-<%= image_tag('azure-net-topology-base.png') %>
-
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-net-topology-base.png).
-
-### <a id="network_components"></a> Network Objects
-
-The following table lists the network objects in PCF on Azure reference architecture.
-
-<table class="nice">
-  <th><strong>Network Object</strong></th>
-  <th><strong>Notes</strong></th>
-  <th><strong>Estimated Number</strong></th>
-  <tr>
-  <td><strong>External Public IP addresses</strong></td>
-  <td>Use
-   <ol>
-     <li>global IP address for apps and system access</li>
-     <li>Ops Manager or optional jumpbox.</li>
-   </ol>
-   Optionally, you can use a public IP address for the ssh-proxy and tcp-router load balancers.
-  </td>
-  <td>1-4</td>
-  </tr>
-  <tr>
-  <td><strong>Virtual Network</strong></td>
-  <td>One per deployment. Azure virtual network objects allow multiple subnets with multiple CIDRs, so a typical deployment of PCF will likely only ever require one Azure Virtual Network object.</td>
-  <td>1</td>
-  </tr>
-  <tr>
-  <td><strong>Subnets</strong></td>
-  <td>Separate subnets for
-   <ol>
-     <li>management (Ops Manager, BOSH Director, Jumpbox),</li>
-     <li>PAS,</li>
-     <li>and services.</li>
-   </ol>
-   Using separate subnets allows you to configure different firewall rules due to your needs.
-   </td>
-  <td>4</td>
-  </tr>
-  <tr>
-  <td><strong>Routes</strong></td>
-  <td>Routes are typically created by Azure dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy PCF without public IP addresses.</td>
-  <td>3+</td>
-  </tr>
-  <tr>
-  <td><strong>Firewall Rules</strong></td>
-  <td>Azure firewall rules are collected into a Network Security Group (NSG) and bound to a Virtual Network object and can be created to use IP ranges, subnets, or instance tags to match for source and destination fields in a rule. One NSG can be used for all firewall rules.</td>
-  <td>12</td>
-  </tr>
-  <tr>
-  <td><strong>Load Balancers</strong></td>
-  <td>Used to handle requests to Gorouters and infrastructure components. Azure uses 1 or more load balancers. The API and Apps load balancer is required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. In addition, you can use a MySQL load balancer to provide high availability to MySQL. This is also optional.</td>
-  <td>1-4</td>
-  </tr>
-  <tr>
-  <td><strong>Jumpbox</strong></td>
-  <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox.
-</td>
-  <td>1</td>
-  </tr>
-</table>
-
-### <a id="multiple_resource_groups"></a> Multiple Resource Group Deployment
-
-This diagram illustrates the case where you want to use additional resource groups in your PCF deployment on Azure.
-
-Shared network resources may already exist in an Azure subscription. In this type of deployment, using multiple resource groups allows you to reuse existing resources instead of provisioning new ones.
-
-To use multiple resource groups, you need to provide the BOSH Service Principal with access to the existing network resources.
-
-<%= image_tag('azure-multi-resgroup.png') %>
-
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-multi-resgroup.png).
-
-### <a id="multi-resgroup-notes"></a> Multiple Resource Groups Deployment Notes
-
-To deploy PCF on Azure with multiple resource groups, you can define custom roles to grant resource group access to your BOSH Service Principal. For example, you might develop the following:
-
-* Dedicated `Network` Resource Group, limits BOSH Service Principal so that it does not have admin access to network objects.
-
-* Custom Role for BOSH Service Principal, applied to `Network` Resource Group, limits the BOSH Service Principal to minimum read-only access.
-  <pre class="terminal">
-  az role definition create --role-definition
-  { \
-  "Name": "PCF Network Read Only", \
-  "IsCustom": true, \
-  "Description": "MVP PCF Read Network Resgroup", \
-  "Actions": [ \
-  "Microsoft.Network/virtualNetworks/read", \
-  "Microsoft.Network/virtualNetworks/subnets/read", \
-  "Microsoft.Network/virtualNetworks/subnets/join/action", \
-  "Microsoft.Network/networkSecurityGroups/read", \
-  "Microsoft.Network/networkSecurityGroups/join/action", \
-  "Microsoft.Network/loadBalancers/read", \
-  "Microsoft.Network/publicIPAddresses/read", \
-  "Microsoft.Network/publicIPAddresses/join/action" \
-  ], \
-  "NotActions": [], \
-  "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"] \
-  }
-  </pre>
-  The actions prefixed with `Microsoft.Network/publicIPAddresses` are only required if using IP addresses.
-
-* Custom Role for BOSH Service Principal, applied to Subscription, allowing the Operator to deploy PCF components
-  <pre class="terminal">
-  az role definition create --role-definition
-  { \
-   "Name": "PCF Deploy Min Perms", \
-   "IsCustom": true, \
-   "Description": "MVP PCF Terraform Perms", \
-   "Actions": [ \
-     "Microsoft.Compute/register/action" \
-   ], \
-   "NotActions": [], \
-   "AssignableScopes": ["/subscriptions/[YOUR\_SUBSCRIPTION\_ID]"] \
-  }
-  </pre>
-
-* Custom roles can be assigned to service principals with `az role assignment create --role [ROLE] --assignee [SERVICE_PRINCIPAL_ID]`.
-
-### <a id="multiple_resource_groups_multiple_load_balancer"></a> Multiple Resource Group and Multiple Load Balancer Deployment
-
-This diagram illustrates the case where you want to deploy multiple load balancers with your multiple resource group deployment.
-
-The key design points of this deployment are the following:
-
-* Two Azure load balancer (ALBs) to the Gorouter exist. The first ALB is for API access, which utilizes a private IP address. The system domain should resolve to this ALB. The second ALB is for application access, which can either use a public or private IP address. The apps domain should resolve to this ALB.
-
-* Azure does not allow the Gorouters to be members of more than one ALB member pool for the same ports, for example `80` and `443`. This restriction requires an additional reverse proxy to front the Gorouters to allow hem to expose traffic on these ports for the system domain.
-
-<%= image_tag('azure-multi-resgroup-multi-lb.png') %>
-
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/azure-multi-resgroup-multi-lb.png).
-
-### <a id="log_analytics_integration"></a> Log Analytics Integration
-
-[Azure Log Analytics](https://docs.microsoft.com/en-us/azure/log-analytics/log-analytics-overview) is a service that helps you collect and analyze data generated by resources in your cloud and on-premises environments. The [Microsoft Azure Log Analytics Nozzle for PCF](http://docs.pivotal.io/partners/azure-log-analytics-nozzle) receives logs and metrics from the Loggregator Firehose, filters and resolves the events, and then sends them to Log Analytics, where they appear on unified dashboards and can be correlated with and alerted on other Azure resources.
-
-
-## <a id='dns-delegation'></a> DNS Delegation
-
-Azure DNS supports DNS delegation, allowing for sub-level domains to be hosted within Azure. This functionality is fully supported within PCF.
-
-Pivotal recommends that use a sub-zone for your PCF deployment. For example, if your company's domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`.
-
-As Azure DNS does not support recursion, in order to properly configure Azure DNS, create an `NS` record with your registrar which points to the four name servers supplied by your Azure DNS Zone configuration. Once your `NS` records have been created, you can then create the required wildcard `A` records for the PCF application and system domains, as well as any other records desired for your PCF deployments.
+1. Create a `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration. 
+1. Create the required wildcard `A` records for the PCF app and system domains, as well as any other records desired for your PCF deployments.
 
 You do not need to make any configuration changes in PCF to support Azure DNS.
 
-### <a id='azure-blob-storage'></a> Azure Blob Storage
 
-Due to limitations in PCF, it is not possible to support a high-availability deployment of the backing NFS store needed for droplets, buildpacks, and other resources. Azure Blob Storage provides fully-redundant holt, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availability deployments of PCF.
+## <a id="networks-subnets-ip-space"></a> Networks, Subnets, and IP Spacing Planning
 
-To enable Azure Blob Storage, do the following:
+Networks defined for PAS is outlined in base ref arch section [https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-network](https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-network).
 
-1. Create a Storage Account with the level of redundancy you require. The storage account does not need to be in the same Gesource Group as PCF.
+For PKS, refer to [https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network](https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network).
 
-1. Create Containers for the buildpacks, droplets, packages, and resources required by PCF.
 
-1. Open Ops Manager.
+## <a id="network-considerations"></a> Network Considerations
 
-1. Select **Pivotal Application Services**.
+* You must enable Virtual Network peering between hub and spoke resource groups. See [Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview). 
+* You can use Express routes or VPN Gateway to enable connectivity from an on-premises data center to Azure Hub resource groups. See [ExpressRoute Documentation](https://docs.microsoft.com/en-us/azure/expressroute/).  
+* You can place network resources, such as DNS and NTP servers, either on-premises or on Azure cloud. 
+* A separate subscription for central network resource group (Hub) and each workspace where each workload runs (spoke) is needed.
+*   If you want Internet ingress, create the load balancers with elastic IPs
+*   Use ExpressRoutes for dedicated connection from on-premises datacenter to VDC
+*   Use Azure VPN Gateways for passing encrypted data into VDC via internet.  Use this option as backup, if Express Routes goes down.
+*   Setup a central firewall in the Hub resource group to enhance and to do data infiltration - data coming in and also data exfiltration using network virtual appliance.
 
-1. Click the **Settings Tab**.
 
-1. Select **File Storage**.
 
-1. Click **External Azure Account**.
+## <a id="c2c-considerations"></a>  Container-To-Container Considerations
 
-1. Enter the Storage Account details.
+None
 
-1. In the Ops Manager main page, apply the changes when you are ready to reconfigure.
 
-<p class='note'><strong>Note:</strong> There is no direct path to migrate previous objects to Azure Blob Storage. Contact Pivotal Support if you need assistance with this migration.</p>
+## <a id="ha-considerations"></a>  High Availability Considerations
 
-### Load Balancer Migrations
+Pivotal Cloud Foundry (PCF) on Azure supports both Availability Zones and [Availability Sets](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) for availability mode as of v2.5.3. PCF deployments should use Availability Zones (AZ) over Availability Sets (AS) where possible. 
 
-The Azure Load Balancer has two SKUs: Standard and Basic. The Standard SKU Load Balancer is a new load balancer for all TCP and UDP applications with an expanded and more granular feature set over the Basic Load Balancer. Azure's Standard SKU Load Balancer lets you scale your applications and create high availability in environments ranging from small scale deployments to large and complex multi-zone architectures. While the Basic SKU Load Balancer works within the scope of an availability set, a Standard Load Balancer covers an entire virtual network. Pivotal recommends using the Standard SKU Load Balancer instead of the Basic SKU Load Balancer. If you currently use the Basic SKU Load Balancer and wish to migrate to the the Standard SKU, please see the [Migrate Basic SKU Load Balancer to Standard SKU Load Balancer](https://github.com/cloudfoundry-incubator/bosh-azure-cpi-release/tree/master/docs/advanced/migrate-basic-lb-to-standard-lb) documentation on GitHub.
+
+### <a id="region-internal-ha"></a> Region-Internal High Availability
+
+Availability Sets were the first Azure primitive to support High Availability (HA) scenarios within a region. They are a logical concept that ensures multiple VMs in the same set are spread evenly across 3 Fault Domains and either 5 or 20 Update Domains. VMs on independent Fault Domains are guaranteed not to share power supply or networking and will therefore maintain availability of a subset of VMs in the set when a hardware issue occurs. VMs in independant Update Domains, when updates are rolled out to a Cluster, will not be updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
+
+Availability Sets are implemented at the Cluster level in Azure, Clusters being a grouping of hardware for Azure Compute, this means Availability Sets cannot span VMs backed by different Clusters; for this reason, as Bosh places VMs for Jobs within the same Availability Sets, VMs for a particular Job are pinned to the Cluster where the first VM spins up. The Cluster Pinning problem leads to issues migrating Jobs from one Family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`, as well as issues scaling up if there is no capacity on the given cluster.
+
+
+
+![alt_text](../images/PAS_Azure.png) 
+
+[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
+
+Availability Zones are a newer Azure primitive supporting HA scenarios within a region. AZs are physically separate data centers in the same region, each comprised of separate power, cooling and network. VMs and other Zonal services deployed to independent Zones provide greater physical separation than Fault Domains and avoid the Cluster Pinning problem described above. Zonal services are also effectively in separate Update Domains as updates will not be rolled out to another Zone before the other is complete. Finally, Availability Zones are visible and configurable to the customer. This means two Zonal services placed in the same logical Zone are placed in the same physical Zone, allowing services of different types to take advantage of the HA qualities a Zone provides.
+
+
+### <a id="migration"></a> Migration to Availability Zones
+
+Availability Zones should be used as the HA primitive for PCF in all Azure Regions where they are available. Availability Zones solve the Cluster Pinning issue and allow customers greater control when defining the HA configuration when using Azure multiple services. 
+
+New Foundations deployed to AZ enabled Regions should use AZs over Availability Sets. New Foundations without hard requirements should consider selecting AZ enabled Regions; some hard requirements include existing ExpressRoute connections from non-AZ enabled Regions to customer data centers and application specific latency requirements. 
+
+Existing Foundations in AZ enabled Regions should plan to migrate to a new PCF v2.5.3+ Foundation; these existing Foundations, especially those using older Families of VMs like `DS_v2`, risk running out of capacity as they scale. For existing Foundations in non-AZ enabled Regions the customer requirements should be evaluated to determine the cost/benefit of migration to an AZ enabled Region.
+
+
+## <a id="storage-considerations"></a> Storage Considerations
+
+All Azure Storage Accounts should be Premium Skew and should be configured for Zone Redundant Storage (ZRS) in Availability Zones enabled Regions. In Non-AZ enabled Regions Locally Redundant Storage (LRS) is sufficient. 
+
+PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three PAS storage accounts. Each account comes with a set amount of disk. Reference architecture recommends using 5 storage accounts because Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally relates to a BOSH JOB/VM limit of approximately 20 VMs each.
+
+
+## <a id="sql-server"></a> SQL Server
+
+Internal MySQL database is sufficient for production use.
+
+
+## <a id="blobstore-storage-accts"></a>  Blobstore storage accounts
+
+Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availability deployments of PCF.
+
+PAS needs buckets  created for:
+
+
+
+*   BOSH Blobstore
+*   Build Packs
+*   Droplets
+*   Packages
+*   Resources
+
+These bucket should have an associated role for read/write access.
+
+
+## <a id="security-considerations"></a> Security Considerations
+
+None
+
+
+## <a id="identity-management"></a> Identity management
+
+Azure uses Managed Service Identities to handle service authorization against Azure. We recommend using unique Service Identities for deploying Operations Manager, Bosh Director, Microsoft Azure Service Broker, along with any other Tiles that require independent credentials. Each of these Service Identities should be scoped to the least privilege necessary to operate.
+
+
+## <a id="pas-components-considerations"></a> PAS components considerations  
+
+None
+
+
+## <a id="alter-deployment-network"></a> Alternative/variations of deployment and network layouts    
+
+
+### <a id="pas-single-azure-resource"></a> PAS on Single Azure Resource Group
+
+When shared network resources do not exist in an Azure subscription, a single resource group can be used to deploy PCF and define network constructs.
