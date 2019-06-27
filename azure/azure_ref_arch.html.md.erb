@@ -6,12 +6,15 @@ owner: Customer0
 This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Azure.
 
 
-## <a id="network-considerations"></a>  Introduction
+## <a id="overview"></a> Overview
 
-Azure Virtual Data Center (VDC) defines a new approach for extending on-premises data centers through a hub and spoke model. When installing PCF, you can use this model to place resources in resource groups. For example, a PCF installation contains the following:
+Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers.
 
-* **Hub**: A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies. 
-* **Spokes**: Resource groups such as the following:
+When installing PCF, you can use this model to place resources in resource groups. For example, a PCF installation contains the following:
+
+* **Hub**: 
+	* A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies. 
+* **Spokes**: 
   * A Network resource group for all network resource
   * PAS/PKS resource groups for all PAS/PKS resources
 
@@ -21,40 +24,13 @@ See the following architecture diagram, which illustrates this model:
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure_with_AZs.png).
 
-For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
-
-
-## <a id="lb-types"></a>  Load Balancer Type
-
-Use Standard Azure Load Balancers (ALBs). 
-
-Consider the following:
-
-* The ALBs must be configured for PAS Gorouters. 
-* The PAS system and applications domains should resolve to this ALB and have either a private or a public IP address assigned to it. 
-* When applicable, TCP Routers and SSH Proxies also require load balancers.
-
-
-## <a id="dns"></a> DNS
-
-You can use Azure DNS zones for PCF domains. Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. Pivotal recommends that you use a sub-zone for your PCF deployment. For example, if your company’s domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`.
-
-Azure DNS does not support recursion. To properly configure Azure DNS, do the following:
-
-1. Create a `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration. 
-1. Create the required wildcard `A` records for the PCF app and system domains, as well as any other records desired for your PCF deployments.
+ For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
 You do not need to make any configuration changes in PCF to support Azure DNS.
 
+## <a id="networking"></a> Networking
 
-## <a id="networks-subnets-ip-space"></a> Networks, Subnets, and IP Spacing Planning
-
-Networks defined for PAS is outlined in base ref arch section [https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-network](https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-network).
-
-For PKS, refer to [https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network](https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network).
-
-
-## <a id="network-considerations"></a> Network Considerations
+### <a id="network-considerations"></a> General Considerations
 
 * You must enable Virtual Network peering between hub and spoke resource groups. See [Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview). 
 * You can use Express routes or VPN Gateway to enable connectivity from an on-premises data center to Azure Hub resource groups. See [ExpressRoute Documentation](https://docs.microsoft.com/en-us/azure/expressroute/).  
@@ -65,17 +41,38 @@ For PKS, refer to [https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.h
 *   Use Azure VPN Gateways for passing encrypted data into VDC via internet.  Use this option as backup, if Express Routes goes down.
 *   Setup a central firewall in the Hub resource group to enhance and to do data infiltration - data coming in and also data exfiltration using network virtual appliance.
 
+### <a id="lb-types"></a>  Load Balancing
 
+Use Standard Azure Load Balancers (ALBs). 
 
-## <a id="c2c-considerations"></a>  Container-To-Container Considerations
+Consider the following:
 
-None
+* The ALBs must be configured for PAS Gorouters. 
+* The PAS system and applications domains should resolve to this ALB and have either a private or a public IP address assigned to it. 
+* When applicable, TCP Routers and SSH Proxies also require load balancers.
 
+### <a id="networks"></a> Networks
 
-## <a id="ha-considerations"></a>  High Availability Considerations
+PCF requires the networks defined in the base reference architectures for PAS and PKS. See the _Networks_ sections in [Platform Architecture and Planning](./index.html). 
 
-Pivotal Cloud Foundry (PCF) on Azure supports both Availability Zones and [Availability Sets](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) for availability mode as of v2.5.3. PCF deployments should use Availability Zones (AZ) over Availability Sets (AS) where possible. 
+### <a id="dns"></a> DNS
 
+You can use Azure DNS zones for PCF domains. Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. Pivotal recommends that you use a sub-zone for your PCF deployment. For example, if your company’s domain is `example.com`, your PCF zone in Azure DNS would be `pcf.example.com`.
+
+Azure DNS does not support recursion. To properly configure Azure DNS, do the following:
+
+1. Create a `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration. 
+1. Create the required wildcard `A` records for the PCF app and system domains, as well as any other records desired for your PCF deployments.
+
+### <a id="pas-single-azure-resource"></a> PAS on a Single Azure Resource Group
+
+If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy PCF and define network constructs.
+
+## <a id="ha-considerations"></a>  High Availability
+
+As of PCF v2.5.3, PCF on Azure supports both Availability Zones and Availability Sets. Pivotal recommends that PCF deployments use Availability Zones over Availability Sets when possible. 
+
+For more information about availability modes in Azure, see [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) in the Microsoft Azure documentation. 
 
 ### <a id="region-internal-ha"></a> Region-Internal High Availability
 
@@ -112,7 +109,7 @@ PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three 
 
 ## <a id="sql-server"></a> SQL Server
 
-Internal MySQL database is sufficient for production use.
+The Internal MySQL database provided by PAS is sufficient for production use.
 
 
 ## <a id="blobstore-storage-accts"></a>  Blobstore storage accounts
@@ -131,25 +128,6 @@ PAS needs buckets  created for:
 
 These bucket should have an associated role for read/write access.
 
-
-## <a id="security-considerations"></a> Security Considerations
-
-None
-
-
 ## <a id="identity-management"></a> Identity management
 
 Azure uses Managed Service Identities to handle service authorization against Azure. We recommend using unique Service Identities for deploying Operations Manager, Bosh Director, Microsoft Azure Service Broker, along with any other Tiles that require independent credentials. Each of these Service Identities should be scoped to the least privilege necessary to operate.
-
-
-## <a id="pas-components-considerations"></a> PAS components considerations  
-
-None
-
-
-## <a id="alter-deployment-network"></a> Alternative/variations of deployment and network layouts    
-
-
-### <a id="pas-single-azure-resource"></a> PAS on Single Azure Resource Group
-
-When shared network resources do not exist in an Azure subscription, a single resource group can be used to deploy PCF and define network constructs.
