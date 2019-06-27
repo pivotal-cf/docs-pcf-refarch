@@ -105,6 +105,8 @@ Existing Foundations in AZ enabled Regions should plan to migrate to a new PCF v
 
 All Azure Storage Accounts should be Premium Skew and should be configured for Zone Redundant Storage (ZRS) in Availability Zones enabled Regions. In Non-AZ enabled Regions Locally Redundant Storage (LRS) is sufficient. 
 
+All VMs should be using Managed Disks instead manually managed VHDs on Storage Accounts. Managed Disks are an Azure feature that handles the correct distribution of VHDs over Storage Accounts to maintain high IOPS as well as HA for the VMs.
+
 PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three PAS storage accounts. Each account comes with a set amount of disk. Reference architecture recommends using 5 storage accounts because Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally relates to a BOSH JOB/VM limit of approximately 20 VMs each.
 
 
