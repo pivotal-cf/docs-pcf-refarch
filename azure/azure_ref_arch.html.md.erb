@@ -26,8 +26,6 @@ See the following architecture diagram, which illustrates this model:
 
  For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
-You do not need to make any configuration changes in PCF to support Azure DNS.
-
 ## <a id="networking"></a> Networking
 
 ### <a id="network-considerations"></a> General Considerations
@@ -63,6 +61,8 @@ Azure DNS does not support recursion. To properly configure Azure DNS, do the fo
 
 1. Create a `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration. 
 1. Create the required wildcard `A` records for the PCF app and system domains, as well as any other records desired for your PCF deployments.
+
+You do not need to make any configuration changes in PCF to support Azure DNS.
 
 ### <a id="pas-single-azure-resource"></a> PAS on a Single Azure Resource Group
 
