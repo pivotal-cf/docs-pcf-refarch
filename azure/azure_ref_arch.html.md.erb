@@ -8,9 +8,7 @@ This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on 
 
 ## <a id="overview"></a> Overview
 
-Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers.
-
-When installing PCF, you can use this model to place resources in resource groups. For example, a PCF installation contains the following:
+Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers. When installing PCF, you can use this model to place resources in resource groups. For example, a PCF installation contains the following:
 
 * **Hub**: 
 	* A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies. 
@@ -70,32 +68,59 @@ If shared network resources do not exist in an Azure subscription, you can use a
 
 ## <a id="ha-considerations"></a>  High Availability
 
-As of PCF v2.5.3, PCF on Azure supports both Availability Zones and Availability Sets. Pivotal recommends that PCF deployments use Availability Zones over Availability Sets when possible. 
+<p class="note"><strong>Note</strong>: As of PCF v2.5.3, PCF on Azure supports both availability zones (AZ) and Availability Sets.</p>
+
+Pivotal recommends that you use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the cluster pinning issue described in the sections below and allow greater control when defining the high availability configuration when using Azure multiple services. 
+
+See the following for additional guidance depending on your use case:
+
+* **New foundations**: 
+	* If you do not have hard requirements, select AZ enabled regions. Examples of hard requirements include existing ExpressRoute connections from non-AZ enabled regions to customer data centers and app-specific latency requirements. 
+* **Existing foundations in AZ enabled regions**: 
+	* Migrate to a new PCF v2.5.3+ foundation so that you can use AZs. These existing foundations, especially those using older families of VMs such as  `DS_v2`, risk running out of capacity as they scale. 
+* **Existing foundations not in AZ enabled regions**:
+	* Evaluate your requirements to determine the cost/benefit of migrating to an AZ enabled region.
+
+
 
 For more information about availability modes in Azure, see [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) in the Microsoft Azure documentation. 
 
-### <a id="region-internal-ha"></a> Region-Internal High Availability
+### <a id="AZ"></a> Availability Zones
 
-Availability Sets were the first Azure primitive to support High Availability (HA) scenarios within a region. They are a logical concept that ensures multiple VMs in the same set are spread evenly across 3 Fault Domains and either 5 or 20 Update Domains. VMs on independent Fault Domains are guaranteed not to share power supply or networking and will therefore maintain availability of a subset of VMs in the set when a hardware issue occurs. VMs in independant Update Domains, when updates are rolled out to a Cluster, will not be updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
+AZs are an Azure primitive that supports high availability within a region. AZs are physically separate data centers in the same region, each comprised of separate power, cooling, and network. 
 
-Availability Sets are implemented at the Cluster level in Azure, Clusters being a grouping of hardware for Azure Compute, this means Availability Sets cannot span VMs backed by different Clusters; for this reason, as Bosh places VMs for Jobs within the same Availability Sets, VMs for a particular Job are pinned to the Cluster where the first VM spins up. The Cluster Pinning problem leads to issues migrating Jobs from one Family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`, as well as issues scaling up if there is no capacity on the given cluster.
-
-
+The following diagram illustrates PAS deployed on Azure using AZs:
 
 ![alt_text](../images/PAS_Azure.png) 
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
 
-Availability Zones are a newer Azure primitive supporting HA scenarios within a region. AZs are physically separate data centers in the same region, each comprised of separate power, cooling and network. VMs and other Zonal services deployed to independent Zones provide greater physical separation than Fault Domains and avoid the Cluster Pinning problem described above. Zonal services are also effectively in separate Update Domains as updates will not be rolled out to another Zone before the other is complete. Finally, Availability Zones are visible and configurable to the customer. This means two Zonal services placed in the same logical Zone are placed in the same physical Zone, allowing services of different types to take advantage of the HA qualities a Zone provides.
+AZs have the following advantages:
+
+* VMs and other zonal services deployed to independent zones provide greater physical separation than fault domains and avoid the cluster pinning problem of availability sets. 
+* Zonal services are effectively in separate update domains as updates are rolled out to one zone at a time. 
+* AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same physical zone. This allows services of different types to take advantage of the highly available qualities a zone provides.
 
 
-### <a id="migration"></a> Migration to Availability Zones
+### <a id="AS"></a> Availability Sets
 
-Availability Zones should be used as the HA primitive for PCF in all Azure Regions where they are available. Availability Zones solve the Cluster Pinning issue and allow customers greater control when defining the HA configuration when using Azure multiple services. 
 
-New Foundations deployed to AZ enabled Regions should use AZs over Availability Sets. New Foundations without hard requirements should consider selecting AZ enabled Regions; some hard requirements include existing ExpressRoute connections from non-AZ enabled Regions to customer data centers and application specific latency requirements. 
+Availability Sets were the first Azure primitive to support high availability   within a region. They have the following properties:
 
-Existing Foundations in AZ enabled Regions should plan to migrate to a new PCF v2.5.3+ Foundation; these existing Foundations, especially those using older Families of VMs like `DS_v2`, risk running out of capacity as they scale. For existing Foundations in non-AZ enabled Regions the customer requirements should be evaluated to determine the cost/benefit of migration to an AZ enabled Region.
+* They are a logical concept that ensures multiple VMs in the same set are spread evenly across 3 Fault Domains and either 5 or 20 Update Domains. 
+* VMs on independent Fault Domains are guaranteed not to share power supply or networking and will therefore maintain availability of a subset of VMs in the set when a hardware issue occurs. 
+* VMs in independent Update Domains, when updates are rolled out to a Cluster, will not be updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
+
+#### <a id="cluster-pinning"></a> Cluster Pinning Issues
+
+Azure implements availability sets in a single cluster, which is a group of hardware for Azure Compute.
+
+In PCF on Azure, VMs for a particular job are pinned to the cluster where the first VM spins up. This is because BOSH places VMs for jobs within the same Availability Sets. 
+
+Cluster pinning causes the following:
+
+* Issues migrating jobs from one family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`
+* Issues scaling up if there is no capacity on the given cluster
 
 
 ## <a id="storage-considerations"></a> Storage
@@ -103,9 +128,9 @@ Existing Foundations in AZ enabled Regions should plan to migrate to a new PCF v
 For storage, Pivotal recommends the following:
 
 * For the storage account type, use the premium performance tier. 
-* Configure storage accounts for Zone Redundant Storage (ZRS) in Availability Zone-enabled Regions. 
-	<p class="note">In Non-Availability-zone-enabled Regions, Locally Redundant Storage (LRS) is sufficient.</p> 
-* Configure VMs to use managed disks instead manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high availability for the VMs.
+* Configure storage accounts for Zone Redundant Storage (ZRS) in AZ-enabled Regions. 
+	<p class="note"><strong>Note</strong>: In Non-Availability-zone-enabled Regions, Locally Redundant Storage (LRS) is sufficient.</p> 
+* Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high availability for the VMs.
 * Use 5 storage accounts. PCF on Azure requires 5 storage accounts: 1 BOSH, 1 Ops Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally corresponds to a BOSH JOB/VM limit of approximately 20 VMs each.
 
 
@@ -133,4 +158,4 @@ These buckets require an associated role for read/write access.
 
 Pivotal recommends using unique managed identities to deploy Ops Manager, BOSH Director, Microsoft Azure Service Broker, and any other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege necessary to operate.
 
-Azure uses managed identities to handle service authorization against Azure. See [What is managed identities for Azure resources?](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview). 
+Azure uses managed identities to handle service authorization. See [What is managed identities for Azure resources?](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview). 
