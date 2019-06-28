@@ -98,13 +98,15 @@ New Foundations deployed to AZ enabled Regions should use AZs over Availability 
 Existing Foundations in AZ enabled Regions should plan to migrate to a new PCF v2.5.3+ Foundation; these existing Foundations, especially those using older Families of VMs like `DS_v2`, risk running out of capacity as they scale. For existing Foundations in non-AZ enabled Regions the customer requirements should be evaluated to determine the cost/benefit of migration to an AZ enabled Region.
 
 
-## <a id="storage-considerations"></a> Storage Considerations
+## <a id="storage-considerations"></a> Storage
 
-All Azure Storage Accounts should be Premium Skew and should be configured for Zone Redundant Storage (ZRS) in Availability Zones enabled Regions. In Non-AZ enabled Regions Locally Redundant Storage (LRS) is sufficient. 
+For storage, Pivotal recommends the following:
 
-All VMs should be using Managed Disks instead manually managed VHDs on Storage Accounts. Managed Disks are an Azure feature that handles the correct distribution of VHDs over Storage Accounts to maintain high IOPS as well as HA for the VMs.
-
-PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three PAS storage accounts. Each account comes with a set amount of disk. Reference architecture recommends using 5 storage accounts because Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally relates to a BOSH JOB/VM limit of approximately 20 VMs each.
+* For the storage account type, use the premium performance tier. 
+* Configure storage accounts for Zone Redundant Storage (ZRS) in Availability Zone-enabled Regions. 
+	<p class="note">In Non-Availability-zone-enabled Regions, Locally Redundant Storage (LRS) is sufficient.</p> 
+* Configure VMs to use managed disks instead manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high availability for the VMs.
+* Use 5 storage accounts. PCF on Azure requires 5 storage accounts: 1 BOSH, 1 Ops Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure Storage Accounts have an IOPs limit of approximately 20k per account, which generally corresponds to a BOSH JOB/VM limit of approximately 20 VMs each.
 
 
 ## <a id="sql-server"></a> SQL Server
@@ -112,22 +114,23 @@ PCF on Azure requires 5 standard storage accounts: BOSH, Ops Manager, and three 
 The Internal MySQL database provided by PAS is sufficient for production use.
 
 
-## <a id="blobstore-storage-accts"></a>  Blobstore storage accounts
+## <a id="blobstore-storage-accts"></a>  Blobstore Storage Account
 
-Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. It is recommended to use Azure Blob Storage as the external File Storage to provide unlimited scaling and redundancy for high-availability deployments of PCF.
+Pivotal recommends using Azure Blob Storage as the external file storage option for PCF. This provides unlimited scaling and redundancy for high-availability deployments of PCF. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
 
-PAS needs buckets  created for:
+Ops Manager requires a bucket for the BOSH blobstore. 
 
+PAS requires the following buckets:
 
-
-*   BOSH Blobstore
-*   Build Packs
+*   Buildpacks
 *   Droplets
 *   Packages
 *   Resources
 
-These bucket should have an associated role for read/write access.
+These buckets require an associated role for read/write access.
 
-## <a id="identity-management"></a> Identity management
+## <a id="identity-management"></a> Identity Management
 
-Azure uses Managed Service Identities to handle service authorization against Azure. We recommend using unique Service Identities for deploying Operations Manager, Bosh Director, Microsoft Azure Service Broker, along with any other Tiles that require independent credentials. Each of these Service Identities should be scoped to the least privilege necessary to operate.
+Pivotal recommends using unique managed identities to deploy Ops Manager, BOSH Director, Microsoft Azure Service Broker, and any other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege necessary to operate.
+
+Azure uses managed identities to handle service authorization against Azure. See [What is managed identities for Azure resources?](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview). 
