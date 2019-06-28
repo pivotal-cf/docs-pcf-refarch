@@ -80,7 +80,9 @@ If shared network resources do not exist in an Azure subscription, you can use a
 
 <p class="note"><strong>Note</strong>: As of PCF v2.5.3, PCF on Azure supports both availability zones (AZ) and Availability Sets.</p>
 
-Pivotal recommends that you use AZs instead of Availability Sets in all Azure regions where they are available. See the following table for additional guidance depending on your use case:
+Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the cluster pinning issue associated with Availability Sets and allow greater control when defining high availability configuration when using multiple Azure services.
+
+See the following table for additional guidance depending on your use case:
 
 <table>
 <tr>
@@ -89,7 +91,7 @@ Pivotal recommends that you use AZs instead of Availability Sets in all Azure re
 </tr>
 <tr>
 <td>New foundation</td>
-<td>If you do not have hard requirements, select AZ enabled regions. Examples of hard requirements include existing ExpressRoute connections from non-AZ enabled regions to customer data centers and app-specific latency requirements.</td>
+<td>If you do not have strict requirements, select AZ enabled regions. Examples of strict requirements include existing ExpressRoute connections from non-AZ enabled regions to customer data centers and app-specific latency requirements.</td>
 </tr>
 <tr>
 <td>Existing foundation in AZ enabled region</td>
@@ -104,41 +106,40 @@ Pivotal recommends that you use AZs instead of Availability Sets in all Azure re
 </table>
 
 
-For more information about availability modes in Azure, see [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) in the Microsoft Azure documentation. 
+For more information about availability modes in Azure, see the [Availability Zones](#AZ) and [Availability Sets](#AS) sections below, as well as [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) in the Microsoft Azure documentation. 
 
 ### <a id="AZ"></a> Availability Zones
 
-AZs are an Azure primitive that supports high availability within a region. AZs are physically separate data centers in the same region, each comprised of separate power, cooling, and network. 
-
-AZs solve the cluster pinning issue described in the sections below and allow greater control when defining the high availability configuration when using Azure multiple services. 
+AZs are an Azure primitive that supports high availability within a region. They are physically separate data centers in the same region, each with of separate power, cooling, and network. 
 
 The following diagram illustrates PAS deployed on Azure using AZs:
 
 ![alt_text](../images/PAS_Azure.png) 
 
-[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
+[View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png). 
 
 AZs have the following advantages:
 
-* VMs and other zonal services deployed to independent zones provide greater physical separation than fault domains and avoid the cluster pinning problem of availability sets. 
-* Zonal services are effectively in separate update domains as updates are rolled out to one zone at a time. 
+* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the cluster pinning issue associated with availability sets. 
+* Zonal services are effectively in separate Update Domains as updates are rolled out to one zone at a time. 
 * AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same physical zone. This allows services of different types to take advantage of the highly available qualities a zone provides.
 
 
 ### <a id="AS"></a> Availability Sets
 
+Availability Sets were the first Azure primitive to support high availability   within a region. 
 
-Availability Sets were the first Azure primitive to support high availability   within a region. They have the following properties:
+<p class="note warning"><strong>Warning</strong>: Availability Sets are implemented at the cluster-level, which can cause issues when deploying PCF on Azure. See <a href="#cluster-pinning">Cluster Pinning Issues</a>.</p>
+
+They have the following properties:
 
 * They are a logical concept that ensures multiple VMs in the same set are spread evenly across 3 Fault Domains and either 5 or 20 Update Domains. 
-* VMs on independent Fault Domains are guaranteed not to share power supply or networking and will therefore maintain availability of a subset of VMs in the set when a hardware issue occurs. 
-* VMs in independent Update Domains, when updates are rolled out to a Cluster, will not be updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
+* When a hardware issue occurs, VMs on independent Fault Domains are guaranteed not to share power supply or networking and therefore maintain availability of a subset of VMs in the set. 
+* When updates are rolled out to a Cluster, VMs in independent Update Domains are not updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
 
 #### <a id="cluster-pinning"></a> Cluster Pinning Issues
 
-Azure implements availability sets in a single cluster, which is a group of hardware for Azure Compute.
-
-In PCF on Azure, VMs for a particular job are pinned to the cluster where the first VM spins up. This is because BOSH places VMs for jobs within the same Availability Sets. 
+In PCF on Azure, VMs for a particular job are pinned to the cluster where the VM first spins up. This is because BOSH places VMs for jobs within the same Availability Sets. 
 
 Cluster pinning causes the following:
 
@@ -164,7 +165,7 @@ The Internal MySQL database provided by PAS is sufficient for production use.
 
 ## <a id="blobstore-storage-accts"></a>  Blobstore Storage Account
 
-Use Azure Blob Storage as the external file storage option for PCF. This provides redundancy for high-availability deployments of PCF and also unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
+Use Azure Blob Storage as the external file storage option for PCF. This provides redundancy for high-availability deployments of PCF and unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
 
 Ops Manager requires a bucket for the BOSH blobstore. 
 
