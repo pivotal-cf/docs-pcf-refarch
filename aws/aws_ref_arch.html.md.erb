@@ -3,122 +3,129 @@ title: AWS Reference Architecture
 owner: Customer0
 ---
 
-
-
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Amazon Web Services (AWS). 
+This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on Amazon Web Services (AWS). It builds on the common base architectures described in [Platform Architecture and Planning](../index.html). 
 
 See [PCF on AWS Requirements](../../customizing/aws.html) for general requirements for running PCF and specific requirements for running PCF on AWS.
 
+##<a id="diagram"></a>  Diagram
+
+The following diagram illustrates the reference architecture for PCF on AWS. 
+
 ![PCF on AWS Reference Architecture Diagram](PAS_AWS.png)
 
-##<a id="lb-types"></a>  LB types
+##<a id="networking"></a>  Networking
 
-AWS offers Application Load Balancer (ALB) and Network Load Balancers (NLB). We recommend using Network Load Balancers for the added simplicity and security of leaving all encrypted traffic in place until the go routers. If you need to use Amazon Certificate Management or require more complex Layer 7 routing rules, the Network Load Balancer can be fronted or replaced by an ALB. 
+The following sections provide guidance about networking resources.
 
+### <a id="dns"></a> DNS
 
-##<a id="dns"></a> DNS
+You can use AWS Route 53 for DNS resolution to host your PCF domains. 
 
-AWS provides route 53 for DNS resolution which can be used to host your PCF domains. 
+### <a id="lb"></a>  Load Balancing
 
-
-##<a id="subnets"></a> Networks / Subnets / IP spacing planning
-
-In AWS each AZ requires its own subnet of which the first 5 IPs are reserved. In addition to the standard networks in the reference architecture, if you are planning on using the AWS Service Broker you may want to create an additional set of networks to place RDS instances and other AWS managed instances. 
-
-When building a VPC that is only public facing no special consideration is necessary for the use of IPs. However, when you want either the front-end of PCF to be accessible from the corporate network or the services running in PCF to be able to access corporate resources, you will need to either provide routable IPs to your VPC or utilize NAT.
-
-In most cases organizations do not have the IP space necessary to allow PCF to be deployed in a consistent manner, we recommend utilizing a nat instance in the 100.64 address space to deploy a NAT instance and router so that the PCF deployment can use few IP addresses.
+AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). Pivotal recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB. 
 
 
+### <a id="subnets"></a> Networks, Subnets, and IP Spacing Planning
 
-*   If you want internet ingress,  create the load balancers with Elastic IPs
-*   If you want internet egress,  create the NAT Gateway towards the internet
-*   If you want Corporate Ingress, create Load Balancers on Corporate Subnet
-*   If you want Corporate Egress (access corporate resources), create the nat instance in the corporate subnet or if business requirements dictate make the entire VPC corporate routable
+The follow list provides considerations related to networks, subnets, and IP spacing planning. 
 
+* In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved. 
+* Your organization may not have the IP space necessary to deploy PCF in a consistent manner. To alleviate this, Pivotal recommends using the `100.64` address space to deploy a NAT instance and router so that the PCF deployment can use few IP addresses. 
+* If you want the front-end of PCF to be accessible from your corporate network or the services running on PCF to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT. 
+* If you want a VPC that is only public-facing, no special consideration is necessary for the use of IPs. 
+* See the following table to understand the action required depending on the type of traffic you want to allow for your PCF deployment. 
+	<table>
+		<tr>
+			<th>If you want...</th>
+			<th>then...</th>
+		</tr>
+		<tr>
+			<td>Internet ingress</td>
+			<td>Create the load balancers with Elastic IPs.</td>
+		</tr>
+		<tr>
+			<td>Internet egress</td>
+			<td>Create the NAT Gateway towards the Internet.</td>
+		</tr>
+		<tr>
+			<td>Corporate Ingress</td>
+			<td>Create load balancers on your corporate subnet.</td>
+		</tr>
+		<tr>
+			<td>Corporate Egress (For accessing corporate resources)</td>
+			<td>Create the NAT instance on your corporate subnet or if business requirements dictate, make the entire VPC corporate-routable.</td>
+		</tr>
+	</table>
+* If you plan to install [PCF Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you may want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be for for RDS and other AWS managed instances.
 
-##<a id="c2c"></a>  C2C considerations
-
-None
-
-
-##<a id="ha"></a>  HA (how AZs are implemented)
-
-None.
-
-
-##<a id="storage-considerations"></a> Storage Considerations
-
-
-##<a id="rds"></a> RDS/DBaaS
-
-A single RDS Instance should be created for BOSH and PAS. After the instance is created, databases will need to be created for BOSH and PAS.
-
-
-##<a id="blobstore"></a>  Blobstore storage accounts
-
-Need buckets  created for:
-
-
-
-*   BOSH Blobstore
-*   Build Packs
-*   Droplets
-*   Packages
-*   Resources
-
-These bucket should have an associated role for read/write access.
-
-
-##<a id="security"></a> Security Considerations
-
-None
-
-
-##<a id="identity-management"></a> Identity management
-
-We recommend using Instance Profiles whenever possible   
-
-
-##<a id="pas-components"></a> PAS components considerations  
-
-None
-
-
-##<a id="alternatives"></a> Alternative/variations of deployment and network layouts    
+### <a id="alternatives"></a> Alternative Network Layouts
 
 The following options are available for choosing your network topology:
 
+<table>
+	<tr>
+		<th>Type of Traffic</th>
+		<th>Options</th>
+	</tr>
+	<tr>
+		<td>Internet Ingress</td>
+		<td><ul>
+				<li>Allow Internet ingress by associating load balancers with elastic IPs.</li>
+				<li>Do not allow Internet Ingress.</li>
+			</ul></td>
+	</tr>
+	<tr>
+		<td>Internet Egress</td>
+		<td>
+			<ul>
+				<li>Allow PCF to access the Internet through a NAT gateway.</li>
+				<li>Do not allow PCF to access the Internet. Use only a Corporate network.</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td>Peering</td>
+		<td><ul>
+				<li>Isolated. This is normally Internet-only facing.</li>
+				<li>Peered with corporate or other VPCs through Transit Gateway.</li><li>Peered directly with other VPCs and corporate connections.</li>
+			</ul></td>
+	</tr>
+	<tr>
+		<td>Corporate Peering</td>
+		<td><ul>
+				<li>SNAT for corporate resources. This requires 3 corporate IPs.</li>
+				<li>Routable IP Addresses for VPC using /20 or a larger CIDR block necessary.</li>
+			</ul></td>
+	</tr>
+</table>
 
-Internet Egress
 
+##<a id="rds"></a> RDS
 
-How do you want to allow the foundation to access the internet?
+Use a single RDS instance for BOSH and PAS. This instance requires several databases. See the following sections of the installation documentation for more information:
 
+* [Step 3: Director Config Page](../../om/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_
+* [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring PAS_
 
+##<a id="blobstore"></a>  Blobstore Storage Accounts
 
-*   Corporate (or no internet)
-*   NAT Gateway
+Ops Manager requires a bucket for the BOSH blobstore.
 
-Internet Ingress (Load Balancers associated with Elastic IPs)
+PAS requires the following buckets:
 
+* Buildpacks
+* Droplets
+* Packages
+* Resources
 
-
-*   Yes
-*   No
-
-Peering:
-
-
-
-*   Isolated (normally internet-only facing)
-*   Peered with corporate or other VPCs via Transit Gateway
-*   Peered directly with other VPCs and corporate connections
-
-Corporate Peering:
+These buckets require an associated role for read/write access.
 
 
 
-*   SNAT for Corporate Resources (3 corporate IPs necessary)
-*   Routable IP Addresses for VPC (/20 or larger CIDR block necessary)
+
+##<a id="identity-management"></a> Identity Management
+
+For identity management, use Instance Profiles whenever possible   . For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. See [Step 2: AWS Config Page](../../om/aws/config-manual.html#pcfaws-om-awsconfig). 
+
 
