@@ -80,7 +80,7 @@ If shared network resources do not exist in an Azure subscription, you can use a
 
 <p class="note"><strong>Note</strong>: As of PCF v2.5.3, PCF on Azure supports both availability zones (AZ) and Availability Sets.</p>
 
-Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the cluster pinning issue associated with Availability Sets and allow greater control when defining high availability configuration when using multiple Azure services.
+Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the placement group pinning issue associated with Availability Sets and allow greater control when defining high availability configuration when using multiple Azure services.
 
 See the following table for additional guidance depending on your use case:
 
@@ -120,16 +120,16 @@ The following diagram illustrates PAS deployed on Azure using AZs:
 
 AZs have the following advantages:
 
-* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the cluster pinning issue associated with availability sets. 
+* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the placement group pinning issue associated with availability sets. 
 * Zonal services are effectively in separate Update Domains as updates are rolled out to one zone at a time. 
 * AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same physical zone. This allows services of different types to take advantage of the highly available qualities a zone provides.
 
 
 ### <a id="AS"></a> Availability Sets
 
-Availability Sets were the first Azure primitive to support high availability   within a region. 
+Availability Sets were the first Azure primitive to support high availability within a region. 
 
-<p class="note warning"><strong>Warning</strong>: Availability Sets are implemented at the cluster-level, which can cause issues when deploying PCF on Azure. See <a href="#cluster-pinning">Cluster Pinning Issues</a>.</p>
+<p class="note warning"><strong>Warning</strong>: Availability Sets are implemented at the hardware rack level, which can cause issues when deploying PCF on Azure. See <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
 
 They have the following properties:
 
@@ -137,14 +137,14 @@ They have the following properties:
 * When a hardware issue occurs, VMs on independent Fault Domains are guaranteed not to share power supply or networking and therefore maintain availability of a subset of VMs in the set. 
 * When updates are rolled out to a Cluster, VMs in independent Update Domains are not updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set. 
 
-#### <a id="cluster-pinning"></a> Cluster Pinning Issues
+#### <a id="placement-group-pinning"></a> Placement Group Pinning Issues
 
-In PCF on Azure, VMs for a particular job are pinned to the cluster where the VM first spins up. This is because BOSH places VMs for jobs within the same Availability Sets. 
+In PCF on Azure in AS HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job within the same Availability Set. 
 
 Cluster pinning causes the following:
 
 * Issues migrating jobs from one family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`
-* Issues scaling up if there is no capacity on the given cluster
+* Issues scaling up if there is no capacity remaining in the placement group
 
 
 ## <a id="storage-considerations"></a> Storage
