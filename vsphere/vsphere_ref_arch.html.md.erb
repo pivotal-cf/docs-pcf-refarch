@@ -3,39 +3,42 @@ title: vSphere Reference Architecture
 owner: Customer0
 ---
 
-This guide presents a reference architecture for Pivotal Cloud Foundry (PCF) on vSphere. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html). 
+This topic provide reference architectures for Pivotal Cloud Foundry (PCF) on vSphere. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html). 
 
-See [Installing PCF on vSphere](../../customizing/vsphere.html) for additional requirements and installation instructions for running PCF on vSphere.
+See [Installing PCF on vSphere](../../customizing/vsphere.html) for additional requirements and installation instructions for PCF on vSphere.
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for PAS and PKS is based on software-defined networking (SDN) infrastructure.
+The vSphere reference architecture for the Pivotal Application Service (PAS) and Pivotal Container Service (PKS) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support this SDN infrastructure.
 
-VMware vSphere includes NSX-T and NSX-V data centers that support SDN infrastructure. 
+PCF supports the following configurations for PCF on vSphere deployments:
 
-NSX-T Data Center is a software-defined network (SDN) virtualization platform that runs on VMware ESXi virtual hosts.
+* PAS on vSphere with NSX-T 
+* PAS on vSphere with NSX-V
+* PKS on vSphere with NSX-T
 
-NSX-V Data Center is
 
-Using the available NSX-T Container Plug-in (NCP) tile enables a sophisticated container networking stack in place of the built-in “silk” stack and interlocks with NSX-T already deployed in the IaaS. The NCP tile can not be used unless NSX-T has already been established in the IaaS. These technologies can not be retrofitted into an established PKS or PAS installation
+## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
 
-Expanding PAS with SDN features is best considered as a greenfield effort. Inserting an SDN layer under a working PAS installation is non-trivial and likely will trigger a rebuild. NSX-T constructs that can be used by PAS include:
+The reference architecture in this section describes the architecture for PAS on vSphere with NSX-T deployments.
+
+In NSX-T architecure, PAS is deployed on a 3 cluster/AZ defined front ended by a NSX-T Tier-0 router which acts as a central logical router into the PAS platform. 
+
+Tier-1 routers, such as a PAS subnet and a services subnet, connect back to Tier-0 routers. Static or dynamic routing (BGP) from the IP backbone into NSX-T can be configured to the Tier-0 router. 
+
+Using the available NSX-T Container Plug-in (NCP) tile enables a sophisticated container networking stack in place of the built-in “silk” stack and interlocks with NSX-T already deployed in the IaaS. The NCP tile can not be used unless NSX-T has already been established in the IaaS. These technologies can not be retrofitted into an established PKS or PAS installation.
+
+<p class="note"><b>Note:</b> Inserting an SDN layer in an existing PCF deployment is non-trivial and likely will trigger a rebuild.</p>
+
+NSX-T constructs that can be used by PAS include:
 
 * Logical Networks, encapsulated broadcast domains
-* VLAN exhaustion avoidance thru the use of Logical Networks
+* VLAN exhaustion avoidance with the use of Logical Networks
 * Routing services and NAT/SNAT to network fence the PCF installation
 * Load balancing services to pool systems such as gorouters
 * SSL termination at the load balancer
 * Distributed routing and firewalling services at the hypervisor
 
-
-## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
-
-The reference architecture in this section includes VMware vSphere and NSX-T Data Center.
-
-In NSX-T architecure, PAS is deployed on a 3 cluster/AZ defined front ended by a NSX-T Tier-0 router which acts as a central logical router into the PAS platform. Tier-1 routers created for each deployment such as PAS subnet, services subnet connects back to Tier-0 routers. Static or dynamic routing (BGP) from the IP backbone into NSX-T can be configured to Tier-0 router. 
-
-To deploy PCF without NSX-T, see [PAS on vSphere with NSX-V](), which includes NSX-V design considerations.
 
 ### <a id="pas-nsx-t-diagram"></a> Architecture
 
@@ -43,53 +46,51 @@ The following diagram shows PAS on vSphere with NSX-T.
 
 ### <a id="pas-nsx-t-networking"></a> Networking
 
-The following section describe networking considerations for PAS on vSphere with NSX-T.
+The following section describe networking considerations for PAS on vSphere with NSX-T deployments.
 
 #### <a id="pas-nsx-t-dns"></a> DNS
 
-Wildcard domain names for PAS must be configured in DNS and must be registered. 
+The following are DNS considerations for PAS on vSphere with NSX-T deployments:
 
-For more information, see the [Domain Names](./index.html#pas-domains) section in _Platform Planning and Architecture_.
+* Wildcard domain names for PAS must be configured in DNS.
+* Wildcard domain names must be registered. 
+
+For more information about DNS considerations for all PAS deployments, see the [Domain Names](./index.html#pas-domains) section in _Platform Planning and Architecture_.
 
 #### <a id="pas-nsx-t-load-balancing"></a> Load Balancing
 
-Pivotal recommends that you use standard NSX-T load balancers for a PAS on vSphere with NSX-T installation.  
+The following are load balancing considerations for PAS on vSphere with NSX-T deployments:
 
-Layer 4 and Layer 7 NSX-T load balancers are created automatically upon app deployment. Pivotal recommends that you terminate SSL at the Gorouters and use the NSX-T load balancer as a pass-through.
+* Pivotal recommends that you use standard NSX-T load balancers for a PAS on vSphere with NSX-T installation.  
+* Layer 4 and Layer 7 NSX-T load balancers are created automatically during app deployment. Pivotal recommends that you terminate SSL at the Gorouters and use the NSX-T load balancers as a pass-through.
+* You must configure NSX-T load balancers for the Gorouters. The domains for both the PAS system and the PAS apps must resolve to this load balancer and have either a private or a public IP address assigned to them. 
+* Any TCP routers and SSH Proxies also require NSX-T load balancers.
 
-You must configure NSX-T load balancers for the Gorouters. The PAS system and apps domains should resolve to this load balancer and have either a private or a public IP address assigned to them. 
+#### <a id="pas-nsx-t-networking-subnets-ip"></a> Networking, Subnets, and IP Spacing
 
-Any TCP routers and SSH Proxies also require load balancers.
+The following are considerations related to networks, subnets, and IP spacing for PAS on vSphere with NSX-T deployments:
 
-#### <a id="pas-nsx-t-networking-subnets-ip"></a> Networking, Subnets, and IP Spacing Planning
+* PAS requires statically-defined networks to host PAS component VMs. 
+* The tenant side of an NSX-T deployment requires a series of non-routable address banks. NSX-T routers manage the address banks.
+* Dynamically assigned org networks are attached to automatically-generated NSX-T Tier-1 routers. These org networks are constructed based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section in the NSX-T tile in Ops Manager. The default is `/24`, which means that every org gets a new `/24`.
+* This reference architecture uses a pattern in which all networks break on the `/24` boundary and the network octet is numerically sequential.
 
-Networks defined for PAS is outlined in base ref arch section https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-network.
-
-PAS requires statically-defined networks to host PAS component VMs. 
-
-The tenant side of an NSX-T deployment requires a series of non-routable address banks. NSX-T routers manage the address banks.
-
-Dynamically assigned org networks are attached to automatically-generated NSX-T Tier-1 routers. The operator does not define these networks in Ops Manager, but allows for them to get built by supplying a non-overlapping block of address space for this purpose. This is configurable in NCP Configuration in the NSX-T tile in Ops Manager. The default is /24 (every Org gets a new /24).
-
-This reference uses a pattern that follows previous references, with the main difference being all networks break on the /24 boundary (for easier CIDR math) and the network octet is now numerically sequential (1-2-3).
+For more information about PAS networks, see the [Networks](./index.html#pas-network) section of the _Platform Architecure and Planning_ topic.
 
 #### <a id="pas-nsx-t-networks"></a> Networks
 
-Routable external IPs on the Provider side, for example for NATs, PAS Orgs and load balancers get assigned to the T0 router front-ending the PCF installation. There are two approaches to assigning address space blocks to this job, each with its own ramifications.
+The following are considerations related to networks for PAS on vSphere with NSX-T deployments:
 
-The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs, one job being advertised as a route for traffic and the other job is for aligning T0 DNATs/SNATs, load balancers and other jobs. Unlike NSX-V, you will consume much more address space for SNATs than before.
+* Routable external IPs on the Provider side, for example for NATs, PAS Orgs and load balancers get assigned to the T0 router on the PCF deployment.
+* The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs: one job is advertised as a route for traffic and the other job is for aligning T0 DNATs/SNATs, load balancers and other jobs. Note that this configuration consumes much more address space for SNATs.
 
 
 ### <a id="pas-nsx-t-ha"></a> High Availability
 
-(Link to Base Ref arch High availability section)
-https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-ha
+For information about high availability considerations for PAS on vSphere, see the [High Availability](./index.html#pas-ha) section of _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-storage"></a> Storage
-
-(Link to Base Ref arch Storage section)
-https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pas-storage
 
 Shared storage is a requirement for PCF. You can allocate networked storage to the host clusters following one of two common approaches, _horizontal_ or _vertical_. The approach you follow should reflect how your data center arranges its storage and host blocks in its physical layout.
 
@@ -104,8 +105,6 @@ For example, with six datastores `ds01` through `ds06`, you assign datastores `d
 Note: If a datastore is part of a vSphere Storage Cluster using sDRS (storage DRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.
 Storage Capacity and Type
 
-Storage Capacity
-
 Pivotal recommends the following capacity allocation for PAS installations:
 
 - For production use, at least 8 TB of data storage, either as one 8 TB store or a number of smaller volumes adding up to 8 TB. Frequently-used development may require significantly more storage to accommodate new code and buildpacks. 
@@ -114,17 +113,35 @@ Pivotal recommends the following capacity allocation for PAS installations:
 
 The primary consumer of storage is the NFS/WebDAV blobstore. 
 
-<p class="note"><strong>Note</strong>: PCF does not currently support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+For more information about secuirty considerations for PAS on vSphere, see the
+[High Availability](./index.html#pas-storage) section of _Platform Architecture and Planning_.
+
+<p class="note"><strong>Note</strong>: PCF does not support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
 
 ### <a id="pas-nsx-t-sql"></a> SQL Server
 
+This section describes the database considerations for PAS on vSphere with NSX-T deployments. 
+
+An internal MySQL database is sufficient for use in production environments. However, an external database provides more control over database management for large environments that require multiple data centers. 
+
+For information about configuring system databases on PAS, see the [Configure System Databases](../customizing/configure-pas.html#sys-db) section of _Configuring PAS_.
+
 
 ### <a id="pas-nsx-t-securty"></a> Security
+
+For information about security considerations for PAS on vSphere with NSX-T environments, see the [Secuirty](./index.html#pas-security) section of _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-blobstore"></a> Blobstore Storage Account
 
+This section includes considerations related to blobstore storage accounts for PAS on vSphere with NSX-T deployments.
+
+The primary consumer of storage is the NFS/WebDAV blobstore. This is good for non production use, as NFS/WebDAV store needs to be actively maintained from storage perspective. 
+
+There will be down time for apps deployment when storage upgrade or on migrations to new disks etc.  However, for production use, we recommend an S3 storage appliance as blobstore as one need not worry about running out of space or upgrading NFS disk. 
+
+For more information about blob storage considerations, see the [Configure File Storage](../upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
 
 ### <a id="pas-nsx-t-pas"></a> PAS Components
 
