@@ -59,7 +59,7 @@ Azure DNS does not support recursion. To properly configure Azure DNS, do the fo
 
 You do not need to make any configuration changes in PCF to support Azure DNS.
 
-### <a id="lb-types"></a>  Load Balancing
+### <a id="lb-types"></a>Load Balancing
 
 Use Standard Azure Load Balancers (ALBs). If you want Internet ingress, you must create the ALBs with elastic IPs. 
 
@@ -76,7 +76,7 @@ PCF requires the networks defined in the base reference architectures for PAS an
 
 If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy PCF and define network constructs.
 
-## <a id="ha-considerations"></a>  High Availability
+## <a id="ha-considerations"></a>High Availability
 
 <p class="note"><strong>Note</strong>: As of PCF v2.5.3, PCF on Azure supports both availability zones (AZ) and Availability Sets.</p>
 
@@ -144,8 +144,8 @@ In PCF on Azure in AS HA mode, VMs for a particular job are pinned to a placemen
 Cluster pinning causes the following:
 
 * Issues migrating jobs from one family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`
-* Issues scaling up if there is no capacity remaining in the placement group
 
+* Issues scaling up if there is no capacity remaining in the placement group
 
 ## <a id="storage-considerations"></a> Storage
 
@@ -163,7 +163,7 @@ For storage, Pivotal recommends the following:
 The Internal MySQL database provided by PAS is sufficient for production use.
 
 
-## <a id="blobstore-storage-accts"></a>  Blobstore Storage Account
+## <a id="blobstore-storage-accts"></a>Blobstore Storage Account
 
 Use Azure Blob Storage as the external file storage option for PCF. This provides redundancy for high-availability deployments of PCF and unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
 
