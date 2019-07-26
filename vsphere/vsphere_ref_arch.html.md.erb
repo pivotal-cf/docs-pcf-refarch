@@ -47,7 +47,7 @@ A NSX-T Tier-0 router is on the front end of the PAS deployment. This router is 
 
 Several Tier-1 routers, such as the router for the PAS and infrastructure subnets, connect to the Tier-0 router. 
 
-### <a id="pas-nsx-t-pas"></a> PAS Components and Plugins
+### <a id="pas-nsx-t-pas"></a> NSX-T Container Plugin Requirement
 
 For PAS deployments, the VMware NSX-T Container Plugin for PCF is required to enable the SDN features available through NSX-T.
 
@@ -77,7 +77,7 @@ Select a network range for the Tier-0 router with enough space so that the netwo
 
 PAS requires a system domain, app domain, and several wildcard domains. 
 
-For more information about DNS requirements for PAS, see the [Domain Names](./index.html#pas-domains) section in _Platform Planning and Architecture_.
+For more information about DNS requirements for PAS, see the [Domain Names](../index.html#pas-domains) section in _Platform Planning and Architecture_.
 
 #### <a id="pas-nsx-t-load-balancing"></a> Load Balancing
 
@@ -97,12 +97,12 @@ The following are considerations related to networks, subnets, and IP spacing fo
 * The reference architecture for PAS on vSphere with NSX-T deployments uses a pattern in which all networks break on the `/24` network boundary. The network octet is numerically sequential.
 * NSX-T dynamically assigns PAS org networks and attaches them to NSX-T Tier-1 routers. These org networks are automatically constructed based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in Ops Manager. The default is `/24`. This means that every org in PAS is assigned a new `/24` network.
 
-For more information about PAS subnets, see the [Required Subnets](./index.html#pas-network) section in _Platform Architecture and Planning_.
+For more information about PAS subnets, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-ha"></a> High Availability
 
-For information about high availability considerations for PAS on vSphere, see the [High Availability](./index.html#pas-ha) section of _Platform Architecture and Planning_.
+For information about high availability considerations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-t-shared-storage"></a> Shared Storage
 
@@ -135,7 +135,7 @@ Pivotal recommends the following storage capacity allocation for production and 
 <p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
 For more information about general storage considerations for PAS, see the
-[Storage](./index.html#pas-storage) section of _Platform Architecture and Planning_.
+[Storage](../index.html#pas-storage) section of _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-sql"></a> SQL Server
@@ -144,12 +144,12 @@ An internal MySQL database is sufficient for use in production environments.
 
 However, an external database provides more control over database management for large environments that require multiple data centers. 
 
-For information about configuring system databases on PAS, see the [Configure System Databases](../customizing/configure-pas.html#sys-db) section of _Configuring PAS_.
+For information about configuring system databases on PAS, see the [Configure System Databases](https://docs.pivotal.io/pivotalcf/2-7/customizing/configure-pas.html#sys-db) section of _Configuring PAS_.
 
 
 ### <a id="pas-nsx-t-securty"></a> Security
 
-For information about security considerations for PAS deployments, see the [Security](./index.html#pas-security) section of _Platform Architecture and Planning_.
+For information about security considerations for PAS deployments, see the [Security](../index.html#pas-security) section of _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-blobstore"></a> Blobstore Storage
@@ -161,7 +161,7 @@ Pivotal recommends that you use the following blobstore storage for production a
 
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
-For more information about blobstore storage considerations, see the [Configure File Storage](../upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+For more information about blobstore storage considerations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
 
 
 ## <a id="pas-nsx-v"></a> PAS on vSphere with NSX-V
@@ -197,7 +197,7 @@ Routable external IPs on the server side, such as routable IPs for NATs and load
 
 PAS requires a system domain, app domain, and several wildcard domains. 
 
-For more information about DNS requirements for PAS, see the [Domain Names](./index.html#pas-domains) section in _Platform Planning and Architecture_.
+For more information about DNS requirements for PAS, see the [Domain Names](../index.html#pas-domains) section in _Platform Planning and Architecture_.
 
 #### <a id="pas-nsx-v-load-balancing"></a> Load Balancing
 
@@ -213,11 +213,11 @@ The following are load balancing considerations for PAS on vSphere with NSX-V de
 
 #### <a id="pas-nsx-v-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
-For information about network, subnet, and IP space planning considerations, see the [Required Subnets](./index.html#pas-network) section in _Platform Architecture and Planning_.
+For information about network, subnet, and IP space planning considerations, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-ha"></a> High Availability
 
-For information about high availability considerations for PAS on vSphere, see the [High Availability](./index.html#pas-ha) section of _Platform Architecture and Planning_.
+For information about high availability considerations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-shared-storage"></a> Shared Storage
 
@@ -233,12 +233,12 @@ Pivotal recommends the following storage capacity allocation for production and 
 * **Production environments**: Configure at least 8 TB of data storage. You can configure this as either one 8 TB store or a number of smaller volumes that sum to 8 TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks. 
 * **Non-production environments**: Configure 4 to 6 TB of data storage.
 
-<p class="note"><strong>Note</strong>: PCF does not support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+<p class="note"><strong>Note</strong>: PCF does not support using vSphere Storage Clusters with the latest versions of PCF validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
 <p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
 For more information about general storage considerations for PAS, see the
-[Storage](./index.html#pas-storage) section of _Platform Architecture and Planning_.
+[Storage](../index.html#pas-storage) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-sql"></a> SQL Server
 
@@ -246,11 +246,11 @@ An internal MySQL database is sufficient for use in production environments.
 
 However, an external database provides more control over database management for large environments that require multiple data centers. 
 
-For information about configuring system databases on PAS, see the [Configure System Databases](../customizing/configure-pas.html#sys-db) section of _Configuring PAS_.
+For information about configuring system databases on PAS, see the [Configure System Databases](https://docs.pivotal.io/pivotalcf/2-7/customizing/configure-pas.html#sys-db) section of _Configuring PAS_.
 
 ### <a id="pas-nsx-v-security"></a> Security
 
-For information about security considerations for PAS on vSphere deployments, see the [Security](./index.html#pas-security) section in _Platform Architecture and Planning_.
+For information about security considerations for PAS on vSphere deployments, see the [Security](../index.html#pas-security) section in _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-blobstore"></a> Blobstore Storage
 
@@ -261,4 +261,4 @@ Pivotal recommends that you use the following blobstore storage for production a
 
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
-For more information about blobstore storage considerations, see the [Configure File Storage](../upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+For more information about blobstore storage considerations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
