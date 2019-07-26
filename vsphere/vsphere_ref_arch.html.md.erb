@@ -9,7 +9,9 @@ See [Installing PCF on vSphere](../../customizing/vsphere.html) for additional r
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for the Pivotal Application Service (PAS) and Pivotal Container Service (PKS) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure.
+The vSphere reference architecture for the Pivotal Application Service (PAS) and Pivotal Container Service (PKS) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
+
+For PAS deployments, the VMware NSX-T Container Plugin for PCF is required to use the SDN features of NSX-T. For PKS deployments, the SDN features of NSX-T are available by default.
 
 PCF supports the following configurations for PCF on vSphere deployments:
 
@@ -20,38 +22,37 @@ PCF supports the following configurations for PCF on vSphere deployments:
 
 ## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
 
-The reference architecture in this section describes the architecture for PAS on vSphere with NSX-T deployments.
+You can use the following SDN features by deploying PAS on vSphere with NSX-T:
 
-This section also includes considerations and requirments for PAS on vSphere with NSX-T deployments, such as considerations related to storage, networking, and high availability.
+* Logical Networks and encapsulated broadcast domains
+* VLAN exhaustion avoidance with the use of Logical Networks
+* Routing services and NAT/SNAT to network fence the PCF installation
+* Load balancing services to pool systems such as Gorouters
+* SSL termination at the load balancer
+* Distributed routing and firewalling services at the hypervisor
 
 
 ### <a id="pas-nsx-t-diagram"></a> Architecture
 
-The following diagram shows PAS on vSphere with NSX-T.
+The following reference architecture diagram describes the architecture for PAS on vSphere with NSX-T deployments.
 
 
 INSERT DIAGRAM HERE
 
 
-In NSX-T architecure, PAS is deployed with three clusters and three availability zones (AZs). A NSX-T Tier-0 router is on the front end of the PAS deployment. This router is a central logical router into the PAS platform. 
+As shown in the diagram above, PAS deployment with NSX-T are deployed with three clusters and three availability zones (AZs). A NSX-T Tier-0 router is on the front end of the PAS deployment. This router is a central logical router into the PAS platform. 
 
-Tier-1 routers, such as the router for the PAS subnet, connect to the Tier-0 router. Static or dynamic BGP routing from the IP backbone into NSX-T can be configured to the Tier-0 router. 
+Tier-1 routers, such as the router for the PAS subnet, connect to the Tier-0 router. Static or dynamic BGP routing from the IP backbone into NSX-T can be configured to the Tier-0 router.
 
+### <a id="pas-nsx-t-pas"></a> PAS Components
 
-### <a id="pas-nsx-t-constructs"></a> NSX-T Constructs
+NCP Tile for PAS needs to be configured and deployed at the same time when deploying PAS runtime.  Flannel or NSX-T can be considered for network container plugin for PAS on NSX-T
 
-The NSX-T Container Plug-in (NCP) tile enables a sophisticated container networking stack and interlocks with NSX-T. The NCP tile can not be used unless NSX-T has already been established in the IaaS. 
+For PAS deployments, the VMware NSX-T Container Plugin for PCF is required to enable the SDN features available through NSX-T.
 
-These technologies can not be retrofitted into an established PKS or PAS installation.
+The NSX-T Container Plugin enables a container networking stack and integrates with NSX-T. 
 
-NSX-T constructs that can be used by PAS include:
-
-* Logical Networks, encapsulated broadcast domains
-* VLAN exhaustion avoidance with the use of Logical Networks
-* Routing services and NAT/SNAT to network fence the PCF installation
-* Load balancing services to pool systems such as gorouters
-* SSL termination at the load balancer
-* Distributed routing and firewalling services at the hypervisor
+<p class="note"><b>Note:</b> To use NSX-T with PAS, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the PAS tile.</p> 
 
 
 ### <a id="pas-nsx-t-networking"></a> Networking
@@ -150,9 +151,6 @@ For non-production environments, the NFS/WebDAV blobstore can be the primary con
 
 For more information about blobstore storage considerations, see the [Configure File Storage](../upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
 
-### <a id="pas-nsx-t-pas"></a> PAS Components
-
-NCP Tile for PAS needs to be configured and deployed at the same time when deploying PAS runtime.  Flannel or NSX-T can be considered for network container plugin for PAS on NSX-T
 
 ## <a id="pas-nsx-v"></a> PAS on vSphere with NSX-V
 
@@ -241,9 +239,10 @@ spec:
 
 #### <a id="pks-nsx-t-subnets-ips"></a> Networks, Subnets, and IP Spacing Planning
 
-Allocate a large address block for PKS clusters and PODS block.
+PKS on vSphere requires a large block of IP addresses for PKS clusters and pods. 
 
-Networks defined for PKS is outlined in base ref arch section https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network.
+
+
 
 In addition , allocate large block following network CIDRs. These can be configured during PKS cluster configuration in OpsManager.
 PKS Clusters 172.24.0.0/14
@@ -251,7 +250,9 @@ PKS Pods 172.28.0.0/14
 
 When deploying PKS via Ops Manager, you must allow for a block of address space for dynamic networks that PKS will deploy per namespace. The recommended address space is distinctly different  that used with PAS, to give the operator a quick visual queue as to which jobs relate to what service.
 
-When new PKS cluster is  created, PKS dynamically creates a new /24 network is carved out from PKS cluster address space.  When a new application is deployed, a new NSX-T Tier-1 routers are generated and /24 is created from the PKS PODS network.
+When a new PKS cluster is  created, PKS dynamically creates a new /24 network is carved out from PKS cluster address space.  When a new application is deployed, a new NSX-T Tier-1 routers are generated and /24 is created from the PKS PODS network.
+
+For more information about networking considerations for PKS, see https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network.
 
 #### <a id="pks-nsx-t-external-routing"></a> External Routing
 
@@ -282,29 +283,3 @@ For information about PersistentVolume storage considerations for PKS on vSphere
 ### <a id="pks-nsx-t-security"></a> Security
 
 For information about security considerations for PKS on vSphere deployments, see the [Security](./index.html#pks-security) section in _Platform Architecture and Planning_.
-
-
-## <a id="pas-pks"></a> PAS and PKS on vSphere with NSX-T
-
-A fully meshed installation of PCF v2.2 or later designed using the recommendations provided in this topic looks as follows:
-
-<%= image_tag('../images/pas-pks-nsxt.png') %>
-
-[View a larger version of this diagram](../images/pas-pks-nsxt.png)
-
-Common components are the NSX T0 router and the associated T1 routers.
-This approach ensures that any cross-traffic between PKS and PAS apps stays within the bounds of the T0.
-This also provides a one-stop access point to the whole installation, which simplifies deployment automation for multiple, identical installations.
-
-AZs are aligned to vSphere clusters, with resource pools as an optional organizational tool to place multiple foundations into the same capacity.
-You can align PKS to any AZ or cluster.
-Keeping PKS and PAS in completely separate AZs is not required.
-
-You can use resource pools in vSphere clusters as AZ constructs to stack different installations of PCF. 
-As server capacity continues to increase, the efficiency of deploying independent server clusters only for one installation is low. For example, customers are commonly deploying servers with 768-GB RAM and greater.
-
-To allow for max capacity growth, consider using an NSX-T installation per foundation.
-
-If you want to split the PAS and PKS installations into separate network trees, behind separate T0 routers, ensure that approach meets your needs by reviewing VMware’s recommendations for T0 to T0 routing.
-For more information,
-see [Reference Design Guide for PAS and PKS with VMware NSX-T Data Center](https://communities.vmware.com/docs/DOC-38609) in the VMware documentation.
