@@ -13,7 +13,7 @@ See [PCF on AWS Requirements](../../customizing/aws.html) for general requiremen
 
 This section describes a reference architecture for a PAS installation on AWS.
 
-###<a id="diagram"></a> Diagram
+###<a id="diagram"></a>Diagram
 
 The following diagram illustrates the reference architecture for PAS on AWS.
 
@@ -21,7 +21,7 @@ The following diagram illustrates the reference architecture for PAS on AWS.
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_AWS.png).
 
-###<a id="networking"></a> Networking
+###<a id="networking"></a>Networking
 
 The following sections provide guidance about networking resources.
 
@@ -29,9 +29,9 @@ The following sections provide guidance about networking resources.
 
 You can use AWS Route 53 for DNS resolution to host your PAS domains.
 
-#### <a id="lb"></a> Load Balancing
+#### <a id="lb"></a>Load Balancing
 
-AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). Pivotal recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB. 
+AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). Pivotal recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB.
 
 
 #### <a id="subnets"></a> Networks, Subnets, and IP Spacing Planning
@@ -116,7 +116,7 @@ Use a single RDS instance for BOSH and PAS. This instance requires several datab
 * [Step 3: Director Config Page](../../om/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_
 * [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring PAS_
 
-###<a id="blobstore"></a> Blobstore Storage Accounts
+###<a id="blobstore"></a>Blobstore Storage Accounts
 
 Ops Manager requires a bucket for the BOSH blobstore.
 
@@ -131,7 +131,7 @@ These buckets require an associated role for read/write access.
 
 ###<a id="identity-management"></a> Identity Management
 
-For identity management, use Instance Profiles whenever possible   . For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. See [Step 2: AWS Config Page](../../om/aws/config-manual.html#pcfaws-om-awsconfig).
+For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. See [Step 2: AWS Config Page](../../om/aws/config-manual.html#pcfaws-om-awsconfig).
 
 ## <a id="pks"></a>PKS
 
