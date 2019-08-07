@@ -21,14 +21,14 @@ PCF supports the following configurations for PCF on vSphere deployments:
 
 ## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
 
-The following sections describe the reference architecture for PAS on vSphere with NSX-T deployments. They also provide considerations for deploying PAS on vSphere with NSX-T, such as network, load balancing, and storage capacity considerations.
+The following sections describe the reference architecture for PAS on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying PAS on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
 
 PAS on vSphere with NSX-T supports the following SDN features:
 
 * Logical Networks and encapsulated broadcast domains
 * VLAN exhaustion avoidance with the use of Logical Networks
-* Routing services and NAT/SNAT to network fence the PCF installation
-* Load balancing services to pool systems such as Gorouters
+* Routing services and NAT/SNAT to create a separate network space for the PCF installation
+* Load balancing services to distribute traffic to resource pools for systems such as Gorouters
 * SSL termination at the load balancer
 * Distributed routing and firewalling services at the hypervisor
 
@@ -58,7 +58,7 @@ The NSX-T Container Plugin enables a container networking stack and integrates w
 
 ### <a id="pas-nsx-t-networking"></a> Networking
 
-The following sections describe networking considerations for PAS on vSphere with NSX-T deployments.
+The following sections describe networking requirements and recommendations for PAS on vSphere with NSX-T deployments.
 
 #### <a id="pas-nsx-t-routable-ip"></a> Routable IPs 
 
@@ -67,8 +67,8 @@ The Tier-0 router must have routable external IP address space to advertise on t
 The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
 Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
 
-* A job that is a route for traffic. 
-* A job to align Tier-0 DNATs/SNATs, load balancers, and other jobs.
+* A job that routes incoming traffic. 
+* A job that associates Tier-0 DNATs and SNATs, load balancers, and other PCF components. This allows communication between all components and jobs in PCF.
  
 
 <p class="note"><b>Note: </b> Compared to NSX-V, NSX-T consumes much more address space for SNATs.</p>
@@ -81,16 +81,20 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 
 #### <a id="pas-nsx-t-load-balancing"></a> Load Balancing
 
-The following are load balancing considerations for PAS on vSphere with NSX-T deployments:
+The following are load balancing requirements and recommendations for PAS on vSphere with NSX-T deployments:
 
-* Pivotal recommends that you use the standard NSX-T load balancers.  
-* Layer 4 and Layer 7 NSX-T load balancers are created automatically during app deployment. Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-T load balancers. 
-* You must configure NSX-T load balancers for the Gorouters. The domains for the PAS system and apps must resolve to this load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps. 
+* Layer 4 and Layer 7 NSX-T load balancers are created automatically during app deployment.
+* Pivotal recommends that you use the standard Layer 4 and Layer 7 NSX-T load balancers.
+* You must configure the Layer 4 and Layer 7 NSX-T load balancers for the Gorouters. 
+  * The domains for the PAS system and apps must resolve to the load balancer. 
+  * You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
+* Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-T load balancers.
 * Any TCP routers and SSH Proxies also require NSX-T load balancers.
+
 
 #### <a id="pas-nsx-t-networking-subnets-ip"></a> Networking, Subnets, and IP Spacing
 
-The following are considerations related to networks, subnets, and IP spacing for PAS on vSphere with NSX-T deployments:
+The following are requirements and recommendations related to networks, subnets, and IP spacing for PAS on vSphere with NSX-T deployments:
 
 * PAS requires statically-defined networks to host PAS component VMs. 
 * The client side of a NSX-T deployment requires a series of non-routable address banks. NSX-T routers manage the address banks.
@@ -102,7 +106,7 @@ For more information about PAS subnets, see the [Required Subnets](../index.html
 
 ### <a id="pas-nsx-t-ha"></a> High Availability
 
-For information about high availability considerations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
+For information about high availability requirements and recommendations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-t-shared-storage"></a> Shared Storage
 
@@ -134,7 +138,7 @@ Pivotal recommends the following storage capacity allocation for production and 
 
 <p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
-For more information about general storage considerations for PAS, see the
+For more information about general storage requirements and recommendations for PAS, see the
 [Storage](../index.html#pas-storage) section of _Platform Architecture and Planning_.
 
 
@@ -149,7 +153,7 @@ For information about configuring system databases on PAS, see the [Configure Sy
 
 ### <a id="pas-nsx-t-securty"></a> Security
 
-For information about security considerations for PAS deployments, see the [Security](../index.html#pas-security) section of _Platform Architecture and Planning_.
+For information about security requirements and recommendations for PAS deployments, see the [Security](../index.html#pas-security) section of _Platform Architecture and Planning_.
 
 
 ### <a id="pas-nsx-t-blobstore"></a> Blobstore Storage
@@ -161,12 +165,12 @@ Pivotal recommends that you use the following blobstore storage for production a
 
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
-For more information about blobstore storage considerations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+For more information about blobstore storage requirements and recommendations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
 
 
 ## <a id="pas-nsx-v"></a> PAS on vSphere with NSX-V
 
-The following sections describe the reference architecture for PAS on vSphere with NSX-V deployments. They also provide considerations for deploying PAS on vSphere with NSX-V, such as network, load balancing, and storage capacity considerations.
+The following sections describe the reference architecture for PAS on vSphere with NSX-V deployments. They also provide requirements and recommendations for deploying PAS on vSphere with NSX-V, such as network, load balancing, and storage capacity requirements and recommendations.
 
 PAS on vSphere with NSX-V enables services provided by NSX on the PAS platform, such as Edge services gateway (ESG), load balancers, firewall services, and NAT/SNAT services. 
 
@@ -180,18 +184,22 @@ The following reference architecture diagram describes the architecture for PAS 
 
 As shown in the diagram above, PAS deployments with NSX-V are deployed with three clusters and three availability zones (AZs). 
 
-A NSX-V routed Edge external router is on the front end of the PAS deployment. This router is a central logical router into the PAS platform. You can configure VLAN routing from the routed backbone into NSX-V through the routed Edge router.
+PAS deployments with NSX-V also include a NSX-V Edge router on the front end. You can install the NSX-V Edge router as an edge services gateway (ESG) or as a distributed logical router (DLR). 
 
-Compared to the NSX-T architecture, the NSX-V architecture does not use Tier-1 routers to connect the central router to the various subnets for the PAS deployment. 
+The Edge router is a central logical router into the PAS platform. You can configure VLAN routing from the routed backbone into NSX-V through the Edge router.
+
+Compared to NSX-T architecture, NSX-V architecture does not use Tier-1 routers to connect the central router to the various subnets for the PAS deployment.
+
+For more information about using ESG on vSphere, see [Using Edge Services Gateway on VMware NSX](./vsphere_nsx_cookbook.html).
  
 
 ### <a id="pas-nsx-t-networking"></a> Networking
 
-The following sections describe networking considerations for PAS on vSphere with NSX-V deployments.
+The following sections describe networking requirements and recommendations for PAS on vSphere with NSX-V deployments.
 
 #### <a id="pas-nsx-v-routable-ip"></a> Routable IPs
 
-Routable external IPs on the server side, such as routable IPs for NATs and load balancers, are assigned to the ESG on the front end of the PAS deployment.
+You must assign routable external IPs on the server side, such as routable IPs for NATs and load balancers, to the Edge router.
 
 #### <a id="pas-nsx-v-dns"></a> DNS
 
@@ -201,23 +209,23 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 
 #### <a id="pas-nsx-v-load-balancing"></a> Load Balancing
 
-The following are load balancing considerations for PAS on vSphere with NSX-V deployments: 
+The following are load balancing requirements and recommendations for PAS on vSphere with NSX-V deployments: 
 
-* NSX-V includes Edge Services gateway (ESG). ESG provides load balancing and is configured to route to the PAS platform.   
+* NSX-V includes an Edge router. The Edge router supports ESG. ESG provides load balancing and is configured to route to the PAS platform.
 * You must configure Layer 4 and Layer 7 NSX-V load balancers.
-* Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-V load balancers. 
 * You must configure NSX-V load balancers for the Gorouters. The domains for the PAS system and apps must resolve to this load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
+* Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-V load balancers.
 * Any TCP routers and SSH Proxies also require NSX-V load balancers.
-* Pivotal recommends that you also configure any external load balancers, such as F5.
+* Pivotal recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
 
 
 #### <a id="pas-nsx-v-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
-For information about network, subnet, and IP space planning considerations, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning_.
+For information about network, subnet, and IP space planning requirements and recommendations, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-ha"></a> High Availability
 
-For information about high availability considerations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
+For information about high availability requirements and recommendations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-shared-storage"></a> Shared Storage
 
@@ -237,7 +245,7 @@ Pivotal recommends the following storage capacity allocation for production and 
 
 <p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
 
-For more information about general storage considerations for PAS, see the
+For more information about general storage requirements and recommendations for PAS, see the
 [Storage](../index.html#pas-storage) section of _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-sql"></a> SQL Server
@@ -250,7 +258,7 @@ For information about configuring system databases on PAS, see the [Configure Sy
 
 ### <a id="pas-nsx-v-security"></a> Security
 
-For information about security considerations for PAS on vSphere deployments, see the [Security](../index.html#pas-security) section in _Platform Architecture and Planning_.
+For information about security requirements and recommendations for PAS on vSphere deployments, see the [Security](../index.html#pas-security) section in _Platform Architecture and Planning_.
 
 ### <a id="pas-nsx-v-blobstore"></a> Blobstore Storage
 
@@ -261,4 +269,4 @@ Pivotal recommends that you use the following blobstore storage for production a
 
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
-For more information about blobstore storage considerations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+For more information about blobstore storage requirements and recommendations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
