@@ -25,12 +25,12 @@ The following sections describe the reference architecture for PAS on vSphere wi
 
 PAS on vSphere with NSX-T supports the following SDN features:
 
-* Logical Networks and encapsulated broadcast domains
-* VLAN exhaustion avoidance with the use of Logical Networks
-* Routing services and NAT/SNAT to create a separate network space for the PCF installation
-* Load balancing services to distribute traffic to resource pools for systems such as Gorouters
-* SSL termination at the load balancer
-* Distributed routing and firewalling services at the hypervisor
+* Virtualized, encapsulated networks and encapsulated broadcast domains
+* VLAN exhaustion avoidance with the use of virtualized Logical Networks
+* DNAT/SNAT services to create separate, non-routable network spaces for the PAS installation
+* Load balancing services to pass traffic thru (at layer 4) to pools of platform routers (at layer 7)
+* SSL termination at the load balancer at layer 7 with the option to forward on at layer 4 or 7 with unique certificates
+* Virtual, distributed routing and firewalling services native to the hypervisor
 
 
 ### <a id="pas-nsx-t-diagram"></a> Architecture
