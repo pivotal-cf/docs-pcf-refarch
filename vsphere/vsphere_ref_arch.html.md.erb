@@ -3,6 +3,10 @@ title: vSphere Reference Architecture
 owner: Customer0
 ---
 
+<<<<<<< HEAD
+=======
+This topic provides reference architectures for Pivotal Cloud Foundry (PCF) on vSphere. It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html). 
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 
 This guide provides reference architectures for Pivotal Cloud Foundry (PCF),
@@ -203,8 +207,12 @@ To deploy PAS with NSX-T, you need to provide the following in the VMware NSX-T 
 * PAS foundation name that must match the tag added to T0 router, external NAT pool, and IP block
 * Subnet prefix, which controls the size of each org and defaults to /24, that is, 254 addresses
 
+<<<<<<< HEAD
 In addition, you must select **Enable SNAT for Container Networks** in the tile.
 For more information about configuring PAS with NSX-T networking, see [Deploying PAS with NSX-T Networking](../../customizing/vsphere-nsx-t.html).
+=======
+For information about high availability requirements and recommendations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 Each new job, such as an isolation segment, falls to a broadcast domain or logical switch connected to a T1 router acting as the gateway to that network.
 This approach provides a DNAT and SNAT control point and a firewall boundary.
@@ -256,11 +264,16 @@ see [Installing and Configuring PKS with NSX-T Integration](https://docs.pivotal
 
 [View a larger version of this diagram](../images/pks-with-nsxt.png)
 
+<<<<<<< HEAD
 New T1 routers are deployed on-demand as new namespaces are added to PKS.
 Because these can grow rapidly,
 allocate a large Pod IP block such as /14 in NSX-T,
 and then NSX-T provisions /24 address blocks for new namespaces.
 Reference the Pod IP block from your PKS tile configuration.
+=======
+For more information about general storage requirements and recommendations for PAS, see the
+[Storage](../index.html#pas-storage) section of _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 PKS v1.1.5 and later supports multiple master nodes.
 The number of master nodes is defined per plan in the PKS tile.
@@ -284,6 +297,7 @@ Wildcard DNS entries are needed for pointing at the ingress service in the style
 Domain information for ingress is defined in the manifest of your Kubernetes deployment.
 See the example below.
 
+<<<<<<< HEAD
 ```
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -300,6 +314,9 @@ spec:
           serviceName: music-service
           servicePort: 8080
 ```
+=======
+For information about security requirements and recommendations for PAS deployments, see the [Security](../index.html#pas-security) section of _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 ##### <a id="layer-4"></a> Load Balancing
 
@@ -397,11 +414,19 @@ HA considerations include the following:
 PCF achieves redundancy through the AZ construct, and the loss of an AZ is not considered catastrophic.
 BOSH Resurrector replaces lost VMs as needed to repair a foundation.
 
+<<<<<<< HEAD
 Foundation backup and restoration is accomplished externally by BOSH Backup and Restore (BBR).
 For information about BBR, see [Backing Up and Restoring Pivotal Cloud Foundry](../../customizing/backup-restore/index.html).
+=======
+For information about network, subnet, and IP space planning requirements and recommendations, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 
+<<<<<<< HEAD
 ### <a id="scaling"></a> Scaling and Capacity Management
+=======
+For information about high availability requirements and recommendations for PAS on vSphere, see the [High Availability](../index.html#pas-ha) section of _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 This section provides information about scaling and capacity management for PCF.
 
@@ -437,7 +462,12 @@ A medium-sized PCF foundation looks as follows:
 For this design, Pivotal recommends replacing Small Footprint Runtime with PAS.
 The second AZ doubles compute capacity and expands the NSX-T footprint.
 
+<<<<<<< HEAD
 #### <a id="production"></a> Production-Ready PCF Installations
+=======
+For more information about general storage requirements and recommendations for PAS, see the
+[Storage](../index.html#pas-storage) section of _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 A production-ready PCF foundation looks as follows:
 
@@ -458,7 +488,11 @@ A fully meshed installation of PCF v2.2 or later designed using the recommendati
 
 <%= image_tag('../images/pas-pks-nsxt.png') %>
 
+<<<<<<< HEAD
 [View a larger version of this diagram](../images/pas-pks-nsxt.png)
+=======
+For information about security requirements and recommendations for PAS on vSphere deployments, see the [Security](../index.html#pas-security) section in _Platform Architecture and Planning Overview_.
+>>>>>>> 745ec42... Change topic index to 'Overview' [#167633327]
 
 Common components are the NSX T0 router and the associated T1 routers.
 This approach ensures that any cross-traffic between PKS and PAS apps stays within the bounds of the T0.
