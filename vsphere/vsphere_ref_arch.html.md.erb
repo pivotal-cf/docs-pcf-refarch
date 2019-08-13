@@ -81,8 +81,7 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 
 The following are load balancing requirements and recommendations for PAS on vSphere with NSX-T deployments:
 
-* Pivotal recommends that you use the standard Layer 4 and Layer 7 NSX-T load balancers.
-* You must configure the Layer 4 and Layer 7 NSX-T load balancers for the Gorouters. 
+* You must configure Layer 4 and Layer 7 NSX-T load balancers for the Gorouters. 
   * The domains for the PAS system and apps must resolve to the load balancer VIP. 
   * You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
 * Pivotal recommends that you pass SSL traffic thru the NSX-T load balancer(s) and terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-T load balancers at layer 4 and redice processing overhead.
@@ -210,8 +209,7 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 The following are load balancing requirements and recommendations for PAS on vSphere with NSX-V deployments: 
 
 * NSX-V includes an Edge router. The Edge router supports ESG. ESG provides load balancing and is configured to route to the PAS platform.
-* You must configure Layer 4 and Layer 7 NSX-V load balancers.
-* You must configure NSX-V load balancers for the Gorouters. The domains for the PAS system and apps must resolve to this load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
+* You must configure Layer 4 and Layer 7 NSX-V load balancers for the Gorouters. The domains for the PAS system and apps must resolve to this load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
 * Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-V load balancers.
 * Any TCP routers and SSH Proxies also require NSX-V load balancers.
 * Pivotal recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
