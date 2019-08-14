@@ -43,7 +43,7 @@ The following reference architecture diagram describes the architecture for PAS 
 
 As shown in the diagram above, PAS deployments with NSX-T are deployed with three clusters and three availability zones (AZs). 
 
-A NSX-T Tier-0 router is on the front end of the PAS deployment. This router is a central logical router into the PAS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router via the gateway Edge.
+A NSX-T Tier-0 router is on the front end of the PAS deployment. This router is a central logical router into the PAS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
 
 Several Tier-1 routers, such as the router for the PAS and infrastructure subnets, connect to the Tier-0 router. 
 
@@ -84,7 +84,8 @@ The following are load balancing requirements and recommendations for PAS on vSp
 * You must configure Layer 4 and Layer 7 NSX-T load balancers for the Gorouters. 
   * The domains for the PAS system and apps must resolve to the load balancer VIP. 
   * You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
-* Pivotal recommends that you pass SSL traffic thru the NSX-T load balancer(s) and terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-T load balancers at layer 4 and redice processing overhead.
+* Pivotal recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
+<p class='note'><b>Note:</b> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, this approach adds additional overhead processing and is not recommended.</p>
 * Any TCP Gorouters and SSH Proxies within the platofrm also require NSX-T load balancers.
 * Layer 4 and Layer 7 NSX-T load balancers are created automatically during app deployment.
 
@@ -209,8 +210,9 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 The following are load balancing requirements and recommendations for PAS on vSphere with NSX-V deployments: 
 
 * NSX-V includes an Edge router. The Edge router supports ESG. ESG provides load balancing and is configured to route to the PAS platform.
-* You must configure Layer 4 and Layer 7 NSX-V load balancers for the Gorouters. The domains for the PAS system and apps must resolve to this load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
-* Pivotal recommends that you terminate SSL at the Gorouters. By terminating SSL at the Gorouters, traffic is able to pass through the NSX-V load balancers.
+* Pivotal recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
+<p class='note'><b>Note:</b> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, this approach adds additional overhead processing and is not recommended.</p>
+* The domains for the PAS system and apps must resolve to the load balancer. You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
 * Any TCP routers and SSH Proxies also require NSX-V load balancers.
 * Pivotal recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
 
