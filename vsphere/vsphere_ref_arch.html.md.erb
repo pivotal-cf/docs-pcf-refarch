@@ -81,7 +81,7 @@ For more information about DNS requirements for PAS, see the [Domain Names](../i
 
 The following are load balancing requirements and recommendations for PAS on vSphere with NSX-T deployments:
 
-* You must configure Layer 4 and Layer 7 NSX-T load balancers for the Gorouters. 
+* You must configure NSX-T load balancers for the Gorouters. 
   * The domains for the PAS system and apps must resolve to the load balancer VIP. 
   * You must assign either a private or a public IP address assigned to the domains for the PAS system and apps.
 * Pivotal recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
