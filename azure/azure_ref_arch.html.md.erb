@@ -5,13 +5,13 @@ owner: Customer0
 
 This guide presents a reference architecture for <%= vars.first_product_name  %> on Azure. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html). 
 
-See [Installing <%= vars.product_name  %> on Azure](../../customizing/azure.html) for additional requirements and installation instructions for running <%= vars.product_name  %> on Azure. 
+See [Installing <%= vars.product_name %> on Azure](../../customizing/azure.html) for additional requirements and installation instructions for running <%= vars.product_name %> on Azure. 
 
 ## <a id="overview"></a> Overview
 
 Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers.  For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
-When installing <%= vars.product_name  %>, you can use this model to place resources in resource groups. For example, a <%= vars.product_name  %> installation contains the following:
+When installing <%= vars.product_name %>, you can use this model to place resources in resource groups. For example, a <%= vars.product_name %> installation contains the following:
 
 * **Hub**: 
 	* A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies. 
@@ -21,13 +21,13 @@ When installing <%= vars.product_name  %>, you can use this model to place resou
 
 ### <a id="overview"></a> Diagram 
 
-The following architecture diagram illustrates <%= vars.product_name  %> on Azure using the hub and spoke model described above: 
+The following architecture diagram illustrates <%= vars.product_name %> on Azure using the hub and spoke model described above: 
 
-![This diagram illustrates <%= vars.product_name  %> with PAS on Azure using availability sets. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure.png) 
+![This diagram illustrates <%= vars.product_name %> with PAS on Azure using availability sets. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure.png) 
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
 
-The sections below provide guidance about the resources you use for running <%= vars.product_name  %> on Azure. 
+The sections below provide guidance about the resources you use for running <%= vars.product_name %> on Azure. 
 
 
 ## <a id="networking"></a> Networking
@@ -36,7 +36,7 @@ The following sections provide guidance about networking resources.
 
 ### <a id="network-considerations"></a> General Requirements and Recommendations
 
-The following are general requirements and recommendations related to networking when running <%= vars.product_name  %> on Azure:
+The following are general requirements and recommendations related to networking when running <%= vars.product_name %> on Azure:
 
 * You must enable Virtual Network peering between hub and spoke resource groups. See [Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview). 
 * You must have separate subscriptions for each resource group. This includes the following:
@@ -48,16 +48,16 @@ The following are general requirements and recommendations related to networking
 
 ### <a id="dns"></a> DNS
 
-For your <%= vars.product_name  %> domains, use a sub-zone of an Azure DNS zone.  
+For your <%= vars.product_name %> domains, use a sub-zone of an Azure DNS zone.  
 
-Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, if your company’s domain is `example.com`, your <%= vars.product_name  %> zone in Azure DNS would be `pcf.example.com`.
+Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, if your company’s domain is `example.com`, your <%= vars.product_name %> zone in Azure DNS would be `pcf.example.com`.
 
 Azure DNS does not support recursion. To properly configure Azure DNS, do the following:
 
 1. Create a `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration. 
-1. Create the required wildcard `A` records for the <%= vars.product_name  %> app and system domains, as well as any other records desired for your <%= vars.product_name  %> deployments.
+1. Create the required wildcard `A` records for the <%= vars.product_name %> app and system domains, as well as any other records desired for your <%= vars.product_name %> deployments.
 
-You do not need to make any configuration changes in <%= vars.product_name  %> to support Azure DNS.
+You do not need to make any configuration changes in <%= vars.product_name %> to support Azure DNS.
 
 ### <a id="lb-types"></a>Load Balancing
 
@@ -70,15 +70,15 @@ The PAS system and app domains must resolve to your ALB and have either a privat
 
 ### <a id="networks"></a> Networks
 
-<%= vars.product_name  %> requires the networks defined in the base reference architectures for PAS and PKS. See the _Networks_ sections in [Platform Architecture and Planning Overview](../index.html). 
+<%= vars.product_name %> requires the networks defined in the base reference architectures for PAS and PKS. See the _Networks_ sections in [Platform Architecture and Planning Overview](../index.html). 
 
 ### <a id="pas-single-azure-resource"></a> PAS on a Single Resource Group
 
-If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy <%= vars.product_name  %> and define network constructs.
+If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy <%= vars.product_name %> and define network constructs.
 
 ## <a id="ha-considerations"></a>High Availability
 
-<p class="note"><strong>Note</strong>: As of <%= vars.product_name  %> v2.5.3, <%= vars.product_name  %> on Azure supports both availability zones (AZ) and Availability Sets.</p>
+<p class="note"><strong>Note</strong>: As of <%= vars.product_name %> v2.5.3, <%= vars.product_name %> on Azure supports both availability zones (AZ) and Availability Sets.</p>
 
 Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the placement group pinning issue associated with Availability Sets and allow greater control when defining high availability configuration when using multiple Azure services.
 
@@ -95,7 +95,7 @@ See the following table for additional guidance depending on your use case:
 </tr>
 <tr>
 <td>Existing foundation in AZ enabled region</td>
-<td>Migrate to a new <%= vars.product_name  %> v2.5.3+ foundation so that you can use AZs. These existing foundations, especially those using older families of VMs such as  <code>DS_v2</code>, risk running out of capacity as they scale.</td>
+<td>Migrate to a new <%= vars.product_name %> v2.5.3+ foundation so that you can use AZs. These existing foundations, especially those using older families of VMs such as  <code>DS_v2</code>, risk running out of capacity as they scale.</td>
 </tr>
 <tr>
 <td>Existing foundation <strong>not</strong> in AZ enabled region</td>
@@ -114,7 +114,7 @@ AZs are an Azure primitive that supports high availability within a region. They
 
 The following diagram illustrates PAS deployed on Azure using AZs:
 
-![This diagram illustrates <%= vars.product_name  %> with PAS on Azure using availability zones. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure_with_AZs.png) 
+![This diagram illustrates <%= vars.product_name %> with PAS on Azure using availability zones. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure_with_AZs.png) 
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure_with_AZs.png). 
 
@@ -129,7 +129,7 @@ AZs have the following advantages:
 
 Availability Sets were the first Azure primitive to support high availability within a region. 
 
-<p class="note warning"><strong>Warning</strong>: Availability Sets are implemented at the hardware rack level, which can cause issues when deploying <%= vars.product_name  %> on Azure. See <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
+<p class="note warning"><strong>Warning</strong>: Availability Sets are implemented at the hardware rack level, which can cause issues when deploying <%= vars.product_name %> on Azure. See <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
 
 They have the following properties:
 
@@ -139,7 +139,7 @@ They have the following properties:
 
 #### <a id="placement-group-pinning"></a> Placement Group Pinning Issues
 
-In <%= vars.product_name  %> on Azure in AS HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job within the same Availability Set. 
+In <%= vars.product_name %> on Azure in AS HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job within the same Availability Set. 
 
 Cluster pinning causes the following:
 
@@ -155,7 +155,7 @@ For storage, Pivotal recommends the following:
 * Configure storage accounts for Zone Redundant Storage (ZRS) in AZ-enabled Regions. 
 	<p class="note"><strong>Note</strong>: In non-AZ enabled regions, locally Redundant Storage (LRS) is sufficient.</p> 
 * Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high availability for the VMs.
-* Use 5 storage accounts. <%= vars.product_name  %> on Azure requires 5 storage accounts: 1 BOSH, 1 Ops Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit of 20 VMs each.
+* Use 5 storage accounts. <%= vars.product_name %> on Azure requires 5 storage accounts: 1 BOSH, 1 Ops Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit of 20 VMs each.
 
 
 ## <a id="sql-server"></a> SQL Server
@@ -165,7 +165,7 @@ The Internal MySQL database provided by PAS is sufficient for production use.
 
 ## <a id="blobstore-storage-accts"></a>Blobstore Storage Account
 
-Use Azure Blob Storage as the external file storage option for <%= vars.product_name  %>. This provides redundancy for high-availability deployments of <%= vars.product_name  %> and unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
+Use Azure Blob Storage as the external file storage option for <%= vars.product_name %>. This provides redundancy for high-availability deployments of <%= vars.product_name %> and unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings. 
 
 Ops Manager requires a bucket for the BOSH blobstore. 
 
