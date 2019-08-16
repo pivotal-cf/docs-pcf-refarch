@@ -5,24 +5,24 @@ owner: Customer0
 
 
 
-This guide presents a reference architecture for <%= vars.first_product_name  %> on OpenStack. This architecture is valid for most production-grade PCF deployments in a single project using three availability zones (AZs).
+This guide presents a reference architecture for <%= vars.first_product_name  %> on OpenStack. This architecture is valid for most production-grade <%= vars.product_name  %> deployments in a single project using three availability zones (AZs).
 
-See [OpenStack on PCF Requirements](../../customizing/openstack.html) for general requirements for running PCF and specific requirements for running PCF on OpenStack.
+See [OpenStack on <%= vars.product_name  %> Requirements](../../customizing/openstack.html) for general requirements for running <%= vars.product_name  %> and specific requirements for running <%= vars.product_name  %> on OpenStack.
 
-## <a id="refarchs"></a>PCF Reference Architectures ##
+## <a id="refarchs"></a><%= vars.product_name  %> Reference Architectures ##
 
-A PCF reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as OpenStack, that meets the following requirements:
+A <%= vars.product_name  %> reference architecture describes a proven approach for deploying Pivotal Cloud Foundry on a specific IaaS, such as OpenStack, that meets the following requirements:
 
 * Secure
 * Publicly-accessible
-* Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Includes common <%= vars.product_name  %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
 * Can host at least 100 app instances, or far more
 
-Pivotal provides reference architectures to help you determine the best configuration for your PCF deployment.
+Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.product_name  %> deployment.
 
 ##<a id='base'></a> Base OpenStack Reference Architecture ##
 
-The following diagram provides an overview of a reference architecture deployment of PCF on OpenStack using three AZs.
+The following diagram provides an overview of a reference architecture deployment of <%= vars.product_name  %> on OpenStack using three AZs.
 
 <%= image_tag('openstack-overview-arch.png') %>
 
@@ -93,7 +93,7 @@ The following table lists the components that are part of a base reference archi
 	<td>Two service accounts are recommended: one for OpenStack "paving," and the other for Ops Manager and BOSH. Consult the following list:<br><br>
 		<ul>
 		<li>Admin Account: Concourse will use this account to provision required OpenStack resources as well as a Keystone service account.</li>
-		<li>Keystone Service Account: This service account will be automatically provisioned with restricted access only to resources needed by PCF.
+		<li>Keystone Service Account: This service account will be automatically provisioned with restricted access only to resources needed by <%= vars.product_name  %>.
 		</ul>
 	</td>
 </tr>
@@ -118,7 +118,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Project</strong></td>
-  <td>One per deployment. A PCF deployment exists within a single project and a single OpenStack region, but should distribute PCF jobs and instances across three OpenStack AZs to ensure a high degree of availability.</td>
+  <td>One per deployment. A <%= vars.product_name  %> deployment exists within a single project and a single OpenStack region, but should distribute <%= vars.product_name  %> jobs and instances across three OpenStack AZs to ensure a high degree of availability.</td>
   <td>1</td>
   </tr>
   <tr>
@@ -186,7 +186,7 @@ The following table lists the network objects in this reference architecture.
   </tr>
   <tr>
   <td><strong>Load Balancers</strong></td>
-  <td>PCF on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two load balancers are recommended: one to forward the traffic to the Gorouters, <code>AppsLB</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
+  <td><%= vars.product_name  %> on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two load balancers are recommended: one to forward the traffic to the Gorouters, <code>AppsLB</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
   	<br><br>
   	The following table describes the required listeners for each load balancer:
   	<table>

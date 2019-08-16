@@ -9,20 +9,20 @@ This documentation describes reference architectures and other plans for install
 
 ## <a id="overview"></a> Overview
 
-A <%= vars.first_product_name  %> reference architecture describes a proven approach for deploying PCF on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. PCF reference architectures meet the following requirements:
+A <%= vars.first_product_name  %> reference architecture describes a proven approach for deploying <%= vars.product_name  %> on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. <%= vars.product_name  %> reference architectures meet the following requirements:
 
   - Secure
   - Publicly-accessible
-  - Includes common PCF-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+  - Includes common <%= vars.product_name  %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
   - Can host at least 100 app instances, or far more
   - Have been deployed and validated by Pivotal to support Ops Manager, PAS, and PKS
 
-You can use PCF reference architectures to help plan the best configuration for your PCF deployment on your IaaS.
+You can use <%= vars.product_name  %> reference architectures to help plan the best configuration for your <%= vars.product_name  %> deployment on your IaaS.
 
 
 ## <a id="topics"></a> Reference Architecture and Planning Topics
 
-All PCF reference architectures start with the [Base PAS Architecture](#pas-base) and [Base PKS Architecture](#pks-base), below.
+All <%= vars.product_name  %> reference architectures start with the [Base PAS Architecture](#pas-base) and [Base PKS Architecture](#pks-base), below.
 
 The following infrastructure-specific topics build on these two common base architectures:
 
@@ -32,11 +32,11 @@ The following infrastructure-specific topics build on these two common base arch
 * [OpenStack Reference Architecture](./openstack/openstack_ref_arch.html)
 * [vSphere Reference Architecture](./vsphere/vsphere_ref_arch.html)
 
-The following topic describes a broader architecture that automates the installation and updating of multiple PCF foundations, multiple instances of each architecture above:
+The following topic describes a broader architecture that automates the installation and updating of multiple <%= vars.product_name  %> foundations, multiple instances of each architecture above:
 
 * [Control Plane Reference Architectures](./control.html)
 
-The following topics address aspects of platform architecture and planning that the PCF reference architectures do not cover:
+The following topics address aspects of platform architecture and planning that the <%= vars.product_name  %> reference architectures do not cover:
 
 * [Implementing a Multi-Foundation PKS Deployment](https://docs.pivotal.io/runtimes/pks/nsxt-multi-pks.html)
 * [Using Global DNS Load Balancers for Multi-Foundation](./global-dns-lb.html)
@@ -44,7 +44,7 @@ The following topics address aspects of platform architecture and planning that 
 
 ## <a id="pas-base"></a> PAS Architecture
 
-The following diagram shows a base architecture for PAS, and how its network topology places and replicates PCF and PAS components across subnets and Availability Zones.
+The following diagram shows a base architecture for PAS, and how its network topology places and replicates <%= vars.product_name  %> and PAS components across subnets and Availability Zones.
 
 <%# Image from PAS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
 ![PAS Base Deployment Topology](./images/v2/export/PAS_Base.png)
@@ -115,7 +115,7 @@ For additional information, see [Global DNS Load Balancers for Multi-Foundation 
 
 PAS is not considered High Availability (HA) until it runs across at least two Availability Zones (AZs). Pivotal recommends defining three AZs.
 
-On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a PCF HA topology provides the best of both worlds. Multiple AZs give PCF redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
+On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a <%= vars.product_name  %> HA topology provides the best of both worlds. Multiple AZs give <%= vars.product_name  %> redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
 
 To back up and restore a foundation externally, use BOSH Backup and Restore (BBR). For more information, see the [BOSH Backup and Restore](https://docs.cloudfoundry.org/bbr/) documentation.
 
@@ -129,14 +129,14 @@ The platform also requires you to configure file storage for large shared object
 
 See the topics below for how PAS implements security:
 
-* [PCF Infrastructure Security
+* [<%= vars.product_name  %> Infrastructure Security
 ](../security/pcf-infrastructure/index.html)
 
 * [Security Concepts](../security/concepts/)
 
-* [Certificates and TLS in PCF](../security/pcf-infrastructure/certificates-index.html)
+* [Certificates and TLS in <%= vars.product_name  %>](../security/pcf-infrastructure/certificates-index.html)
 
-* [Network Communication Paths in PCF](../security/networking/#net_commpaths) - includes firewall ports
+* [Network Communication Paths in <%= vars.product_name  %>](../security/networking/#net_commpaths) - includes firewall ports
 
 ### <a id="pas-domains"></a> Domain Names
 
@@ -159,7 +159,7 @@ See [Scaling PAS](../opsguide/scaling-ert-components.html) for recommendations o
 
 ## <a id="pks-base"></a> PKS Architecture
 
-The following diagram shows a base architecture for PKS, and how its network topology places and replicates PCF and PKS components across subnets and Availability Zones.
+The following diagram shows a base architecture for PKS, and how its network topology places and replicates <%= vars.product_name  %> and PKS components across subnets and Availability Zones.
 
 <%# Image from PKS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
 ![PAS Base Deployment Topology](./images/v2/export/PKS_Base.png)

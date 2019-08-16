@@ -7,7 +7,7 @@ This guide presents a reference architecture for <%= vars.first_product_name  %>
 Pivotal Application Service (PAS) and Enterprise Pivotal Container Service (PKS), on Amazon Web Services
 (AWS). It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html).
 
-See [PCF on AWS Requirements](../../customizing/aws.html) for general requirements for running PCF and specific requirements for running PCF on AWS.
+See [<%= vars.product_name  %> on AWS Requirements](../../customizing/aws.html) for general requirements for running <%= vars.product_name  %> and specific requirements for running <%= vars.product_name  %> on AWS.
 
 ## <a id="pas"></a>PAS
 
@@ -39,10 +39,10 @@ AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). P
 The following list provides considerations related to networks, subnets, and IP spacing planning.
 
 * In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved.
-* Your organization might not have the IP space necessary to deploy PAS in a consistent manner. To alleviate this, Pivotal recommends using the `100.64` address space to deploy a NAT instance and router so that the PCF deployment can use few IP addresses.
+* Your organization might not have the IP space necessary to deploy PAS in a consistent manner. To alleviate this, Pivotal recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.product_name  %> deployment can use few IP addresses.
 * If you want the front end of PAS to be accessible from your corporate network or the services running on PAS to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
 * If you want a VPC that is only public-facing, no special consideration is necessary for the use of IPs.
-* See the following table to understand the action required depending on the type of traffic you want to allow for your PCF deployment.
+* See the following table to understand the action required depending on the type of traffic you want to allow for your <%= vars.product_name  %> deployment.
 	<table>
 		<tr>
 			<th>If you want...</th>
@@ -65,7 +65,7 @@ The following list provides considerations related to networks, subnets, and IP 
 			<td>Create the NAT instance on your corporate subnet or if business requirements dictate, make the entire VPC corporate-routable.</td>
 		</tr>
 	</table>
-* If you plan to install [PCF Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
+* If you plan to install [<%= vars.product_name  %> Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
 
 #### <a id="alternatives"></a> Alternative Network Layouts
 

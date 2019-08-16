@@ -5,15 +5,15 @@ owner: Customer0
 
 This topic provides reference architectures for <%= vars.first_product_name  %> on vSphere. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html). 
 
-See [Installing PCF on vSphere](../../customizing/vsphere.html) for additional requirements and installation instructions for PCF on vSphere.
+See [Installing <%= vars.product_name  %> on vSphere](../../customizing/vsphere.html) for additional requirements and installation instructions for <%= vars.product_name  %> on vSphere.
 
 ## <a id="overview"></a> Overview
 
 The vSphere reference architecture for the Pivotal Application Service (PAS) runtime is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
 
-For PAS deployments, the VMware NSX-T Container Plugin for PCF is required to use the SDN features of NSX-T.
+For PAS deployments, the VMware NSX-T Container Plugin for <%= vars.product_name  %> is required to use the SDN features of NSX-T.
 
-PCF supports the following configurations for PCF on vSphere deployments:
+<%= vars.product_name  %> supports the following configurations for <%= vars.product_name  %> on vSphere deployments:
 
 * PAS on vSphere with NSX-T. See [PAS on vSphere with NSX-T](#pas-nsx-t).
 * PAS on vSphere with NSX-V. See [PAS on vSphere with NSX-V](#pas-nsx-v).
@@ -49,11 +49,11 @@ Several Tier-1 routers, such as the router for the PAS and infrastructure subnet
 
 ### <a id="pas-nsx-t-pas"></a> NSX-T Container Plugin Requirement
 
-For PAS deployments, the VMware NSX-T Container Plugin for PCF is required to enable the SDN features available through NSX-T.
+For PAS deployments, the VMware NSX-T Container Plugin for <%= vars.product_name  %> is required to enable the SDN features available through NSX-T.
 
 The NSX-T Container Plugin enables a container networking stack and integrates with NSX-T. 
 
-<p class="note"><b>Note:</b> To use NSX-T with PAS, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the PAS tile. To download the NSX-T Container Plugin, see <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in for PCF</a> on Pivotal Network.</p>
+<p class="note"><b>Note:</b> To use NSX-T with PAS, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the PAS tile. To download the NSX-T Container Plugin, see <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in for <%= vars.product_name  %></a> on Pivotal Network.</p>
 
 
 ### <a id="pas-nsx-t-networking"></a> Networking
@@ -66,7 +66,7 @@ The Tier-0 router must have routable external IP address space to advertise on t
 Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
 
 * Routing incoming & outgoing traffic. 
-* DNATs and SNATs, load balancer VIPs, and other PCF components.
+* DNATs and SNATs, load balancer VIPs, and other <%= vars.product_name  %> components.
  
 
 <p class="note"><b>Note: </b> Compared to NSX-V, NSX-T consumes much more address space for SNATs.</p>
@@ -108,19 +108,19 @@ For information about high availability requirements and recommendations for PAS
 
 ### <a id="pas-nsx-t-shared-storage"></a> Shared Storage
 
-Shared storage is a requirement for PCF. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
+Shared storage is a requirement for <%= vars.product_name  %>. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
 
 #### Horizontal Shared Storage
 
-With the horizontal shared storage approach, you grant all hosts access to all datastores and assign a subset to each PCF installation. 
+With the horizontal shared storage approach, you grant all hosts access to all datastores and assign a subset to each <%= vars.product_name  %> installation. 
 
-For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first PCF installation to use stores `ds01` through `ds03`  and your second PCF installation to use `ds04` through `ds06`.
+For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first <%= vars.product_name  %> installation to use stores `ds01` through `ds03`  and your second <%= vars.product_name  %> installation to use `ds04` through `ds06`.
 
 #### Vertical Shared Storage
 
 With the vertical shared storage approach, you grant each cluster its own datastores, creating a cluster-aligned storage strategy. vSphere VSAN is an example of this architecture. 
 
-For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to a cluster, `ds03` and `ds04` to a second cluster, and `ds05` and `ds06` to a third cluster. You then provision your first PCF installation to use `ds01`, `ds03`, and `ds05`, and your second PCF installation to use `ds02`, `ds04`, and `ds06`. 
+For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to a cluster, `ds03` and `ds04` to a second cluster, and `ds05` and `ds06` to a third cluster. You then provision your first <%= vars.product_name  %> installation to use `ds01`, `ds03`, and `ds05`, and your second <%= vars.product_name  %> installation to use `ds02`, `ds04`, and `ds06`. 
 
 With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
@@ -132,9 +132,9 @@ Pivotal recommends the following storage capacity allocation for production and 
 * **Production environments**: Configure at least 8 TB of data storage. You can configure this as either one 8 TB store or a number of smaller volumes that sum to 8 TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks. 
 * **Non-production environments**: Configure 4 to 6 TB of data storage.
 
-<p class="note"><strong>Note</strong>: PCF does not support using vSphere Storage Clusters with the <a href="#overview">latest versions of PCF</a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+<p class="note"><strong>Note</strong>: <%= vars.product_name  %> does not support using vSphere Storage Clusters with the <a href="#overview">latest versions of <%= vars.product_name  %></a> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-<p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
+<p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.product_name  %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate <%= vars.product_name  %> to a New Datastore in vSphere</a>.</p>
 
 For more information about general storage requirements and recommendations for PAS, see the
 [Storage](../index.html#pas-storage) section of _Platform Architecture and Planning Overview_.
@@ -227,7 +227,7 @@ For information about high availability requirements and recommendations for PAS
 
 ### <a id="pas-nsx-v-shared-storage"></a> Shared Storage
 
-Shared storage is a requirement for PCF. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
+Shared storage is a requirement for <%= vars.product_name  %>. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
 
 For information about horizontal and vertical shared storage, see [Shared Storage](#pas-nsx-v-shared-storage).
 
@@ -239,9 +239,9 @@ Pivotal recommends the following storage capacity allocation for production and 
 * **Production environments**: Configure at least 8 TB of data storage. You can configure this as either one 8 TB store or a number of smaller volumes that sum to 8 TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks. 
 * **Non-production environments**: Configure 4 to 6 TB of data storage.
 
-<p class="note"><strong>Note</strong>: PCF does not support using vSphere Storage Clusters with the latest versions of PCF validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+<p class="note"><strong>Note</strong>: <%= vars.product_name  %> does not support using vSphere Storage Clusters with the latest versions of <%= vars.product_name  %> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-<p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by PCF. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate PCF to a New Datastore in vSphere</a>.</p>
+<p class="note"><b>Note:</b> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.product_name  %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate <%= vars.product_name  %> to a New Datastore in vSphere</a>.</p>
 
 For more information about general storage requirements and recommendations for PAS, see the
 [Storage](../index.html#pas-storage) section of _Platform Architecture and Planning Overview_.
