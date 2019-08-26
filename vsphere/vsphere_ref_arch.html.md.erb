@@ -268,3 +268,99 @@ Pivotal recommends that you use the following blobstore storage for production a
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
 For more information about blobstore storage requirements and recommendations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+
+___________
+
+
+
+
+
+
+
+
+
+
+
+
+
+## <a id="pks-nsx-t"></a> PKS on vSphere with NSX-T
+
+The following sections describe the reference architecture for PKS on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying PKS on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
+
+### <a id="pks-nsx-t-diagram"></a> Architecture
+
+The following reference architecture diagram describes the architecture for PKS on vSphere with NSX-T deployments.
+
+![The diagram shows the archiecture for a PKS on vSphere with NSX-T deployment. For more information about the components and networking demonstrated by the diagram, read the description below this diagram.](../images/v2/export/PKS_vSphere_NSX-T.png)
+
+[View a larger version of this diagram](../images/v2/export/PKS_vSphere_NSX-T.png).
+
+As shown in the diagram above, PKS deployments with NSX-T are deployed with three clusters and three availability zones (AZs). 
+
+A NSX-T Tier-0 router is on the front end of the PKS deployment. This router is a central logical router into the PKS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
+
+Several Tier-1 routers, such as the router for the PAS and infrastructure subnets, connect to the Tier-0 router.
+
+### <a id="pks-nsx-t-networking"></a> Networking
+
+The following sections describe networking requirements and recommendations for PKS on vSphere with NSX-T deployments.
+
+#### <a id="pks-nsx-t-load-balancing"></a> Load Balancing
+
+The following are load balancing requirements and recommendations for PKS on vSphere with NSX-V deployments: 
+
+Standard  NSX-T Load Balancer  are preferred Load Balancers on PKS  on vSphere NSX-T installation.  NSX-T Load Balancers of type Layer 4 and Layer 7 are created automatically upon application deployment.. SSL can  be terminated at the load balancer.
+How you select ingress routing influences load balancing choices. You’re going to want both.
+Ingress Routing - Layer 7
+Service Type:LoadBalancer - Layer 4
+Ingress Routing is provided natively by NSX-T.  Third party options include Istio or Nginx running as containers in the cluster. Wildcard DNS entries are needed to point at the ingress service in the style of go-routers in PAS. Domain info for ingress is defined in the manifest of the kubernetes deployment.
+
+
+Service Type:LoadBalancer - Layer 4
+When pushing a kubernetes deployment with type set to “LoadBalancer”, NSX-T automatically creates a new VIP for the deployment on the existing load balancer for that namespace. You will need to specify a listening and translation port in the service, along with a name for tagging. You will also specify a protocol to use.
+
+
+#### <a id="pks-nsx-t-external-routing"></a> External Routing
+
+Routable external IPs on the Provider side, for example for NATs, PAS Orgs and load balancers get assigned to the T0 router front-ending the PCF installation. There are two approaches to assigning address space blocks to this job, each with its own ramifications.
+
+Without PKS at all, or With PKS Ingress: The T0 router needs some routable address space to advertise on the BGP network with its peers. Select a network range with ample address space that can be split into two logical jobs, one job being advertised as a route for traffic and the other job is for aligning T0 DNATs/SNATs, load balancers and other jobs. Unlike NSX-V, you will consume much more address space for SNATs than before.
+
+With PKS No Ingress: Relative to above, this approach has much higher address space consumption for load balancer WVIPs, so allow for 4x the address space due to the fact that Kubernetes service types allocate addresses very frequently.
+
+Reference: Kubernetes Ingress
+
+Provider Routable Address Space: /25 (or /23 for PKS No Ingress)
+
+NSX-T handles the routing between a T0 router and any T1 routers associated with it. There are no design parameters needed from Pivotal to accomplish this. For the purposes of PCF, the T0/T1 routing relationship “just works”.
+
+
+#### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
+
+Networks defined for PKS is outlined in base ref arch section https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network.
+In addition , allocate large block following network CIDRs. These can be configured during PKS cluster configuration in OpsManager.
+PKS Clusters 172.24.0.0/14
+PKS Pods 172.28.0.0/14
+
+When deploying PKS via Ops Manager, you must allow for a block of address space for dynamic networks that PKS will deploy per namespace. The recommended address space is distinctly different  that used with PAS, to give the operator a quick visual queue as to which jobs relate to what service.
+When new PKS cluster is  created, PKS dynamically creates a new /24 network is carved out from PKS cluster address space.  When a new application is deployed, a new NSX-T Tier-1 routers are generated and /24 is created from the PKS PODS network. 
+So, to summarize, do allocate a large address block for PKS clusters and PODS block.
+
+
+### <a id="pks-nsx-t-ha"></a> High Availability
+
+https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-ha
+
+
+### <a id="pks-nsx-t-storage-capacity"></a> Storage Capacity
+
+Pivotal recommends the following storage capacity allocation for production and non-production PAS environments:
+
+Pivotal Container service(PKS) on vSphere supports stateful apps using Persistent Volumes (PVs). PKS on vSphere supports static persistent volume provisioning and dynamic persistent volume provisioning.  These storage options to support stateful apps making PVs claims include vSAN datastores and Network File Share(NFS) or VMFS over iSCI or Fiber channel datastores. 
+
+vSAN datastores typically has data boundary limits to single vSphere cluster, thus limiting static/dynamic PVs to single Availability Zone(AZ). When configured as multi cluster , multi AZs deployment, there will be a need to provide a shared storage such as VMFS/NFS over iSCI/FC.  Storage considerations are well documented in this https://docs.pivotal.io/runtimes/pks/1-4/vsphere-persistent-storage.html
+
+
+### <a id="pks-nsx-t-security"></a> Security
+
+https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-security
