@@ -9,14 +9,13 @@ See [Installing <%= vars.product_name %> on vSphere](../../customizing/vsphere.h
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for the Pivotal Application Service (PAS) runtime is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
-
-For PAS deployments, the VMware NSX-T Container Plugin for <%= vars.product_name %> is required to use the SDN features of NSX-T.
+The vSphere reference architecture for the Pivotal Application Service (PAS) and Pivotal Container Service (PKS) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
 
 <%= vars.product_name %> supports the following configurations for <%= vars.product_name %> on vSphere deployments:
 
 * PAS on vSphere with NSX-T. See [PAS on vSphere with NSX-T](#pas-nsx-t).
 * PAS on vSphere with NSX-V. See [PAS on vSphere with NSX-V](#pas-nsx-v).
+* PKS on vSphere with  NSX-T. See [PKS on vSphere with NSX-T](#pks-nsx-t)
 
 
 ## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
@@ -297,9 +296,27 @@ The following reference architecture diagram describes the architecture for PKS 
 
 As shown in the diagram above, PKS deployments with NSX-T are deployed with three clusters and three availability zones (AZs). 
 
-A NSX-T Tier-0 router is on the front end of the PKS deployment. This router is a central logical router into the PKS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
+A NSX-T Tier-0 router is on the front end of the PKS deployment. This router is a central logical router into the PKS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router.
 
-Several Tier-1 routers, such as the router for the PAS and infrastructure subnets, connect to the Tier-0 router.
+Several Tier-1 routers, such as the router for the PAS and infrastructure subnets, connect to the Tier-0 router. New Tier-1 routers are created on-demand as new clusters and namespaces are added to PKS. 
+
+The PKS on vSphere with NSX-T architecture supports multiple master nodes for PKS v1.2 and later.  
+
+### <a id="pks-nsx-t-multitenancy"></a> Multi-Tenancy
+
+With PKS on vSphere with NSX-T, networks are created dynamically for both PKS clusters and pods. 
+
+To accomodate dynamically-created networks, Pivotal recommends that you use multiple clusters rather than a single cluster with multiple namespaces. 
+
+Multiple clusters provide additional features such as security, customization on a per cluster basis, privileged containers, failure domains, and version choice. Namespaces should be used as a naming construct and not as a tenancy construct.
+
+### <a id="pks-nsx-t-master-nodes"></a> Master Nodes
+
+The PKS on vSphere with NSX-T architecture supports multiple master nodes for PKS v1.2 and later. 
+
+You can define the number of master nodes per plan in the PKS tile in Ops Manager. The number of master nodes should be an odd number to allow `etcd` to form a quorum. 
+
+Pivotal recommends that you have at least one master node per AZ for high availability and disaster recovery.
 
 ### <a id="pks-nsx-t-networking"></a> Networking
 
@@ -338,6 +355,8 @@ NSX-T handles the routing between a T0 router and any T1 routers associated with
 #### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
 Networks defined for PKS is outlined in base ref arch section https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network.
+
+
 In addition , allocate large block following network CIDRs. These can be configured during PKS cluster configuration in OpsManager.
 PKS Clusters 172.24.0.0/14
 PKS Pods 172.28.0.0/14
@@ -345,6 +364,8 @@ PKS Pods 172.28.0.0/14
 When deploying PKS via Ops Manager, you must allow for a block of address space for dynamic networks that PKS will deploy per namespace. The recommended address space is distinctly different  that used with PAS, to give the operator a quick visual queue as to which jobs relate to what service.
 When new PKS cluster is  created, PKS dynamically creates a new /24 network is carved out from PKS cluster address space.  When a new application is deployed, a new NSX-T Tier-1 routers are generated and /24 is created from the PKS PODS network. 
 So, to summarize, do allocate a large address block for PKS clusters and PODS block.
+
+These can grow rapidly, so a large address block is desired for this use. Allocate a large POD IP block like /14 in NSX-T and NSX-T carves out address blocks of /24 by default. This CIDR range for kubernetes services network ranges  is configurables from operations manager. Reference POD IP block from PKS tile configuration. 
 
 
 ### <a id="pks-nsx-t-ha"></a> High Availability
