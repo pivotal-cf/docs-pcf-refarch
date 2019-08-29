@@ -9,14 +9,13 @@ See [Installing <%= vars.product_name %> on vSphere](../../customizing/vsphere.h
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for the Pivotal Application Service (PAS) runtime is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
-
-For PAS deployments, the VMware NSX-T Container Plugin for <%= vars.product_name %> is required to use the SDN features of NSX-T.
+The vSphere reference architecture for the Pivotal Application Service (PAS) and Pivotal Container Service (PKS) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure. 
 
 <%= vars.product_name %> supports the following configurations for <%= vars.product_name %> on vSphere deployments:
 
 * PAS on vSphere with NSX-T. See [PAS on vSphere with NSX-T](#pas-nsx-t).
 * PAS on vSphere with NSX-V. See [PAS on vSphere with NSX-V](#pas-nsx-v).
+* PKS on vSphere with  NSX-T. See [PKS on vSphere with NSX-T](#pks-nsx-t)
 
 
 ## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
@@ -65,7 +64,7 @@ The following sections describe networking requirements and recommendations for 
 The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
 Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
 
-* Routing incoming & outgoing traffic. 
+* Routing incoming and outgoing traffic. 
 * DNATs and SNATs, load balancer VIPs, and other <%= vars.product_name %> components.
  
 
@@ -268,3 +267,146 @@ Pivotal recommends that you use the following blobstore storage for production a
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
 For more information about blobstore storage requirements and recommendations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+
+
+## <a id="pks-nsx-t"></a> PKS on vSphere with NSX-T
+
+The following sections describe the reference architecture for PKS on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying PKS on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
+
+### <a id="pks-nsx-t-diagram"></a> Architecture
+
+The following reference architecture diagram describes the architecture for PKS on vSphere with NSX-T deployments.
+
+![The diagram shows the archiecture for a PKS on vSphere with NSX-T deployment. For more information about the components and networking demonstrated by the diagram, read the description below this diagram.](../images/v2/export/PKS_vSphere_NSX-T.png)
+
+[View a larger version of this diagram](../images/v2/export/PKS_vSphere_NSX-T.png).
+
+As shown in the diagram above, PKS deployments with NSX-T are deployed with three clusters and three availability zones (AZs). 
+
+A NSX-T Tier-0 router is on the front end of the PKS deployment. This router is a central logical router into the PKS platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router.
+
+Several Tier-1 routers, such as the router for the infrastructure subnet, connect to the Tier-0 router. New Tier-1 routers are created on-demand as new clusters and namespaces are added to PKS. 
+
+<p class="note"><b>Note:</b> The PKS on vSphere with NSX-T architecture supports multiple master nodes for PKS v1.2 and later.</p>  
+
+### <a id="pks-nsx-t-networking"></a> Networking
+
+The following sections describe networking requirements and recommendations for PKS on vSphere with NSX-T deployments.
+
+#### <a id="pks-nsx-t-load-balancing"></a> Load Balancing
+
+The following are load balancing requirements and recommendations for PKS on vSphere with NSX-T deployments: 
+
+* Use standard  NSX-T load balancers. NSX-T Load Balancers of type Layer 4 and Layer 7 are created automatically during app deployment. 
+* Use both Layer 4 and Layer 7 load balancers:
+	* Use Layer 7 load balancers for ingress routing.
+	* Use Layer 4 load balancers for services of type `LoadBalancer`. This allows you to terminate SSL at the load balancers, which reduces overhead processing. 
+* NSX-T provides ingress routing natively. You can also use a third party service for ingress routing, such as Istio or Nginx. You run the third party ingress routing service as a container in the cluster. 
+* If you use a third party ingress routing service, the following requirements apply:
+	* Create wildcard DNS entries to point to the service. 
+	* Define domain information for the ingress routing service in the manifest of the PKS on vSphere deployment. For example:
+	
+		```
+		apiVersion: extensions/v1beta1
+		kind: Ingress
+		metadata:
+		  name: music-ingress
+		  namespace: music1
+		spec:
+		  rules:
+		  - host: music1.pks.domain.com
+		    http:
+		      paths:
+		      - path: /.*
+		        backend:
+		          serviceName: music-service
+		          servicePort: 8080
+		``` 
+* When you push a PKS on vSphere deployment with a service `type` set to `LoadBalancer`, NSX-T automatically creates a new WIP for the deployment on the existing load balancer for that namespace. You must specify a listening and translation port in the service, a name for tagging, and a protocol. For example:
+
+	```
+	apiVersion: v1
+	kind: Service
+	metadata:
+	  ...
+	spec:
+	  type: LoadBalancer
+	  ports:
+	  - port: 80
+	    targetPort: 8080
+	    protocol: TCP
+	    name: web
+    ```         
+
+
+#### <a id="pks-nsx-t-external-routing"></a> Routable IPs
+
+The following routable IP requirements and recommendations apply to deployments with PKS ingress and with PKS no ingress:
+
+* **Without PKS or With PKS Ingress**: Pivotal recommends a `/25` network for deployments with PKS ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. 
+	</br>
+	</br>
+	Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
+
+	* Routing incoming and outgoing traffic. 
+	* DNATs and SNATs, load balancer WIPs, and other <%= vars.product_name %> components.
+
+	<p class="note"><b>Note: </b> Compared to vSphere deployments with NSX-V, PKS on vSphere with NSX-T consumes much more address space for SNATs.</p>
+
+* **With PKS No Ingress**: Pivotal recommends a `/23` network for deployments with PKS no ingress. Relative to deployments with PKS ingress, PKS no ingress has much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space. 
+
+
+#### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
+
+The following considerations and recommendations apply to networks, subnets, and IP spacing for PKS on vSphere with NSX-T deployments:
+
+* Allocate a large network block for PKS clusters and pods:
+	* **PKS Clusters**: Configure a `172.24.0.0/14` network block.
+	* **PKS Pods**: Configure a `172.24.0.0/14` network block.
+
+	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or pod is created. You can configure this CIDR range for PKS in Ops Manager. 
+
+* When deploying PKS with Ops Manager, you must allow for a block of address space for dynamic networks that PKS deploys for each namespace. The recommended address space allows you to view a queue of which jobs relate to each service.
+
+* When a new PKS cluster is created, PKS creates a new `/24` network from PKS cluster address space.  
+
+* When a new app is deployed, new NSX-T Tier-1 routers are generated and PKS creates a `/24` network from the PKS pods network.
+
+* Allocate a large IP block in NSX-T for Kubernetes pods. For example, a `/14` network. NSX-T creates address blocks of `/24` by default. This CIDR range for Kubernetes services network ranges is configurable in Ops Manager.
+
+For more information, see [Networks](../index.html#pks-network) in _Platform Architecture and Planning Overview_.
+
+
+### <a id="pks-nsx-t-multitenancy"></a> Multi-Tenancy
+
+For PKS on vSphere with NSX-T deployments, networks are created dynamically for both PKS clusters and pods. 
+
+To accommodate these dynamically-created networks, Pivotal recommends that you use multiple clusters, rather than a single cluster with multiple namespaces. 
+
+Multiple clusters provide additional features such as security, customization on a per cluster basis, privileged containers, failure domains, and version choice. Namespaces should be used as a naming construct and not as a tenancy construct.
+
+### <a id="pks-nsx-t-master-nodes"></a> Master Nodes
+
+The PKS on vSphere with NSX-T architecture supports multiple master nodes for PKS v1.2 and later. 
+
+You can define the number of master nodes per plan in the PKS tile in Ops Manager. The number of master nodes should be an odd number to allow `etcd` to form a quorum. 
+
+Pivotal recommends that you have at least one master node per AZ for high availability and disaster recovery.
+
+### <a id="pks-nsx-t-ha"></a> High Availability
+
+For information about high availability requirements and recommendations, see the [High Availability](../index.html#pks-ha) section of _Platform Architecture and Planning Overview_.
+
+
+### <a id="pks-nsx-t-storage-capacity"></a> Storage Capacity
+
+Pivotal recommends the following storage capacity allocation for production and non-production PKS environments:
+
+PKS on vSphere supports static persistent volume provisioning and dynamic persistent volume provisioning. 
+
+For more information about storage requirements and recommendations, see [PersistentVolume Storage Options on vSphere](https://docs.pivotal.io/runtimes/pks/vsphere-persistent-storage.html)
+
+
+### <a id="pks-nsx-t-security"></a> Security
+
+For information about security requirements and recommendations, see the [Security](../index.html#pks-security) section of _Platform Architecture and Planning Overview_.
