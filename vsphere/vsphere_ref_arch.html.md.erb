@@ -343,13 +343,13 @@ The following are load balancing requirements and recommendations for PKS on vSp
 
 The following routable IP requirements and recommendations apply to deployments with PKS ingress and with PKS no ingress:
 
-* **With PKS Ingress**: Pivotal recommends a `/25` network for deployments with PKS ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. 
+* **Without PKS or With PKS Ingress**: Pivotal recommends a `/25` network for deployments with PKS ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. 
 	</br>
 	</br>
 	Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
 
 	* Routing incoming and outgoing traffic. 
-	* DNATs and SNATs, load balancer VIPs, and other <%= vars.product_name %> components.
+	* DNATs and SNATs, load balancer WIPs, and other <%= vars.product_name %> components.
 
 	<p class="note"><b>Note: </b> Compared to vSphere deployments with NSX-V, PKS on vSphere with NSX-T consumes much more address space for SNATs.</p>
 
@@ -358,22 +358,23 @@ The following routable IP requirements and recommendations apply to deployments 
 
 #### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
-Networks defined for PKS is outlined in base ref arch section https://docs-pcf-staging.cfapps.io/pivotalcf/2-6/plan/index.html#pks-network.
-
-
 The following considerations and recommendations apply to networks, subnets, and IP spacing for PKS on vSphere with NSX-T deployments:
 
-* NSX-T creates IP address blocks of `/24` by default. You can configure this CIDR range for PKS in Ops Manager. Allocate a large network block for PKS clusters and pods following network CIDRs:
-	* PKS Clusters 172.24.0.0/14
-	* PKS Pods 172.28.0.0/14
+* Allocate a large network block for PKS clusters and pods:
+	* **PKS Clusters**: Configure a `172.24.0.0/14` network block.
+	* **PKS Pods**: Configure a `172.24.0.0/14` network block.
+
+	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or pod is created. You can configure this CIDR range for PKS in Ops Manager. 
 
 * When deploying PKS with Ops Manager, you must allow for a block of address space for dynamic networks that PKS deploys for each namespace. The recommended address space allows you to view a queue of which jobs relate to each service.
 
-* When a new PKS cluster is created, PKS dynamically creates a new `/24` network from PKS cluster address space.  
+* When a new PKS cluster is created, PKS creates a new `/24` network from PKS cluster address space.  
 
-* When a new app is deployed, new NSX-T Tier-1 routers are generated and a `/24` network is created from the PKS PODS network.
+* When a new app is deployed, new NSX-T Tier-1 routers are generated and PKS creates a `/24` network from the PKS pods network.
 
 * Allocate a large IP block in NSX-T for Kubernetes pods. For example, a `/14` network. NSX-T creates address blocks of `/24` by default. This CIDR range for Kubernetes services network ranges is configurable in Ops Manager.
+
+For more information, see [Networks](../index.html#pks-network) in _Platform Architecture and Planning Overview_.
 
 
 ### <a id="pks-nsx-t-multitenancy"></a> Multi-Tenancy
