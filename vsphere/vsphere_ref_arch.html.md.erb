@@ -341,9 +341,9 @@ The following are load balancing requirements and recommendations for PKS on vSp
 
 #### <a id="pks-nsx-t-external-routing"></a> Routable IPs
 
-The following routable IP requirements and recommendations apply to deployments with PKS ingress and with PKS no ingress:
+The following are routable IP requirements and recommendations for PKS with NSX-T deployments:
 
-* **Without PKS or With PKS Ingress**: Pivotal recommends a `/25` network for deployments with PKS ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. 
+* **Deployments with PKS NSX-T ingress**: Pivotal recommends a `/25` network for deployments with PKS NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. 
 	</br>
 	</br>
 	Select a network range for the Tier-0 router with enough space so that the network can be separated into the following two jobs:
@@ -353,7 +353,7 @@ The following routable IP requirements and recommendations apply to deployments 
 
 	<p class="note"><b>Note: </b> Compared to vSphere deployments with NSX-V, PKS on vSphere with NSX-T consumes much more address space for SNATs.</p>
 
-* **With PKS No Ingress**: Pivotal recommends a `/23` network for deployments with PKS no ingress. Relative to deployments with PKS ingress, PKS no ingress has much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space. 
+* **Deployments with several load balancers**: Pivotal recommends a `/23` network for deployments that use several load balancers. Deployments with several load balancers have much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space. 
 
 
 #### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
