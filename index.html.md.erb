@@ -38,7 +38,7 @@ The following topic describes a broader architecture that automates the installa
 
 The following topics address aspects of platform architecture and planning that the PCF reference architectures do not cover:
 
-* [Implementing a Multi-Foundation PKS Deployment](https://docs.pivotal.io/runtimes/pks/1-2/nsxt-multi-pks.html)
+* [Implementing a Multi-Foundation PKS Deployment](https://docs.pivotal.io/pks/nsxt-multi-pks.html)
 * [Using Global DNS Load Balancers for Multi-Foundation](./global-dns-lb.html)
 
 
@@ -175,7 +175,7 @@ The following table describes the internal component placements shown in the dia
 | **Ops Manager**         | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox.   |
 | **BOSH Director**         | Deployed on the infrastructure subnet.   |
 | **Jumpbox**         | Optional. Deployed on the infrastructure subnet for accessing PKS management components such as Ops Manager and the PKS + Kubectl command-line interface.   |
-| **PKS API**         | Deployed as a service broker VM on the PKS Services subnet.  Handles PKS API and service adapter requests, and manages PKS clusters.  For more information, see [Pivotal Container Service (PKS)](https://docs.pivotal.io/runtimes/pks/index.html#components) |
+| **PKS API**         | Deployed as a service broker VM on the PKS Services subnet.  Handles PKS API and service adapter requests, and manages PKS clusters.  For more information, see [Pivotal Container Service (PKS)](https://docs.pivotal.io/pks/index.html#components) |
 | **Harbor Tile**         | Optional container images registry, typically deployed to the Services subnet.   |
 | **PKS Cluster**         | Deployed to a dynamically-created, dedicated PKS cluster subnet. Each cluster consists of worker nodes that run the workloads (applications) and one or more master nodes.   |
 
@@ -211,9 +211,9 @@ PKS requires shared storage across all Availability Zones for the deployed workl
 
 See the topics below for how PKS implements security:
 
-* [Enterprise PKS Security](https://docs.pivotal.io/runtimes/pks/security.html)
+* [Enterprise PKS Security](https://docs.pivotal.io/pks/security.html)
 
-* [Firewall Ports](https://docs.pivotal.io/runtimes/pks/ports-protocols-nsx-t.html)
+* [Firewall Ports](https://docs.pivotal.io/pks/ports-protocols-nsx-t.html)
 
 ### <a id="pks-domains"></a> Domain Names
 
@@ -223,4 +223,4 @@ The wildcard certificate covers both the PKS API domain e.g. `api.pks.domain.nam
 
 ### <a id="pks-management"></a> Cluster Management
 
-See [Managing Clusters](https://docs.pivotal.io/runtimes/pks/managing-clusters.html) for recommendations on managing Enterprise PKS clusters.
+See [Managing Clusters](https://docs.pivotal.io/pks/managing-clusters.html) for recommendations on managing Enterprise PKS clusters.
