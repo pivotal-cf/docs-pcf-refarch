@@ -155,7 +155,7 @@ For storage, Pivotal recommends the following:
 * Configure storage accounts for Zone Redundant Storage (ZRS) in AZ-enabled Regions. 
 	<p class="note"><strong>Note</strong>: In non-AZ enabled regions, locally Redundant Storage (LRS) is sufficient.</p> 
 * Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high availability for the VMs.
-* Use 5 storage accounts. <%= vars.product_name %> on Azure requires 5 storage accounts: 1 BOSH, 1 Ops Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit of 20 VMs each.
+* Use 5 storage accounts. <%= vars.product_name %> on Azure requires 5 storage accounts: 1 BOSH, 1 Pivotal Operations Manager, and 3 PAS storage accounts. Each account comes with a set amount of disk. Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit of 20 VMs each.
 
 
 ## <a id="sql-server"></a> SQL Server

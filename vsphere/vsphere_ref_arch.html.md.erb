@@ -96,7 +96,7 @@ The following are requirements and recommendations related to networks, subnets,
 * PAS requires statically-defined networks to host PAS component VMs. 
 * The client side of a NSX-T deployment uses a series of non-routable address blocks when using DNAT/SNAT at the Tier-0 interface.
 * The reference architecture for PAS on vSphere with NSX-T deployments uses a pattern in which all networks are calculated on the `/24` 8-bit network boundary. The network octet is numerically sequential.
-* NSX-T dynamically assigns PAS org networks and adds a Tier-1 router. These org networks are automatically instantiated based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in Ops Manager. The default is `/24`. This means that every org in PAS is assigned a new `/24` network.
+* NSX-T dynamically assigns PAS org networks and adds a Tier-1 router. These org networks are automatically instantiated based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in Pivotal Operations Manager. The default is `/24`. This means that every org in PAS is assigned a new `/24` network.
 
 For more information about PAS subnets, see the [Required Subnets](../index.html#pas-network) section in _Platform Architecture and Planning Overview_.
 

@@ -42,7 +42,7 @@ The ESG can scale to accommodate very large <%= vars.product_name %> deployments
 This cookbook focuses on a single-site deployment and makes the following design assumptions:
 
 -	There are five non-routable networks on the tenant (inside) side of the ESG.
-   - The **Infra** network is used to deploy Ops Manager and BOSH Director.
+   - The **Infra** network is used to deploy Pivotal Operations Manager and BOSH Director.
    - The **Deployment** network is used exclusively by Pivotal Application Service (PAS) to deploy Cells that host apps and related elements.
    - The **CF Tiles** network is used for all other deployed tiles in a <%= vars.product_name %> installation.
    - The **Services** network is used by BOSH Director for service tiles.
