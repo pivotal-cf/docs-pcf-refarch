@@ -192,21 +192,21 @@ To enable the load balancer, access the ESG UI and do the following:
 
 ### <a id="create_app"></a> Step 2.3: Create Application Profiles
 
-The Application Profiles allow advanced `x-forwarded` options as well as linking to the SSL Certificate.  You must create three Profiles: **<%= vars.product_name_code_embed %>-HTTP**, **<%= vars.product_name_code_embed %>-HTTPS** and **<%= vars.product_name_code_embed %>-TCP**.
+The Application Profiles allow advanced `x-forwarded` options as well as linking to the SSL Certificate.  You must create three Profiles: **<%= vars.platform_code %>-HTTP**, **<%= vars.platform_code %>-HTTPS** and **<%= vars.platform_code %>-TCP**.
 
 To create the application profiles, access the ESG UI and do the following:
 
 1. Select **Edge**, **Manage**, **Load Balancer**, and then **Global Application Profiles**.
 
-1. Create/Edit Profile and make the **<%= vars.product_name_code_embed %>-HTTP** rule, turning on **Insert X-Forwarded-For HTTP header**.
+1. Create/Edit Profile and make the **<%= vars.platform_code %>-HTTP** rule, turning on **Insert X-Forwarded-For HTTP header**.
 
     <%= image_tag('vsphere-app-profile-pcf-http.png') %>
 
-1. Create/Edit Profile and make the **<%= vars.product_name_code_embed %>-HTTPS** rule, same as before, but add the service certificate inserted before. If encrypting TLS traffic to the Gorouters, turn on **Enable Pool Side SSL**. Otherwise, leave it unchecked.
+1. Create/Edit Profile and make the **<%= vars.platform_code %>-HTTPS** rule, same as before, but add the service certificate inserted before. If encrypting TLS traffic to the Gorouters, turn on **Enable Pool Side SSL**. Otherwise, leave it unchecked.
  
     <%= image_tag('vsphere-app-profile-pcf-https.png') %>
 
-1. Create/Edit Profile and make **<%= vars.product_name_code_embed %>-TCP** rule, with the Type set to TCP.
+1. Create/Edit Profile and make **<%= vars.platform_code %>-TCP** rule, with the Type set to TCP.
 
     <%= image_tag('vsphere-app-profile-pcf-tcp.png') %>
 
@@ -312,7 +312,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
 
 1. Select an IP address from the available routable address space allocated to the ESG. For information about reserved IP addresses, see [General Overview](#overview).
 
-1. Create a new Virtual Server named `GoRtr-HTTP` and select Application Profile `<%= vars.product_name_code_embed %>-HTTP`.
+1. Create a new Virtual Server named `GoRtr-HTTP` and select Application Profile `<%= vars.platform_code %>-HTTP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (HTTP) and set **Port** to match the protocol (80).
 	*	Set **Default Pool** to the pool name set in [Step 2.6a: Create Pool for `http-routers`](#http_router_pools). This connects this VIP to the pool of resources being balanced to.
@@ -323,7 +323,7 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
      * reqadd X-Forwarded-Proto:\ http
     <p class="note"><strong>Note:</strong> Be careful to match protocol rules to the protocol <code>VIP- HTTP</code> to <code>HTTP</code> and <code>HTTPS</code> to <code>HTTPS</code>.</p>
 
-1. Create a new Virtual Server named `GoRtr-HTTPS` and select Application Profile `<%= vars.product_name_code_embed %>-HTTPS`.
+1. Create a new Virtual Server named `GoRtr-HTTPS` and select Application Profile `<%= vars.platform_code %>-HTTPS`.
 	*	Use **Select IP Address** to select the **same IP address** to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (`HTTPS`) and set **Port** to match the protocol (443).
 	*	Set **Default Pool** to the pool name set in [Step 2.6a: Create Pool for `http-routers`](#http_router_pools) (`http-routers`). This connects this VIP to that pool of resources being balanced to.
@@ -334,14 +334,14 @@ This is the Virtual IP (VIP) that the load balancer uses to represent the pool o
      * reqadd X-Forwarded-Proto:\ https
     <p class="note"><strong>Note:</strong> Be careful to match protocol rules to the protocol <code>VIP- HTTP</code> to <code>HTTP</code> and <code>HTTPS</code> to <code>HTTPS</code>.</p>
 
-1. Create a new Virtual Server named `TCPRtrs` and select Application Profile `<%= vars.product_name_code_embed %>-TCP`.
+1. Create a new Virtual Server named `TCPRtrs` and select Application Profile `<%= vars.platform_code %>-TCP`.
 	*	Use **Select IP Address** to select the IP address to use as a VIP on the uplink interface.
 	*	Set **Protocol** to match the **Application Profile** protocol (TCP) and set **Port** to match the protocol (5000).
 	*	Set **Default Pool** to the pool name set in [Step 2.6b: Create Pool for `tcp-routers`](#tcp_router_pools) (`tcp-routers`). This connects this VIP to the pool of resources being balanced to.
 	*	Ignore **Connection Limit** and **Connection Rate Limit** unless these limits are desired.
     <%= image_tag('vsphere-tcprouter-vip.png') %>
 
-1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `<%= vars.product_name_code_embed %>-HTTPS`.
+1. Create a new Virtual Server named `SSH-DiegoBrains` and select Application Profile `<%= vars.platform_code %>-HTTPS`.
 	*	Use **Select IP Address** to select the same IP address to use as a VIP on the uplink interface if you want to use this address for SSH access to apps. If not, select a different IP address to use as the VIP.
 	*	Set **Protocol** to TCP and set **Port** to 2222.
 	*	Set **Default Pool** to the pool name set in [Step 2.6c: Create Pool for `diego-brains`](#diego_brain_pools) (`diego-brains`). This connects this VIP to that pool of resources being balanced to.
@@ -357,7 +357,7 @@ The ESG obfuscates the <%= vars.product_name %> installation through network tra
 
 |Action|Applied on Interface|Original IP|Original Port|Translated IP|Translated Port|Protocol|Description|
 |---|---|---|---|---|---|---|---|
-|SNAT|uplink|192.168.0.0/16|any|IP\_of\_<%= vars.product_name_code_embed %>|any|any|All Nets Egress|
+|SNAT|uplink|192.168.0.0/16|any|IP\_of\_<%= vars.platform_code %>|any|any|All Nets Egress|
 |DNAT|uplink|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for external use|
 |SNAT|infra|192.168.10.OpsMgr|any|IP\_of\_OpsMgr|any|tcp|OpsMgr Mask for internal use|
 |DNAT|infra|IP\_of\_OpsMgr|any|192.168.10.OpsMgr|any|tcp|OpsMgr Mask for internal use|
