@@ -63,7 +63,7 @@ You do not need to make any configuration changes in <%= vars.product_name %> to
 
 Use Standard Azure Load Balancers (ALBs). If you want Internet ingress, you must create the ALBs with elastic IPs.
 
-During installation, you configure ALBs for PAS Gorouters. See [Create Load Balancers](/platform/<%= vars.current_major_version.sub('.', '-') %>/om/azure/deploy-manual.html#lb) in _Deploying Ops Manager on Azure Manually_. When applicable, TCP Routers and SSH Proxies also require load balancers. 
+During installation, you configure ALBs for PAS Gorouters. See [Create Load Balancers](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/azure/deploy-manual.html#lb) in _Deploying Ops Manager on Azure Manually_. When applicable, TCP Routers and SSH Proxies also require load balancers. 
 
 The PAS system and app domains must resolve to your ALB and have either a private or a public IP address assigned. You set these domains in the **Domains** pane of the PAS tile.
 
