@@ -3,11 +3,9 @@ title: GCP Reference Architecture
 owner: Customer0
 ---
 
-
-
 This topic presents two reference architectures for installing <%= vars.product_name  %> on Google Cloud Platform (GCP): on a [shared virtual private cloud](#shared-vpc) (VPC) and on a [single-project VPC](#single-vpc). This topic also outlines multiple networking variants for VPC deployment. The architectures are validated for production-grade <%= vars.product_name %> deployments using multiple AZs.
 
-See [<%= vars.product_name %> on GCP Requirements](../../customizing/gcp.html) for general requirements for running <%= vars.product_name %> and specific requirements for running <%= vars.product_name %> on GCP.
+For general requirements for running <%= vars.product_name %> and specific requirements for running <%= vars.product_name %> on GCP, see [<%= vars.product_name %> on GCP Requirements](../../customizing/gcp.html)
 
 
 ## <a id="refarchs"></a> <%= vars.product_name %> Reference Architectures
@@ -23,6 +21,7 @@ A <%= vars.product_name %> reference architecture must meet the following requir
 
 Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.product_name %> deployment.
 
+
 ## <a id="shared-vs-single"></a> Shared vs Single-Project VPCs
 
 A [shared VPC](#shared-vpc) installation is harder to configure than a <%= vars.product_name %> deployment on a single-project VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. Pivotal recommends the shared VPC model for:
@@ -34,6 +33,7 @@ A [single-project VPC](#single-vpc) lets the platform architect give <%= vars.pr
 
 * Standalone deployments that do not connect to an internal network
 * Test and experimental deployments, and for projects which do not belong to an organization
+
 
 ## <a id="shared-vpc"></a> Shared VPC GCP Reference Architecture
 
@@ -63,13 +63,13 @@ To speed communication between data centers, use Google Cloud Interconnect as sh
 
 [View a larger version of this diagram](../images/gcp-cloud-interconnect.png).
 
-### <a id="host-service"></a> Host / Service Architecture
+### <a id="host-service"></a> Host and Service Architecture
 
 GCP allocates resources using a hierarchy that centers around projects. To create a VPC, architects define a _host project_ that allocates network resources for the VPC, such as address space and firewall rules. Then they can define one or more _service projects_ to run within the VPC, which share the network resources allocated by the host project and include their own non-network resources, such as VMs and storage buckets.
 
 To install <%= vars.product_name %> in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running <%= vars.product_name %>.
 
-#### <a id="host-resources"></a>Host Project Resources
+#### <a id="host-resources"></a> Host Project Resources
 
 The host project centrally manages the following shared VPC network resources for <%= vars.product_name %>:
 
@@ -82,7 +82,7 @@ The host project centrally manages the following shared VPC network resources fo
 * VPN/interconnect
 * Routes, e.g. egress internet through NAT or egress on-premises through VPN
 
-#### <a id="service-resources"></a>Service Project Resources
+#### <a id="service-resources"></a> Service Project Resources
 
 The <%= vars.product_name %> service project manages the following resources:
 
@@ -90,16 +90,22 @@ The <%= vars.product_name %> service project manages the following resources:
     - BOSH
     - Ops Manager
     - VMs deployed by BOSH, such as <%= vars.product_name %> and service components
+
 * Google Cloud Storage buckets, for blobstore
     - BOSH Director
     - Resources
     - Buildpacks
     - Droplets
     - Packages
+
 * Service account and a service account key for <%= vars.product_name %> to access the storage buckets
+
 * A service account for <%= vars.product_name %>
+
 * Load Balancers
+
 * Google Cloud SQL instances, if using external databases
+
 
 ## <a id="single-vpc"></a> Single-Project VPC Base GCP Reference Architecture
 
@@ -113,18 +119,17 @@ The following diagram provides an overview of a reference architecture deploymen
 
 The following table lists the components that are part of a reference architecture deployment with three availability zones.
 
-|**Component**| **Reference Architecture Notes**|
-|--------------------|------------|
-|**Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for Ops Manager (required), a route for doppler (required), a route for Loggregator (required), a route for ssh access to app containers (optional) and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
-|**Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or through an optional jumpbox. |
-|**BOSH Director** | Deployed on the infrastructure subnet. |
-|**Gorouters**| Accessed through the HTTP and TCP WebSockets load balancers. Deployed on the Pivotal Application Service (PAS) subnet, one job per availability zone. |
-|**Diego Brains**| Required. However, the SSH container access functionality is optional and enabled through the SSH Proxy load balancer. Deployed on the PAS subnet, one job per availability zone. |
-|**TCP Routers** | Optional feature for TCP routing. Deployed on the PAS subnet, one job per availability zone.|
-|**CF Database**| Reference architecture uses GCP Cloud SQL rather than internal databases. Configure your database with a strong password and limit access only to components that require database access. |
-|**CF Blob Storage and Buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
-|**Services**|Deployed on the <%= vars.product_name %> managed services subnet. Each service is deployed to each availability zone. |
-
+| **Component** | **Reference Architecture Notes** |
+| ------------- | -------------------------------- |
+| **Domains & DNS** | CF Domain Zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for Ops Manager (required), a route for doppler (required), a route for Loggregator (required), a route for ssh access to app containers (optional) and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
+| **Ops Manager**| Deployed on the infrastructure subnet and accessible by FQDN or through an optional jumpbox. |
+| **BOSH Director** | Deployed on the infrastructure subnet. |
+| **Gorouters**| Accessed through the HTTP and TCP WebSockets load balancers. Deployed on the Pivotal Application Service (PAS) subnet, one job per availability zone. |
+| **Diego Brains**| Required. However, the SSH container access functionality is optional and enabled through the SSH Proxy load balancer. Deployed on the PAS subnet, one job per availability zone. |
+| **TCP Routers** | Optional feature for TCP routing. Deployed on the PAS subnet, one job per availability zone.|
+| **CF Database**| Reference architecture uses GCP Cloud SQL rather than internal databases. Configure your database with a strong password and limit access only to components that require database access. |
+| **CF Blob Storage and Buckets** | For buildpacks, droplets, packages and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
+| **Services**| Deployed on the <%= vars.product_name %> managed services subnet. Each service is deployed to each availability zone. |
 
 ### <a id="common_network"></a> Alternative GCP Network Layouts for <%= vars.product_name %>
 
@@ -134,12 +139,13 @@ At a high level, there are currently two possible ways of granting public Intern
 
 * NAT provides connectivity from <%= vars.product_name %> internals to the public Internet.
 	* The instructions for [Installing <%= vars.product_name %> on GCP Manually](../../customizing/gcp-manual.html) use this method.
+
 * Every <%= vars.product_name %> VM receives its own public IP address (no NAT).
 	* The instructions for [Installing <%= vars.product_name %> on GCP using Terraform](../../customizing/gcp-terraform.html) use this method.
 
 However, if you require NAT, you may refer to the following section.
 
-#### <a id="nat_network_diagram"></a> NAT-based Solution
+#### <a id="nat_network_diagram"></a> NAT-Based Solution
 
 This diagram illustrates the case where you want to expose only a minimal number of public IP addresses.
 
@@ -155,22 +161,23 @@ If you prefer not to use a NAT solution, you can configure <%= vars.product_name
 
 The following table lists the network objects expected for each type of reference architecture deployment with three availability zones (assumes you are using NAT).
 
-|**Network Object**| **Notes**| **Minimum Number: NAT-based** | **Minimum Number: Public IP Addresses**|
-|--------------------|------------|----------------------|---------------------------|
-| **External IPs** | For a NAT solution, use global IP address for apps and system access, and Ops Manager or optional jumpbox | 2 | 30+ |
+| **Network Object** | **Notes** | **Minimum Number: NAT-Based** | **Minimum Number: Public IP Addresses** |
+| ------------------ | --------- | ----------------------------- | --------------------------------------- |
+| **External IPs** | For a NAT solution, use global IP address for apps and system access, and Ops Manager or an optional jumpbox. | 2 | 30+ |
 | **NAT** | One NAT per availability zone. | 3 | 0 |
-| **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of <%= vars.product_name %> will likely only ever require one GCP Network object | 1 | 1 |
+| **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of <%= vars.product_name %> will likely only ever require one GCP Network object. | 1 | 1 |
 | **Subnets** | Separate subnets for infrastructure (Ops Manager, BOSH Director, Jumpbox), PAS, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy <%= vars.product_name %> without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source & destination fields in a rule. The preferred method use in the reference architecture deployment is instance tags. | 6+ | 6+ |
-| **Load balancers**| Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
+| **Load balancers** | Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP Router load balancer used for TCP routing feature and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
 | **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox. | (1) | (1)|
+
 
 ## <a id="network_comm"></a> Network Communication in GCP Deployments
 
 This section provides more background on the reasons behind certain network configuration decisions, specifically for the Gorouter.
 
-### Load Balancer to Gorouter Communications and TLS Termination
+### <a id='lb-to-gorouter'></a> Load Balancer to Gorouter Communications and TLS Termination
 
 In a <%= vars.product_name %> on GCP deployment, the Gorouter receives two types of traffic:
 
@@ -182,6 +189,6 @@ TLS is terminated for HTTPS on the HTTP load balancer and is terminated for WebS
 
 <%= vars.product_name %> deployments on GCP use two load balancers to handle Gorouter traffic because HTTP load balancers currently do not support WebSockets.
 
-### ICMP
+### <a id='icmp'></a> ICMP
 
-GCP routers do not respond to ICMP; therefore, Pivotal recommends disabling ICMP checks in [BOSH Director network configuration](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/gcp/config-manual.html#network).
+GCP routers do not respond to ICMP. Pivotal recommends disabling ICMP checks in your BOSH Director network configuration. For more information, see the [Step 5: Create Networks Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/gcp/config-manual.html#network) section of the _Configuring BOSH Director on GCP Manually_ topic.

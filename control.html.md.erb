@@ -4,13 +4,14 @@ title: Control Plane Reference Architectures
 owner: Customer0
 ---
 
-## <a id="intro"></a>Introduction
+This topic describes topologies and best practices for deploying Concourse on BOSH, and using Concourse to manage <%= vars.product_name  %> foundations. For production environments, Pivotal recommends deploying Concourse with BOSH.
+
+
+## <a id="overview"></a> Overview
 
 Concourse is the main continuous integration and continuous delivery (CI/CD) tool that the Pivotal and open-source Cloud Foundry communities use to develop, test, deploy and manage Cloud Foundry foundations.
 
 [//]: # ( <img src="images/concourse-hero.png" align="right" width="50%"> commented out decorative image )
-
-This topic describes topologies and best practices for deploying Concourse on [BOSH](http://bosh.io), and using Concourse to manage <%= vars.product_name  %> foundations. For production environments, Pivotal recommends deploying Concourse with BOSH.
 
 The three topologies described in this document govern the network placement and relationship between two systems:
 
@@ -20,7 +21,8 @@ The three topologies described in this document govern the network placement and
 
 Each topology described below has been developed and validated in multiple <%= vars.product_name %> customer and Pivotal Labs environments.
 
-## <a id="topologies"></a>Deployment Topologies
+
+## <a id="topologies"></a> Deployment Topologies
 
 Security policies are usually the main factor that determines which CI/CD deployment topology best suits a site's needs. Specifically, the decision depends on what network connections are allowed between the control plane and the <%= vars.product_name %> foundations that it manages.
 
@@ -37,13 +39,13 @@ Across these three topologies, the increasing level of <%= vars.product_name %> 
 * Increasing network complexity
 * Increasing effort required for initial deployment and ongoing maintenance
 
-### <a id="decision"></a>Security Decision Factors
+### <a id="decision"></a> Security Decision Factors
 
 The graph below captures the decision factors dictated by network security policy, and recommends Concourse deployment topologies that adhere to those policies.
 
 <%= image_tag('concourse-decision.png') %>
 
-### <a id="additional"></a>Additional Decision Factors
+### <a id="additional"></a> Additional Decision Factors
 
 In addition to security policy, deciding on a CI/CD deployment topology may also depend on factors such as:
 
@@ -53,7 +55,7 @@ In addition to security policy, deciding on a CI/CD deployment topology may also
 
 The [Credentials Management](#manage-creds) and [Storage Services](#services) sections below includes notes and recommendations regarding credentials management, Docker registries, S3 buckets, and git repositories, but does not cover these tools extensively.
 
-### <a id="placement"></a>Topology Objects
+### <a id="placement"></a> Topology Objects
 
 Complete deployment topologies dictate the internal placement or remote use of the following:
 
@@ -63,7 +65,7 @@ Complete deployment topologies dictate the internal placement or remote use of t
 * S3 or other storage buckets, public or private
 * git or other code repositories, public or private
 
-### <a id="topology1"></a>Topology 1: Concourse Server and Worker VMs All Colocated on Control Plane
+### <a id="topology1"></a> Topology 1: Concourse Server and Worker VMs All Colocated on Control Plane
 
 This simple topology follows network security policies that allow a single control plane to connect to all <%= vars.product_name %> foundations deployed across multiple network zones or data centers.
 
@@ -99,7 +101,7 @@ See [<%= vars.product_name %> CI/CD Pipelines](#pipelines) section for required 
 
 - You may have to configure firewall rules in each <%= vars.product_name %> network to allow connectivity from workers in CI/CD zone, as mentioned above.
 
-### <a id="topology2"></a>Topology 2: Concourse Server on Control Plane, and Remote Workers Colocated with <%= vars.product_name %> Foundations
+### <a id="topology2"></a> Topology 2: Concourse Server on Control Plane, and Remote Workers Colocated with <%= vars.product_name %> Foundations
 
 This topology supports environments where <%= vars.product_name %> foundation VMs cannot receive incoming traffic from IP addresses outside their network zone or data center, but they can initiate outbound connections to outside zones.
 
@@ -142,7 +144,7 @@ See the [<%= vars.product_name %> CI/CD Pipelines](#pipelines) section for requi
 - In addition to deploying the control plane, you need an additional BOSH deployment and running BOSH Director for each <%= vars.product_name %> Foundation network zone or data center.
 - You need to manage multiple Concourse worker pools in multiple locations.
 
-### <a id="topology3"></a>Topology 3: Multiple Concourse Servers and Workers Colocated with <%= vars.product_name %> Foundations
+### <a id="topology3"></a> Topology 3: Multiple Concourse Servers and Workers Colocated with <%= vars.product_name %> Foundations
 
 This topology supports environments where <%= vars.product_name %> foundation VMs can only be accessed from within the same network zone or data center. This scenario requires deploying complete and dedicated control planes within each deployment zone.  
 
@@ -167,7 +169,8 @@ Since workers run in the same network zone or data center as the <%= vars.produc
 - Requires deploying and maintaining multiple <%= vars.product_name %> pipelines for each Concourse server.
 - For air-gapped environments, requires setting up an S3 repository for each control plane.
 
-## <a id="boot"></a>Deploying CI/CD to the Control Plane
+
+## <a id="boot"></a> Deploying CI/CD to the Control Plane
 
 There are a few alternatives to deploy BOSH Directors, Concourse servers, and other tool releases to the control plane. Details on those alternatives are outside of the scope of this document, but refer to the links below for the most common options:
 
@@ -189,11 +192,12 @@ There are a few alternatives to deploy BOSH Directors, Concourse servers, and ot
 
 * [Bosh Bootloader (BBL)](https://github.com/cloudfoundry/bosh-bootloader) deploys BOSH Director and Concourse on multiple IaaSes.
 
-## <a id="deployment-practices"></a>Control Plane Deployment Best Practices
+
+## <a id="deployment-practices"></a> Control Plane Deployment Best Practices
 
 Here are some best practices for control plane components that apply across all deployment topologies:
 
-### <a id="dedicated-director"></a>Dedicated BOSH Director
+### <a id="dedicated-director"></a> Dedicated BOSH Director
 
 Pivotal recommends deploying Concourse and other control plane tools on their own, dedicated BOSH layer, with their own BOSH Director that runs separately from the <%= vars.product_name %> foundations that the control plane manages.
 
@@ -203,11 +207,11 @@ Dedicating a BOSH Director to Concourse other control plane tools also provides 
 
 <%= image_tag('concourse-dedicated-bosh.png') %>
 
-### <a id="manage-creds"></a>Credentials Management
+### <a id="manage-creds"></a> Credentials Management
 
 All credentials and other sensitive information that feeds into a Concourse pipeline should be encrypted and stored using credentials management software such as CredHub or Vault. Never store credentials as plain text in parameter files in file repositories.
 
-#### <a id="creds-credhub"></a>Credentials Management with CredHub
+#### <a id="creds-credhub"></a> Credentials Management with CredHub
 
 Concourse integrates with CredHub to manage credentials in its pipelines. The pipelines reference encrypted secrets stored in a CredHub server and retrieve them automatically during execution of tasks.
 
@@ -223,13 +227,13 @@ The diagram below illustrates the jobs of Concourse VMs, along with the ones for
 
 The [Concourse Pipelines Integration with CredHub](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/credhub-integration.md) documentation in the <%= vars.product_name %> Pipelines repository describes how to deploy a CredHub server integrated with Concourse.
 
-#### <a id="creds-vault"></a>Credentials Management with Vault
+#### <a id="creds-vault"></a> Credentials Management with Vault
 
 For how to configure Vault to manage credentials for Concourse pipelines, see [Secure credential automation with Vault and Concourse](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/vault-integration.md) in the <%= vars.product_name %> Pipelines repository.
 
-### <a id="services"></a>Storage Services
+### <a id="services"></a> Storage Services
 
-#### <a id="git"></a>Git Server
+#### <a id="git"></a> Git Server
 
 BOSH and Concourse implement the concepts of infrastructure-as-code and pipelines-as-code. As such, it is important to store all source code for deployments and pipelines in a version-controlled repository.
 
@@ -239,29 +243,29 @@ GitLab, BitBucket and [GOGS](https://github.com/cloudfoundry-community/gogs-bosh
 
 A git server that contains configuration and pipeline code for a <%= vars.product_name %> foundation needs to be accessible by the corresponding worker VMs that run CI/CD pipelines for that foundation. 
 
-#### <a id="s3"></a>S3 Repository
+#### <a id="s3"></a> S3 Repository
 
 In all environments Concourse requires an S3 repository to store <%= vars.product_name %> backups and possibly other files. 
 If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as [Minio S3](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) to your control plane.
 
 For air-gapped environments, an S3 repository is also the preferred method to store release files for <%= vars.product_name %> tiles, stemcells and buildpacks. Docker images can also be stored to an S3 repository as an alternative to a private Docker registry. See [Offline Pipelines for Airgapped Environments](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/offline-pipelines.md) for details.
 
-#### <a id="docker-registry"></a>Private Docker Registry
+#### <a id="docker-registry"></a> Private Docker Registry
 
-For air-gapped environments, Docker Images for Concourse pipelines need to be stored either on a private Docker registry or in an S3 repository.
-For BOSH-deployed private registry alternatives, check [Docker Registry](https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/private-docker-registry/docker-registry-release) or [VMWare Harbor](https://github.com/vmware/harbor).
+For air-gapped environments, Docker Images for Concourse pipelines need to be stored either on a private Docker registry or in an S3 repository. For BOSH-deployed private registry alternatives, see [Docker Registry](https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/private-docker-registry/docker-registry-release) or [VMWare Harbor](https://github.com/vmware/harbor).
 
-### <a id="ha"></a>High Availability
+### <a id="ha"></a> High Availability
 
 For details on how to set up a load balancer to handle traffic across multiple instances of the ATC/web VM, and how to deploy multiple worker instances, see the [Concourse Architecture](https://concourse-ci.org/architecture.html) topic.
 
-## <a id="pipelines"></a><%= vars.product_name %> CI/CD Pipelines
+
+## <a id="pipelines"></a> <%= vars.product_name %> CI/CD Pipelines
 
 **<%= vars.product_name %> Pipelines**
 
 <%= vars.product_name %> Platform Automation with Concourse (<%= vars.product_name %> Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.product_name %>. See the [source on Github](https://github.com/pivotal-cf/pcf-pipelines) or download from [Pivotal Network](https://network.pivotal.io/products/pcf-automation/) (sign-in required).
 
-<p class="note warning"><strong>Warning: </strong> At time of publication, the <%= vars.product_name %> Pipelines repository is undergoing planned deprecation.</p>
+<p class="note warning"><strong>Warning:</strong> At time of publication, the <%= vars.product_name %> Pipelines repository is undergoing planned deprecation.</p>
 
 To run <%= vars.product_name %> Pipelines, you need:
 
@@ -279,7 +283,7 @@ BBR <%= vars.product_name %> Pipelines automate <%= vars.product_name %> foundat
 
 To run BBR <%= vars.product_name %> Pipelines, you need an S3 repository for storing backup artifacts.
 
-<p class="note"><strong>Note</strong>: BBR <%= vars.product_name %> Pipelines is a <%= vars.product_name %> community project not officially supported by Pivotal.</p>
+<p class="note"><strong>Note:</strong> BBR <%= vars.product_name %> Pipelines is a <%= vars.product_name %> community project not officially supported by Pivotal.</p>
 
 **Pipelines Orchestration Frameworks**
 
@@ -288,9 +292,10 @@ To run BBR <%= vars.product_name %> Pipelines, you need an S3 repository for sto
 * Automate pipeline creation and management for multiple <%= vars.product_name %> foundations
 * Promote and audit configuration changes and version upgrades across all foundations
 
-<p class="note"><strong>Note</strong>: <%= vars.product_name %> Pipelines Maestro is a <%= vars.product_name %> community project not officially supported by Pivotal.</p>
+<p class="note"><strong>Note:</strong> <%= vars.product_name %> Pipelines Maestro is a <%= vars.product_name %> community project not officially supported by Pivotal.</p>
 
-## <a id="team"></a>Concourse Team Management Best Practices
+
+## <a id="team"></a> Concourse Team Management Best Practices
 
 When a single Concourse server hosts CI/CD pipelines for more than one <%= vars.product_name %> foundation, Pivotal recommends creating one Concourse team (not `main`) specific to each foundation, and associating that team with all pipelines for that foundation, e.g. install, upgrade, backup, and metering. 
 
@@ -310,7 +315,7 @@ When a single team hosts maintenance pipelines for multiple foundations, the clu
 * **It allows workers to be assigned to pipelines of a specific foundation.**
 Concourse deployment configuration allows for the assignment of workers to a single team. If that team contains pipelines of only one foundation, then the corresponding group of workers run pipelines only for that foundation. This is useful when security policy requires tooling and automation for a foundation (e.g. Production) to run on specific VMs.
 
-### <a id="app-dev"></a>Concourse Teams for App Development Orgs and Spaces
+### <a id="app-dev"></a> Concourse Teams for App Development Orgs and Spaces
 
 When a Concourse server hosts pipelines for an app development team, Pivotal recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the Pivotal Application Service (PAS) user authentication and authorization (UAA) server.
 
