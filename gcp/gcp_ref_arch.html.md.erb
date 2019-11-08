@@ -153,7 +153,7 @@ This diagram illustrates the case where you want to expose only a minimal number
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/gcp-net-topology-base.png).
 
-#### <a id="no_nat"></a> Public IP addresses Solution
+#### <a id="no_nat"></a> Public IP Addresses Solution
 
 If you prefer not to use a NAT solution, you can configure <%= vars.platform_name %> on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between <%= vars.platform_name %> components are routed through the front end load balancer and the Gorouter.
 
