@@ -5,7 +5,7 @@ owner: Customer0
 
 This topic presents two reference architectures for installing Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP): on a [shared virtual private cloud](#shared-vpc) (VPC) and on a [single-project VPC](#single-vpc). This topic also outlines multiple networking variants for VPC deployment. The architectures are validated for production-grade PCF deployments using multiple AZs.
 
-For general requirements for running PCF and specific requirements for running <%= vars.product_name %> on GCP, see [PCF on GCP Requirements](../../customizing/gcp.html)
+For general requirements for running PCF and specific requirements for running PCF on GCP, see [PCF on GCP Requirements](../../customizing/gcp.html)
 
 
 ## <a id="refarchs"></a> PCF Reference Architectures
@@ -155,7 +155,7 @@ This diagram illustrates the case where you want to expose only a minimal number
 
 #### <a id="no_nat"></a> Public IP addresses Solution
 
-If you prefer not to use a NAT solution, you can configure PCF on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between Cloud Foundry components are routed through the front end load balancer and the Gorouter.
+If you prefer not to use a NAT solution, you can configure PCF on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between PCF components are routed through the front end load balancer and the Gorouter.
 
 #### <a id="network_components"></a> Network Objects
 
