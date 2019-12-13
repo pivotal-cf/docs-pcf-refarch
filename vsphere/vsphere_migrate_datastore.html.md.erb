@@ -5,27 +5,27 @@ owner: Customer0
 
 <% current_page.data.title = "Migrating " + vars.product_name + " to a New Datastore in vSphere"  %>
 
-This topic describes how to migrate your <%= vars.product_name  %> installation to a new vSphere datastore. 
+This topic describes how to migrate your <%= vars.product_name  %> installation to a new vSphere datastore.
 
 
 ## <a id="prereqs"></a> Prerequisites
- 
+
 Both the new and existing vSphere datastores must reside in the same datacenter.
 
 To avoid service disruption, Pivotal recommends that you configure your overall <%= vars.product_name %> deployment for [high availability](../../concepts/high-availability.html). In addition, check for configurations necessary to achieve high availability in each of your installed product tiles.
 
-If your environment has any single points of failure, service may be disrupted as a result of the migration. 
+If your environment has any single points of failure, service may be disrupted as a result of the migration.
 
 
-## <a id="prep"></a> Before You Begin 
+## <a id="prep"></a> Before You Begin
 
 This section describes the steps you should perform prior to the migration.
 
 ### <a id="backup"></a> Step 1: Back Up Your Environment
 
-Ensure that your <%= vars.product_name %> environment is fully backed up. 
+Ensure that your <%= vars.product_name %> environment is fully backed up.
 
-For more information about how to backup <%= vars.product_name %>, see [Backing up <%= vars.product_name %>](../../customizing/backup-restore/index.html). 
+For more information about how to backup <%= vars.product_name %>, see [Backing up <%= vars.product_name %>](../../customizing/backup-restore/index.html).
 
 ### <a a id="doc"></a> Step 2: Document Current Environment Settings
 
@@ -68,16 +68,16 @@ In each tile installed in your <%= vars.product_name %> deployment, check the **
 
 1. In BOSH Director, navigate to the **vCenter Config** page.
 
-1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** field to reflect the new datastore names, then click **Save**. 
+1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** field to reflect the new datastore names, then click **Save**.
     <p class="note"><strong>Note:</strong> If you use the Datastore Clustering feature in vSphere, provide only the individual names of the datastores in the cluster. Do not provide the name of the cluster that contains them.</p>
 
 1. Click **Review Pending Changes**, then **Apply Changes**.
 
-1. Confirm that the BOSH Director VM has persistent disk on the new datastore. 
+1. Confirm that the BOSH Director VM has persistent disk on the new datastore.
    1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your <%= vars.product_name %> deployment VMs and new datastore.
-   1. Click the **Related Objects** and **Virtual Machines**. 
+   1. Click the **Related Objects** and **Virtual Machines**.
    1. Locate the Pivotal Operations Manager VM and verify that the VM has an expected value in the **Provisioned Space** column.
-    <%= image_tag('vsphere-web-client.png') %> 
+    <%= image_tag('vsphere-web-client.png') %>
 
 1. In BOSH Director, navigate to the **Director Config** page, and select the **Recreate all VMs** option.
 
@@ -86,12 +86,12 @@ In each tile installed in your <%= vars.product_name %> deployment, check the **
 
 ## <a id="after"></a> After the Migration
 
-When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`.  
+When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`.
 
 ### <a id="fix_sync_error"></a> Fix Failed BOSH Deployment with Out-of-Sync Error
 
-If your <%= vars.product_name %> deployment gets into this state, you can resolve the issue by performing the steps in the KB article [How to recover from a failed bosh deployment when VMs are out of sync on vSphere](https://discuss.pivotal.io/hc/en-us/articles/218051768-How-to-recover-from-a-failed-bosh-deployment-when-VMs-are-out-of-sync-on-Vsphere).
+If your <%= vars.product_name %> deployment gets into this state, you can resolve the issue by performing the steps in the KB article [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment).
 
 ### <a id="prevent_sync_error"></a> Prevent Out-of-Sync Error
- 
-You can also prevent the `out of sync` BOSH error by increasing the CPI timeout to a larger value before performing the migration. Follow the instructions in the KB article [How to Increase the Timeout on Bosh CPI Command Calls](https://community.pivotal.io/s/article/How-to-Increase-the-Timeout-on-Bosh-CPI-Command-Calls).
+
+You can also prevent the `out of sync` BOSH error by increasing the CPI timeout to a larger value before performing the migration. Follow the instructions in the KB article [How to Increase the Timeout on BOSH CPI Command Calls in Pivotal Cloud Foundry](https://community.pivotal.io/s/article/how-to-increase-the-timeout-on-bosh-cpi-command-calls).
