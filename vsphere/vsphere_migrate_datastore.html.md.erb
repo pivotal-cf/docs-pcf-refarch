@@ -3,16 +3,16 @@ title: Migrating Pivotal Platform to a New Datastore in vSphere
 owner: Customer0
 ---
 
-<% current_page.data.title = "Migrating " + vars.product_name + " to a New Datastore in vSphere"  %>
+<% current_page.data.title = "Migrating " + vars.platform_name + " to a New Datastore in vSphere"  %>
 
-This topic describes how to migrate your <%= vars.product_name  %> installation to a new vSphere datastore.
+This topic describes how to migrate your <%= vars.platform_name %> installation to a new vSphere datastore.
 
 
 ## <a id="prereqs"></a> Prerequisites
 
 Both the new and existing vSphere datastores must reside in the same datacenter.
 
-To avoid service disruption, Pivotal recommends that you configure your overall <%= vars.product_name %> deployment for [high availability](../../concepts/high-availability.html). In addition, check for configurations necessary to achieve high availability in each of your installed product tiles.
+To avoid service disruption, Pivotal recommends that you configure your overall <%= vars.platform_name %> deployment for [high availability](../../concepts/high-availability.html). In addition, check for configurations necessary to achieve high availability in each of your installed product tiles.
 
 If your environment has any single points of failure, service may be disrupted as a result of the migration.
 
@@ -23,9 +23,9 @@ This section describes the steps you should perform prior to the migration.
 
 ### <a id="backup"></a> Step 1: Back Up Your Environment
 
-Ensure that your <%= vars.product_name %> environment is fully backed up.
+Ensure that your <%= vars.platform_name %> environment is fully backed up.
 
-For more information about how to backup <%= vars.product_name %>, see [Backing up <%= vars.product_name %>](../../customizing/backup-restore/index.html).
+For more information about how to back up <%= vars.platform_name %>, see [Backing up <%= vars.platform_name %>](../../customizing/backup-restore/index.html).
 
 ### <a a id="doc"></a> Step 2: Document Current Environment Settings
 
@@ -53,7 +53,7 @@ In Pivotal Application Service (PAS), check the **Status** tab and make sure the
 
 ### <a id="tile_heatlh"></a> Step 4: Check Installed Products Health
 
-In each tile installed in your <%= vars.product_name %> deployment, check the **Status** tab and make sure there are no errors or reported issues.
+In each tile installed in your <%= vars.platform_name %> deployment, check the **Status** tab and make sure there are no errors or reported issues.
 
 ### <a id="opsman_health"></a> Step 5: Check BOSH Director Status
 
@@ -64,7 +64,7 @@ In each tile installed in your <%= vars.product_name %> deployment, check the **
 1. Before proceeding with the migration, click **Review Pending Changes** and **Apply Changes** to make sure there are no errors in the Installation Log.
 
 
-## <a id="migrate_proc"></a> Procedure: Migrate <%= vars.product_name %> to a New Datastore
+## <a id="migrate_proc"></a> Procedure: Migrate <%= vars.platform_name %> to a New Datastore
 
 1. In BOSH Director, navigate to the **vCenter Config** page.
 
@@ -74,7 +74,7 @@ In each tile installed in your <%= vars.product_name %> deployment, check the **
 1. Click **Review Pending Changes**, then **Apply Changes**.
 
 1. Confirm that the BOSH Director VM has persistent disk on the new datastore.
-   1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your <%= vars.product_name %> deployment VMs and new datastore.
+   1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your <%= vars.platform_name %> deployment VMs and new datastore.
    1. Click the **Related Objects** and **Virtual Machines**.
    1. Locate the Pivotal Operations Manager VM and verify that the VM has an expected value in the **Provisioned Space** column.
     <%= image_tag('vsphere-web-client.png') %>
@@ -90,7 +90,7 @@ When BOSH moves disks, it waits for up to 60 minutes for the operation to comple
 
 ### <a id="fix_sync_error"></a> Fix Failed BOSH Deployment with Out-of-Sync Error
 
-If your <%= vars.product_name %> deployment gets into this state, you can resolve the issue by performing the steps in the KB article [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment).
+If your <%= vars.platform_name %> deployment gets into this state, you can resolve the issue by performing the steps in the KB article [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment).
 
 ### <a id="prevent_sync_error"></a> Prevent Out-of-Sync Error
 
