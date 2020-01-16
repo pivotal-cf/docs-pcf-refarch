@@ -3,46 +3,48 @@ title: AWS Reference Architecture
 owner: Customer0
 ---
 
-This guide presents a reference architecture for <%= vars.product_name  %>, including
-Pivotal Application Service (PAS) and Enterprise Pivotal Container Service (PKS), on Amazon Web Services
-(AWS). It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html).
+This guide presents a reference architecture for <%= vars.platform_name %>, including <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>), on Amazon Web Services (AWS). It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html).
 
-See [<%= vars.product_name %> on AWS Requirements](../../customizing/aws.html) for general requirements for running <%= vars.product_name %> and specific requirements for running <%= vars.product_name %> on AWS.
+For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on AWS, see [<%= vars.platform_name %> on AWS Requirements](../../customizing/aws.html).
 
-## <a id="pas"></a>PAS
 
-This section describes a reference architecture for a PAS installation on AWS.
+## <a id="pas"></a> <%= vars.app_runtime_abbr %>
 
-###<a id="diagram"></a>Diagram
+This section describes a reference architecture for a <%= vars.app_runtime_abbr %> installation on AWS.
 
-The following diagram illustrates the reference architecture for PAS on AWS.
+### <a id="diagram"></a> Diagram
 
-![This diagram illustrates PAS on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](PAS_AWS.png)
+The following diagram illustrates the reference architecture for <%= vars.app_runtime_abbr %> on AWS.
+
+![This diagram illustrates <%= vars.app_runtime_abbr %> on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](PAS_AWS.png)
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_AWS.png).
 
-###<a id="networking"></a>Networking
+### <a id="networking"></a> Networking
 
 The following sections provide guidance about networking resources.
 
 #### <a id="dns"></a> DNS
 
-You can use AWS Route 53 for DNS resolution to host your PAS domains.
+You can use AWS Route 53 for DNS resolution to host your <%= vars.app_runtime_abbr %> domains.
 
-#### <a id="lb"></a>Load Balancing
+#### <a id="lb"></a> Load Balancing
 
-AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). Pivotal recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB.
-
+AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). <%= vars.recommended_by %> recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB.
 
 #### <a id="subnets"></a> Networks, Subnets, and IP Spacing Planning
 
 The following list provides considerations related to networks, subnets, and IP spacing planning.
 
 * In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved.
-* Your organization might not have the IP space necessary to deploy PAS in a consistent manner. To alleviate this, Pivotal recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.product_name %> deployment can use few IP addresses.
-* If you want the front end of PAS to be accessible from your corporate network or the services running on PAS to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
+
+* Your organization might not have the IP space necessary to deploy <%= vars.app_runtime_abbr %> in a consistent manner. To alleviate this, <%= vars.recommended_by %> recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.platform_name %> deployment can use few IP addresses.
+
+* If you want the front end of <%= vars.app_runtime_abbr %> to be accessible from your corporate network or the services running on <%= vars.app_runtime_abbr %> to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
+
 * If you want a VPC that is only public-facing, no special consideration is necessary for the use of IPs.
-* See the following table to understand the action required depending on the type of traffic you want to allow for your <%= vars.product_name %> deployment.
+
+* See the following table to understand the action required depending on the type of traffic you want to allow for your <%= vars.platform_name %> deployment.
 	<table>
 		<tr>
 			<th>If you want...</th>
@@ -65,7 +67,8 @@ The following list provides considerations related to networks, subnets, and IP 
 			<td>Create the NAT instance on your corporate subnet or if business requirements dictate, make the entire VPC corporate-routable.</td>
 		</tr>
 	</table>
-* If you plan to install [<%= vars.product_name %> Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
+
+* If you plan to install [<%= vars.platform_name %> Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
 
 #### <a id="alternatives"></a> Alternative Network Layouts
 
@@ -87,8 +90,8 @@ The following options are available for choosing your network topology:
 		<td>Internet Egress</td>
 		<td>
 			<ul>
-				<li>Allow PAS to access the internet through a NAT gateway.</li>
-				<li>Do not allow PAS to access the internet. Use only a corporate network.</li>
+				<li>Allow <%= vars.app_runtime_abbr %> to access the internet through a NAT gateway.</li>
+				<li>Do not allow <%= vars.app_runtime_abbr %> to access the internet. Use only a corporate network.</li>
 			</ul>
 		</td>
 	</tr>
@@ -96,7 +99,8 @@ The following options are available for choosing your network topology:
 		<td>Peering</td>
 		<td><ul>
 				<li>Isolated. This is normally internet-only facing.</li>
-				<li>Peered with corporate or other VPCs through Transit Gateway.</li><li>Peered directly with other VPCs and corporate connections.</li>
+				<li>Peered with corporate or other VPCs through Transit Gateway.</li>
+				<li>Peered directly with other VPCs and corporate connections.</li>
 			</ul></td>
 	</tr>
 	<tr>
@@ -108,19 +112,19 @@ The following options are available for choosing your network topology:
 	</tr>
 </table>
 
+### <a id="rds"></a> RDS
 
-###<a id="rds"></a> RDS
-
-Use a single RDS instance for BOSH and PAS. This instance requires several databases. See the following sections of the installation documentation for more information:
+Use a single RDS instance for BOSH and <%= vars.app_runtime_abbr %>. This instance requires several databases. For more information, see the following sections of the installation documentation:
 
 * [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_
-* [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring PAS_
 
-###<a id="blobstore"></a>Blobstore Storage Accounts
+* [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring <%= vars.app_runtime_abbr %>_
+
+### <a id="blobstore"></a> Blobstore Storage Accounts
 
 Pivotal Operations Manager requires a bucket for the BOSH blobstore.
 
-PAS requires the following buckets:
+<%= vars.app_runtime_abbr %> requires the following buckets:
 
 * Buildpacks
 * Droplets
@@ -129,47 +133,48 @@ PAS requires the following buckets:
 
 These buckets require an associated role for read/write access.
 
-###<a id="identity-management"></a> Identity Management
+### <a id="identity-management"></a> Identity Management
 
-For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. See [Step 2: AWS Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-awsconfig).
+For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. For more informationee [Step 2: AWS Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-awsconfig).
 
-## <a id="pks"></a>PKS
 
-This section describes a reference architecture for a PKS installation on AWS.
+## <a id="pks"></a> <%= vars.k8s_runtime_abbr %>
 
-### <a id="pks-diagram"></a>Diagram
+This section describes a reference architecture for a <%= vars.k8s_runtime_abbr %> installation on AWS.
 
-The following diagram illustrates the reference architecture for PKS on AWS.
+### <a id="pks-diagram"></a> Diagram
 
-![This diagram illustrates PKS on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](../images/v2/export/PKS_AWS.png)
+The following diagram illustrates the reference architecture for <%= vars.k8s_runtime_abbr %> on AWS.
+
+![This diagram illustrates <%= vars.k8s_runtime_abbr %> on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](../images/v2/export/PKS_AWS.png)
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/v2/export/PKS_AWS.png).
 
-### <a id="pks-networking"></a>Networking
+### <a id="pks-networking"></a> Networking
 
 The following sections provide guidance about networking resources.
 
-#### <a id="pks-dns"></a>DNS
+#### <a id="pks-dns"></a> DNS
 
-You can use AWS Route 53 for DNS resolution to host your PKS domains.
+You can use AWS Route 53 for DNS resolution to host your <%= vars.k8s_runtime_abbr %> domains.
 
-#### <a id="pks-lb"></a>Load Balancing
+#### <a id="pks-lb"></a> Load Balancing
 
-You can configure a front end load balancer to enable public access to the PKS API VM.
+You can configure a front end load balancer to enable public access to the <%= vars.k8s_runtime_abbr %> API VM.
 
-For each PKS cluster, creating a load balancer is recommended for the corresponding master node or nodes.
-For more information, see [Creating and Configuring an AWS Load Balancer for Enterprise PKS Clusters](https://docs.pivotal.io/pks/aws-cluster-load-balancer.html).
+For each <%= vars.k8s_runtime_abbr %> cluster, <%= vars.recommended_by %> recommends creating a load balancer for the corresponding master node or nodes. For more information, see [Creating and Configuring an AWS Load Balancer for Enterprise <%= vars.k8s_runtime_abbr %> Clusters](https://docs.pivotal.io/pks/aws-cluster-load-balancer.html).
 
-For deployed workloads, Kubernetes can automatically create load balancers when applying
-the service definition to the app instances. For more information, see [Deploying and Exposing Basic Workloads](https://docs.pivotal.io/pks/deploy-workloads.html).
+For deployed workloads, Kubernetes can automatically create load balancers when applying the service definition to the app instances. For more information, see [Deploying and Exposing Basic Workloads](https://docs.pivotal.io/pks/deploy-workloads.html).
 
-#### <a id="pks-subnets"></a>Networks, Subnets, and IP Spacing Planning
+#### <a id="pks-subnets"></a> Networks, Subnets, and IP Spacing Planning
 
 The following list provides considerations related to networks, subnets, and IP spacing planning.
 
 * In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved.
-* If you want the front end of PKS to be accessible from your corporate network or the services running on PKS to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
-* Create the PKS subnets that host the Kubernetes cluster VMs with enough IP address capacity to accommodate the number of VMs and clusters you expect to deploy. The reference architecture diagram above shows a `/24` CIDR for the PKS subnets, which allows for about 250 VMs per AZ. If you expect a larger number of clusters for your organization, consider defining larger subnets, such as `/20`, to make room for future growth.
+
+* If you want the front end of <%= vars.k8s_runtime_abbr %> to be accessible from your corporate network or the services running on <%= vars.k8s_runtime_abbr %> to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
+
+* Create the <%= vars.k8s_runtime_abbr %> subnets that host the Kubernetes cluster VMs with enough IP address capacity to accommodate the number of VMs and clusters you expect to deploy. The reference architecture diagram above shows a `/24` CIDR for the <%= vars.k8s_runtime_abbr %> subnets, which allows for about 250 VMs per AZ. If you expect a larger number of clusters for your organization, consider defining larger subnets, such as `/20`, to make room for future growth.
 
 #### <a id="pks-alternatives"></a> Alternative Network Layouts
 
@@ -213,13 +218,12 @@ The following options are available for choosing your network topology:
   </tr>
 </table>
 
-### <a id="pks-rds"></a>RDS
+### <a id="pks-rds"></a> RDS
 
-Use a single RDS instance for BOSH. This instance requires a database. For more information, see [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_.
+Use a single RDS instance for BOSH. This instance requires a database. For more information, see the [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) section of the _Configuring BOSH Director on AWS_ topic.
 
-### <a id="pks-id"></a>Identity Management
+### <a id="pks-id"></a> Identity Management
 
-To create and manage Kubernetes master and worker nodes, use Instance Profiles.
-For more information, see [Kubernetes Cloud Provider](https://docs.pivotal.io/pks/installing-pks-aws.html#cloud-provider) in _Installing Enterprise PKS on AWS_.
+To create and manage Kubernetes master and worker nodes, use Instance Profiles. For more information, see the [Kubernetes Cloud Provider](https://docs.pivotal.io/pks/installing-pks-aws.html#cloud-provider) section of the _Installing Enterprise <%= vars.k8s_runtime_abbr %> on AWS_ topic.
 
-For information about installing the required AWS constructs for PKS, see [Installing <%= vars.product_name %> on AWS](../../customizing/aws.html).
+For information about installing the required AWS constructs for <%= vars.k8s_runtime_abbr %>, see [Installing <%= vars.platform_name %> on AWS](../../customizing/aws.html).
