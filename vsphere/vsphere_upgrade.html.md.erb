@@ -3,69 +3,65 @@ title: Upgrading vSphere without Pivotal Platform Downtime
 owner: Customer0
 ---
 
-<% current_page.data.title = "Upgrading vSphere without " + vars.product_name + " Downtime"  %>
+<% current_page.data.title = "Upgrading vSphere without " + vars.platform_name + " Downtime"  %>
 
-<html class="list-style-none"></html>
+This topic describes how to upgrade the vSphere components that host your <%= vars.platform_name %> installation without service disruption.
 
-This topic describes how to upgrade the vSphere components that host your <%= vars.product_name  %> installation without service disruption. 
 
 ## <a id="overview"></a> Minimum Requirements
 
-At a bare minimum, vSphere contains the following components:
+At minimum, vSphere contains a vCenter Server and one or more ESXi hosts.
 
-* vCenter Server
-* one or more ESXi hosts
+You cannot perform an in-place upgrade of vSphere without at least two ESXi hosts in your cluster.
 
-You cannot perform an in-place upgrade of vSphere without at least two ESXi hosts in your cluster. 
+If you do not meet this requirement, you have insufficient resources to evacuate an entire host. Because of this, you may experience <%= vars.platform_name %> downtime during the upgrade.
 
-If you do not meet this requirement (in other words, you have insufficient resources to evacuate an entire host), then you may experience <%= vars.product_name %> downtime during the upgrade. 
+To upgrade vSphere with only one ESXi host or without sufficient headroom capacity, you must reduce your <%= vars.platform_name %> installation size. In other words, you can either reduce the number of Diego Cells in your deployment or pause <%= vars.platform_name %> VMs to make more capacity available. These actions can result in <%= vars.platform_name %> downtime.
 
-To upgrade vSphere with only one ESXi host or without sufficient headroom capacity, you must reduce your <%= vars.product_name %> installation size. In other words, you can either reduce the number of Diego cells in your deployment or pause <%= vars.product_name %> VMs to make more capacity available. These actions can result in <%= vars.product_name %> downtime.
 
 ## <a id="rec_start"></a> Recommended Starting Configuration
 
-If you are running a <%= vars.product_name %> deployment as recommended by the base reference architecture for <%= vars.product_name %> on vSphere (recommended), then your vSphere installation should have the following components:
+If you are running a <%= vars.platform_name %> deployment as recommended by the base reference architecture described in [vSphere Reference Architecture](vsphere_ref_arch.html), your vSphere installation should have these components:
 
 * One vCenter Server
 * Three ESXi hosts per cluster
 * Three or more clusters
 * One (or HA pair) NSX Edge appliances
 
-<p class="note"><strong>Note</strong>: Pivotal recommends having at least three ESXi hosts in your cluster to maintain <%= vars.product_name %> high availability during your upgrade.</p>
+<p class="note"><strong>Note:</strong> <%= vars.recommended_by %> recommends having at least three ESXi hosts in your cluster to maintain high availability (HA) during your upgrade.</p>
 
-For more information, see the <a href="vsphere_ref_arch.html">Reference Architecture for <%= vars.product_name %> on vSphere</a>. 
 
-## <a id="upgrade_procedure"></a> Procedure to Upgrade vSphere 
+## <a id="upgrade_procedure"></a> Upgrade vSphere
 
-To upgrade the vSphere management layer underneath <%= vars.product_name %>, perform the following steps: 
+These sections describe the procedure to upgrade the vSphere management layer underneath <%= vars.platform_name %>.
 
-### <a id="upgrade_vcenter"></a> Step 1. Upgrade vCenter
+### <a id="upgrade_vcenter"></a> Step 1: Upgrade vCenter
 
-For example, you might be upgrading vCenter 6.0 to vCenter 6.5. 
+For more information about how to upgrade vCenter, see [Overview of the vCenter Server Upgrade Process](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.vcenter.upgrade.doc/GUID-C5CBFB63-4E95-4143-BA89-89AA5D292C68.html?hWord=N4IghgNiBcIG4GMCmA7ALkgTgAgM5bi2wFcAHAc0zABMltTMB7ZXXEAXyA) in the vSphere documentation.
 
-For more information about how to upgrade vCenter, see <a href="http://pubs.vmware.com/vsphere-65/index.jsp#com.vmware.vsphere.upgrade.doc/GUID-C5CBFB63-4E95-4143-BA89-89AA5D292C68.html">Overview of the vCenter Server Upgrade Process</a> in VMware documentation.
+### <a id="upgrade_esxi"></a> Step 2: Upgrade ESXi Hosts
 
-### <a id="upgrade_esxi"></a> Step 2. Upgrade ESXi Hosts
+After a successful vCenter upgrade, you must upgrade your ESXi hosts one at a time, starting with the first ESXi host.
 
-After a successful vCenter upgrade, upgrade your ESXi hosts one at a time.
-
-Starting with the first ESXi host, perform the following steps:
+To upgrade your ESXi hosts:
 
 1. Verify that your ESXi hosts have sufficient resources and headroom to evacuate the VM workload of a single ESXi host to the two remaining hosts.
+    <p class="note"><strong>Note:</strong> If you have enabled vSphere HA on your ESXi host, each ESXi host should have sufficient headroom capacity, since HA reserves 66% of available memory.</p>
 
-    <p class="note"><strong>Note</strong>: If you have enabled vSphere HA on your ESXi host, then each ESXi host should have sufficient headroom capacity since HA reserves 66% of available memory.</p>
-2. Use vMotion to move all the <%= vars.product_name %> VMs on the host you want to upgrade to the other ESXi hosts. vMotion places the VMs on the other hosts based on available capacity. For more information, see <a href="http://pubs.vmware.com/vsphere-65/index.jsp#com.vmware.vsphere.vcenterhost.doc/GUID-D19EA1CB-5222-49F9-A002-4F8692B92D63.html?resultof=%2522%2576%254d%256f%2574%2569%256f%256e%2522%2520%2522%2576%256d%256f%2574%2569%256f%256e%2522%2520">Migration with vMotion</a> in VMware documentation.
-3. Upgrade the evacuated ESXi host. For example, you may be upgrading from ESXi v6.0 to ESX v6.5. For instructions, see <a href="http://pubs.vmware.com/vsphere-65/index.jsp#com.vmware.vsphere.upgrade.doc/GUID-122035F6-8433-463E-A0F7-B4FC71A05B04.html">Upgrading ESXi Hosts</a> in VMware documentation.
+1. Use vMotion to move all the <%= vars.platform_name %> VMs on the host you want to upgrade to the other ESXi hosts. vMotion places the VMs on the other hosts based on available capacity. For more information, see [Migration with vMotion](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.vsphere.vcenterhost.doc/GUID-D19EA1CB-5222-49F9-A002-4F8692B92D63.html?hWord=N4IghgNiBcILIEsDmAnMAXBB7AdgAgHcF0ALPANzi01xAF8g) the vSphere documentation.
 
-After successfully upgrading the first ESXi host, repeat the above steps for each remaining host one at a time. vSphere automatically rebalances all <%= vars.product_name %> VMs back onto the upgraded hosts via DRS after all the hosts are done.
+1. Upgrade the evacuated ESXi host. For example, you may be upgrading from ESXi v6.0 to ESX v6.5. For more information, see [Upgrading ESXi Hosts](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.esxi.upgrade.doc/GUID-122035F6-8433-463E-A0F7-B4FC71A05B04.html?hWord=N4IghgNiBcIKoAcDmAnMATAlgOyQAgFEBlADUzwAkB7AZwBcaQBfIA) in the vSphere documentation.
 
-### <a id="upgrade_nsx"></a> Step 3. Upgrade ESG on VMware NSX
+1. Repeat the previous steps for each remaining host, one at a time. vSphere automatically rebalances all <%= vars.platform_name %> VMs back onto the upgraded hosts via DRS after all the hosts are done.
 
-If your <%= vars.product_name %> deployment lives on a network behind an Edge Services Gateway (ESG) as recommended by the reference architecture, then upgrade each ESG only after completing the upgrade of vCenter and your ESXi hosts.
+### <a id="upgrade_nsx"></a> Step 3: Upgrade ESG on VMware NSX
 
-When you upgrade an ESG on VMware NSX, you upgrade the NSX Manager software. This upgrade can cause some slight downtime, the amount of which depends on the number of ESGs you are using. 
+If your <%= vars.platform_name %> deployment is on a network behind an Edge Services Gateway (ESG) as recommended in [vSphere Reference Architecture](vsphere_ref_arch.html), upgrade each ESG only after completing the upgrade of vCenter and your ESXi hosts.
 
-* If your deployment only has one ESG, you can expect a downtime of 5 minutes for network reconvergence. 
-* If your ESGs are deployed in HA, upgrade the first ESG. Then upgrade the second ESG. This upgrade results only in 15-20 seconds of downtime.
+When you upgrade an ESG on VMware NSX, you upgrade the NSX Manager software. This upgrade can cause some slight downtime, the amount of which depends on the number of ESGs you are using:
 
-For more information, see the <a href="http://pubs.vmware.com/nsx-63/index.jsp?topic=%2Fcom.vmware.nsx.upgrade.doc%2FGUID-4613AC10-BC73-4404-AF80-26E924EF5FE0.html">NSX Upgrade Guide</a> in VMware documentation.
+* If your deployment only has one ESG, you can expect a downtime of five minutes for network reconvergence.
+
+* If your ESGs are deployed in HA, upgrade the first ESG. Then upgrade the second ESG. This upgrade causes only 15-20 seconds of downtime.
+
+For more information, see [NSX Upgrade Guide](https://docs.vmware.com/en/VMware-NSX-Data-Center-for-vSphere/6.4/com.vmware.nsx.upgrade.doc/GUID-4613AC10-BC73-4404-AF80-26E924EF5FE0.html?hWord=N4IghgNiBcIHIGUAaACAqgBwOYCcwBMBTFAcQFcBLIkAXyA) in the VMware documentation.

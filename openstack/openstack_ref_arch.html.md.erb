@@ -3,26 +3,26 @@ title: OpenStack Reference Architecture
 owner: Customer0
 ---
 
+This topic describes a reference architecture for <%= vars.platform_name  %> on OpenStack. This architecture is valid for most production-grade <%= vars.platform_name %> deployments in a single project using three availability zones (AZs).
+
+For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on OpenStack, see [OpenStack on <%= vars.platform_name %> Requirements](../../customizing/openstack.html).
 
 
-This guide presents a reference architecture for <%= vars.product_name  %> on OpenStack. This architecture is valid for most production-grade <%= vars.product_name %> deployments in a single project using three availability zones (AZs).
+## <a id="refarchs"></a><%= vars.platform_name %> Reference Architectures
 
-See [OpenStack on <%= vars.product_name %> Requirements](../../customizing/openstack.html) for general requirements for running <%= vars.product_name %> and specific requirements for running <%= vars.product_name %> on OpenStack.
-
-## <a id="refarchs"></a><%= vars.product_name %> Reference Architectures ##
-
-A <%= vars.product_name %> reference architecture describes a proven approach for deploying <%= vars.product_name %> on a specific IaaS, such as OpenStack, that meets the following requirements:
+A <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as OpenStack, that meets these requirements:
 
 * Secure
 * Publicly-accessible
-* Includes common <%= vars.product_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-* Can host at least 100 app instances, or far more
+* Includes common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Can host at least 100 app instances
 
-Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.product_name %> deployment.
+Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
 
-##<a id='base'></a> Base OpenStack Reference Architecture ##
 
-The following diagram provides an overview of a reference architecture deployment of <%= vars.product_name %> on OpenStack using three AZs.
+## <a id='base'></a> Base OpenStack Reference Architecture
+
+The diagram below illustrates a reference architecture of a deployment of <%= vars.platform_name %> on OpenStack using three AZs.
 
 <%= image_tag('openstack-overview-arch.png') %>
 
@@ -30,210 +30,208 @@ The following diagram provides an overview of a reference architecture deploymen
 
 ### <a id="base_components"></a> Base Reference Architecture Components
 
-The following table lists the components that are part of a base reference architecture deployment on OpenStack with three AZs.
+The table below lists the components that are part of a base reference architecture deployment on OpenStack with three AZs.
 
 <table class="nice">
 <th><strong>Component</strong></th>
 <th><strong>Reference Architecture Notes</strong></th>
-<tr>
- <td><strong>Domains & DNS</strong></td>
- <td>CF Domain zones and routes in use by the reference architecture include:<br><br>
-   <ul>
-     <li>zones for *.apps and *.sys (required)</li>
-     <li>a route for Pivotal Operations Manager (required)</li>
-     <li>a route for Doppler (required)</li>
-     <li>a route for Loggregator (required)</li>
-     <li>a route for ssh access to app containers (optional)</li>
-     <li>a route for tcp access to tcp routers (optional)</li>
-   </ul>
- </td>
-</tr>
-<tr>
- <td><strong>Ops Manager</strong></td>
- <td>Deployed on the infrastructure network and accessible by FQDN or through an optional jumpbox.</td>
-</tr>
-<tr>
- <td><strong>BOSH Director</strong></td>
- <td>Deployed on the infrastructure network.</td>
-</tr>
-<tr>
- <td><strong>Application Load Balancer</strong></td>
- <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP, and SSL traffic and forwards them to the Gorouters. Load balancers are outside the scope of this document.</td>
-</tr>
-<tr>
- <td><strong>SSH Load Balancer</strong></td>
- <td>Optional. Load balancer that provides SSH access to application containers for developers. Load balancers are outside the scope of this document.</td>
-</tr>
-<tr>
- <td><strong>Gorouters</strong></td>
- <td>Accessed through the Application Load Balancer. Deployed on the Pivotal Application Service (PAS) network, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>Diego Brains</strong></td>
- <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH Load Balancers. Deployed on the PAS network, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>TCP Routers</strong></td>
- <td>Optional feature for TCP routing. Deployed on the PAS network, one per AZ.</td>
-</tr>
-<tr>
- <td><strong>CF Database</strong></td>
- <td>Reference architecture uses internal MySQL.</td>
-</tr>
-<tr>
- <td><strong>Storage Buckets</strong></td>
- <td>Reference architecture uses customer provided blobstore. Buckets are needed for BOSH and PAS.</td>
-</tr>
-<tr>
- <td><strong>Service Tiles</strong></td>
- <td>Deployed on the services network.</td>
-</tr>
-<tr>
-	<td><strong>Service Accounts</strong></td>
-	<td>Two service accounts are recommended: one for OpenStack "paving," and the other for Ops Manager and BOSH. Consult the following list:<br><br>
-		<ul>
-		<li>Admin Account: Concourse will use this account to provision required OpenStack resources as well as a Keystone service account.</li>
-		<li>Keystone Service Account: This service account will be automatically provisioned with restricted access only to resources needed by <%= vars.product_name %>.
-		</ul>
-	</td>
-</tr>
-<tr>
-	<td><strong>OpenStack Quota</strong></td>
-	<td>The default compute quota on a new OpenStack subscription is typically not enough to host a multi-AZ deployment. The recommended quota for instances is 100. Your OpenStack network quotas may also need to be increased.</td>
-</tr>
+  <tr>
+    <td><strong>Domains and DNS</strong></td>
+    <td>Domain zones and routes in use by the reference architecture include:<br><br>
+      <ul>
+         <li>Zones for *.apps and *.sys (required)</li>
+         <li>A route for <%= vars.ops_manager_full %> (required)</li>
+         <li>A route for Doppler (required)</li>
+         <li>A route for Loggregator (required)</li>
+         <li>A route for SSH access to app containers (optional)</li>
+         <li>A route for TCP access to TCP routers (optional)</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong><%= vars.ops_manager %></strong></td>
+    <td>Deployed on the infrastructure network and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox.</td>
+  </tr>
+  <tr>
+    <td><strong>BOSH Director</strong></td>
+    <td>Deployed on the infrastructure network.</td>
+  </tr>
+  <tr>
+    <td><strong>Application Load Balancer</strong></td>
+    <td>Required. Load balancer that handles incoming HTTP, HTTPS, TCP, and SSL traffic and forwards them to the Gorouters. Load balancers are outside the scope of this topic.</td>
+  </tr>
+  <tr>
+    <td><strong>SSH Load Balancer</strong></td>
+    <td>Optional. Load balancer that provides SSH access to app containers for developers. Load balancers are outside the scope of this topic.</td>
+  </tr>
+  <tr>
+    <td><strong>Gorouters</strong></td>
+    <td>Accessed through the Application Load Balancer. Deployed on the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) network, one per AZ.</td>
+  </tr>
+  <tr>
+    <td><strong>Diego Brains</strong></td>
+    <td>This component is required. However, the SSH container access functionality is optional and enabled through the SSH load balancers. Deployed on the <%= vars.app_runtime_abbr %> network, one per AZ.</td>
+  </tr>
+  <tr>
+    <td><strong>TCP Routers</strong></td>
+    <td>Optional feature for TCP routing. Deployed on the <%= vars.app_runtime_abbr %> network, one per AZ.</td>
+  </tr>
+  <tr>
+    <td><strong>Database</strong></td>
+    <td>Reference architecture uses internal MySQL.</td>
+  </tr>
+  <tr>
+    <td><strong>Storage Buckets</strong></td>
+    <td>Reference architecture uses customer provided blobstore. Buckets are needed for BOSH and <%= vars.app_runtime_abbr %>.</td>
+  </tr>
+  <tr>
+    <td><strong>Service Tiles</strong></td>
+    <td>Deployed on the services network.</td>
+  </tr>
+  <tr>
+  	<td><strong>Service Accounts</strong></td>
+  	<td><%= vars.recommended_by %> recommends two service accounts: one for OpenStack "paving," and the other for <%= vars.ops_manager %> and BOSH.<br><br>
+      <ul>
+        <li><strong>Admin Account:</strong> Concourse uses this account to provision required OpenStack resources as well as a Keystone service account.</li>
+  		  <li><strong>Keystone Service Account:</strong> This service account is automatically provisioned with restricted access only to resources needed by <%= vars.platform_name %>.
+      </ul>
+  	 </td>
+  </tr>
+  <tr>
+  	 <td><strong>OpenStack Quota</strong></td>
+  	 <td>The default compute quota on a new OpenStack subscription is typically not enough to host a multi-AZ deployment. <%= vars.recommended_by %> recommends a quota of 100 for instances. Your OpenStack network quotas may also need to be increased.</td>
+  </tr>
 </table>
 
 ### <a id="openstack_components"></a> OpenStack Objects
 
-The following table lists the network objects in this reference architecture.
+The table below lists the network objects in this reference architecture.
 
 <table class="nice">
-  <th><strong>Network Object</strong></th>
-  <th><strong>Notes</strong></th>
-  <th><strong>Estimated Number</strong></th>
+<th><strong>Network Object</strong></th>
+<th><strong>Notes</strong></th>
+<th><strong>Estimated Number</strong></th>
   <tr>
-  <td><strong>Floating IP addresses</strong></td>
-  <td>Two per deployment. One assigned to Ops Manager, the other to your jumpbox. </td>
-  <td>2</td>
+    <td><strong>Floating IP addresses</strong></td>
+    <td>Two per deployment: one assigned to <%= vars.ops_manager %>, the other to your jumpbox.</td>
+    <td>2</td>
   </tr>
   <tr>
-  <td><strong>Project</strong></td>
-  <td>One per deployment. A <%= vars.product_name %> deployment exists within a single project and a single OpenStack region, but should distribute <%= vars.product_name %> jobs and instances across three OpenStack AZs to ensure a high degree of availability.</td>
-  <td>1</td>
+    <td><strong>Project</strong></td>
+    <td>One per deployment. A <%= vars.platform_name %> deployment exists within a single project and a single OpenStack region, but should distribute <%= vars.platform_name %> jobs and instances across three OpenStack AZs to ensure high availability.</td>
+    <td>1</td>
   </tr>
   <tr>
-  <td><strong>Networks</strong></td>
-  <td>The reference architecture requires the following Tenant Networks:
-   <ul>
-     <li>1 x (/24) <strong>Infrastructure</strong> (Ops Manager, BOSH Director, Jumpbox).</li>
-     <li>1 x (/20) <strong>PAS</strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
-     <li>1 x (/20) <strong>Services</strong> (RabbitMQ, MySQL, Spring Cloud Services, etc.)</li>
-     <li>1 x (/24) <strong>On-demand services</strong> (Various.)</li>
-   </ul>
-   An Internet-facing network is also required:
-   <ul>
-   <li>1 x <strong>Public</strong> network.<br/>
-   </ul>
-   <p class="note"><strong>Note</strong>: In many cases, the public network is an "under the cloud" network that is shared across projects.</p>
-   </td>
-  <td>5</td>
+    <td><strong>Networks</strong></td>
+    <td>The reference architecture requires these Tenant Networks:
+      <ul>
+        <li>1 x (/24) <strong>Infrastructure</strong> (<%= vars.ops_manager %>, BOSH Director, Jumpbox).</li>
+        <li>1 x (/20) <strong><%= vars.app_runtime_abbr %></strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
+        <li>1 x (/20) <strong>Services</strong> (RabbitMQ, MySQL, Spring Cloud Services, etc.)</li>
+        <li>1 x (/24) <strong>On-demand services</strong> (various)</li>
+      </ul>
+      An Internet-facing network is also required:
+      <ul>
+        <li>One <strong>Public</strong> network.<br/>
+      </ul>
+      <p class="note"><strong>Note:</strong> In many cases, the public network is an "under the cloud" network that is shared across projects.</p>
+    </td>
+    <td>5</td>
   </tr>
   <tr>
-  <td><strong>Routers</strong></td>
-  <td>This reference architecture requires one router attached to all networks:
-  	<ul>
-  	<li><strong>VirtualRouter</strong>: This router table enables the ingress/egress routes from/to Internet to the project networks and provides sNAT services.</li>
-  	</ul>
-  </td>
-  <td>1</td>
+    <td><strong>Routers</strong></td>
+    <td>This reference architecture requires one router attached to all networks:
+    	<ul>
+    	   <li><strong>VirtualRouter:</strong> This router table enables the ingress and egress routes to and from the Internet to the project networks and provides sNAT services.</li>
+    	</ul>
+    </td>
+    <td>1</td>
   </tr>
   <tr>
-  <td><strong>Security Groups</strong></td>
-  <td>The reference architecture requires one Security Groups.  The following table describes the Security Group ingress rules:
-  	<table>
-  	<tr>
-  		<th>Security Group</th>
-  		<th>Port</th>
-  		<th>From CIDR</th>
-  		<th>Protocol</th>
-  		<th>Description</th>
-  	</tr>
-  	<tr>
-  		<td>OpsMgrSG</td>
-  		<td>22</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>Ops Manager SSH access</td>
-  	</tr>
-  	<tr>
-  		<td>OpsMgrSG</td>
-  		<td>443</td>
-  		<td>0.0.0.0/0</td>
-  		<td>TCP</td>
-  		<td>Ops Manager HTTP access</td>
-  	</tr>
-  	<tr>
-  		<td>VmsSG</td>
-  		<td>ALL</td>
-  		<td>VPC_CIDR</td>
-  		<td>ALL</td>
-  		<td>Open up connections among BOSH-deployed VMs</td>
-  	</tr>
-  </table>
-  Additional security groups may be needed which are specific to your chosen load balancing solution.
-  </td>
-  <td>5</td>
+    <td><strong>Security Groups</strong></td>
+    <td>The reference architecture requires one Security Groups. The table below describes the Security Group ingress rules:
+    	<table>
+    	<tr>
+    		<th>Security Group</th>
+    		<th>Port</th>
+    		<th>From CIDR</th>
+    		<th>Protocol</th>
+    		<th>Description</th>
+    	</tr>
+    	<tr>
+    		<td>OpsMgrSG</td>
+    		<td>22</td>
+    		<td>0.0.0.0/0</td>
+    		<td>TCP</td>
+    		<td><%= vars.ops_manager %> SSH access</td>
+    	</tr>
+    	<tr>
+    		<td>OpsMgrSG</td>
+    		<td>443</td>
+    		<td>0.0.0.0/0</td>
+    		<td>TCP</td>
+    		<td><%= vars.ops_manager %> HTTP access</td>
+    	</tr>
+    	<tr>
+    		<td>VmsSG</td>
+    		<td>ALL</td>
+    		<td>VPC_CIDR</td>
+    		<td>ALL</td>
+    		<td>Open up connections among BOSH-deployed VMs</td>
+    	</tr>
+    </table>
+    Additional security groups may be needed which are specific to your chosen load balancing solution.
+    </td>
+    <td>5</td>
   </tr>
   <tr>
-  <td><strong>Load Balancers</strong></td>
-  <td><%= vars.product_name %> on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP/HTTPS/TCP traffic. Two load balancers are recommended: one to forward the traffic to the Gorouters, <code>AppsLB</code>, the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
-  	<br><br>
-  	The following table describes the required listeners for each load balancer:
-  	<table>
-  		<tr>
-  			<th>Name</th>
-  			<th>Instance/Port</th>
-  			<th>LB Port</th>
-  			<th>Protocol</th>
-  			<th>Description</th>
-  		</tr>
-  		<tr>
-  			<td>AppsLB</td>
-  			<td>gorouter/80</td>
-  			<td>80</td>
-  			<td>HTTP</td>
-  			<td>Forward traffic to Gorouters
-  		</tr>
-  		<tr>
-  			<td>AppsLB</td>
-  			<td>gorouter/80</td>
-  			<td>443</td>
-  			<td>HTTPS</td>
-  			<td>SSL termination and forward traffic to Gorouters</td>
-  		</tr>
-  		<tr>
-  			<td>SSHLB</td>
-  			<td>diego-brain/2222</td>
-  			<td>2222</td>
-  			<td>TCP</td>
-  			<td>Forward traffic to Diego Brain for container SSH connections</td>
-  		</tr>
-  	</table>
-  Each load balancer needs a check to validate the health of the back-end instances:
-  <ul>
-  	<li><code>AppsLB</code> checks the health on Gorouter port 80 with TCP</li>
-  	<li><code>SSHLB</code> checks the health on Diego Brain port 2222 with TCP</li>
-  </ul>
-  <p class="note"><strong>Note</strong>: In many cases, the load balancers are provided as an "under the cloud" service that is shared across projects.</p>
-</td>
-<td>
-2
-</td>
-</tr>
-<tr>
-<td><strong>Jumpbox</strong></td>
-<td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where Ops Manager does not have a public IP address. In these cases, you can SSH into Ops Manager or any other component through the jumpbox.
-</td>
-<td>1</td>
-</tr>
+    <td><strong>Load Balancers</strong></td>
+    <td><%= vars.platform_name %> on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP, HTTPS, and TCP traffic. <%= vars.recommended_by %> recommends two load balancers: one to forward the traffic to the Gorouters, <code>AppsLB</code>; and the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
+    <br><br>
+    The table below describes the required listeners for each load balancer:
+      <table>
+    		<tr>
+    			<th>Name</th>
+    			<th>Instance/Port</th>
+    			<th>Load Balancer Port</th>
+    			<th>Protocol</th>
+    			<th>Description</th>
+    		</tr>
+    		<tr>
+    			<td>AppsLB</td>
+    			<td>gorouter/80</td>
+    			<td>80</td>
+    			<td>HTTP</td>
+    			<td>Forward traffic to Gorouters
+    		</tr>
+    		<tr>
+    			<td>AppsLB</td>
+    			<td>gorouter/80</td>
+    			<td>443</td>
+    			<td>HTTPS</td>
+    			<td>SSL termination and forward traffic to Gorouters</td>
+    		</tr>
+    		<tr>
+    			<td>SSHLB</td>
+    			<td>diego-brain/2222</td>
+    			<td>2222</td>
+    			<td>TCP</td>
+    			<td>Forward traffic to Diego Brain for container SSH connections</td>
+    		</tr>
+    	</table>
+    Each load balancer needs a check to validate the health of the back end instances:
+      <ul>
+    	   <li><code>AppsLB</code> checks the health on Gorouter port 80 with TCP.</li>
+    	   <li><code>SSHLB</code> checks the health on Diego Brain port 2222 with TCP.</li>
+      </ul>
+      <p class="note"><strong>Note:</strong> In many cases, the load balancers are provided as an "under the cloud" service that is shared across projects.</p>
+    </td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td><strong>Jumpbox</strong></td>
+    <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where <%= vars.ops_manager %> does not have a public IP address. In these cases, you can SSH into <%= vars.ops_manager %> or any other component through the jumpbox.
+    </td>
+    <td>1</td>
+  </tr>
 </table>

@@ -3,7 +3,7 @@ title: AWS Reference Architecture
 owner: Customer0
 ---
 
-This guide presents a reference architecture for <%= vars.platform_name %>, including <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>), on Amazon Web Services (AWS). It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html).
+This topic describes a reference architecture for <%= vars.platform_name %>, including <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>), on Amazon Web Services (AWS). It builds on the common base architectures described in [Platform Architecture and Planning Overview](../index.html).
 
 For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on AWS, see [<%= vars.platform_name %> on AWS Requirements](../../customizing/aws.html).
 
@@ -14,7 +14,7 @@ This section describes a reference architecture for a <%= vars.app_runtime_abbr 
 
 ### <a id="diagram"></a> Diagram
 
-The following diagram illustrates the reference architecture for <%= vars.app_runtime_abbr %> on AWS.
+The diagram below illustrates the reference architecture for <%= vars.app_runtime_abbr %> on AWS.
 
 ![This diagram illustrates <%= vars.app_runtime_abbr %> on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](PAS_AWS.png)
 
@@ -22,7 +22,7 @@ The following diagram illustrates the reference architecture for <%= vars.app_ru
 
 ### <a id="networking"></a> Networking
 
-The following sections provide guidance about networking resources.
+These sections provide guidance about networking resources.
 
 #### <a id="dns"></a> DNS
 
@@ -34,9 +34,9 @@ AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). <
 
 #### <a id="subnets"></a> Networks, Subnets, and IP Spacing Planning
 
-The following list provides considerations related to networks, subnets, and IP spacing planning.
+When planning networks, subnets, and IP spacing, some things to consider are:
 
-* In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved.
+* In AWS, each availability zone (AZ) requires its own subnet of which the first five IPs are reserved.
 
 * Your organization might not have the IP space necessary to deploy <%= vars.app_runtime_abbr %> in a consistent manner. To alleviate this, <%= vars.recommended_by %> recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.platform_name %> deployment can use few IP addresses.
 
@@ -44,7 +44,7 @@ The following list provides considerations related to networks, subnets, and IP 
 
 * If you want a VPC that is only public-facing, no special consideration is necessary for the use of IPs.
 
-* See the following table to understand the action required depending on the type of traffic you want to allow for your <%= vars.platform_name %> deployment.
+* To understand the action required depending on the type of traffic you want to allow for your <%= vars.platform_name %> deployment, see the table below:
 	<table>
 		<tr>
 			<th>If you want...</th>
@@ -56,7 +56,7 @@ The following list provides considerations related to networks, subnets, and IP 
 		</tr>
 		<tr>
 			<td>Internet egress</td>
-			<td>Create the NAT Gateway towards the internet.</td>
+			<td>Create the NAT Gateway toward the Internet.</td>
 		</tr>
 		<tr>
 			<td>Corporate Ingress</td>
@@ -72,7 +72,7 @@ The following list provides considerations related to networks, subnets, and IP 
 
 #### <a id="alternatives"></a> Alternative Network Layouts
 
-The following options are available for choosing your network topology:
+These options are available for choosing your network topology:
 
 <table>
 	<tr>
@@ -82,16 +82,16 @@ The following options are available for choosing your network topology:
 	<tr>
 		<td>Internet Ingress</td>
 		<td><ul>
-				<li>Allow internet ingress by associating load balancers with elastic IPs.</li>
-				<li>Do not allow internet ingress.</li>
+				<li>Allow Internet ingress by associating load balancers with elastic IPs.</li>
+				<li>Do not allow Internet ingress.</li>
 			</ul></td>
 	</tr>
 	<tr>
 		<td>Internet Egress</td>
 		<td>
 			<ul>
-				<li>Allow <%= vars.app_runtime_abbr %> to access the internet through a NAT gateway.</li>
-				<li>Do not allow <%= vars.app_runtime_abbr %> to access the internet. Use only a corporate network.</li>
+				<li>Allow <%= vars.app_runtime_abbr %> to access the Internet through a NAT gateway.</li>
+				<li>Do not allow <%= vars.app_runtime_abbr %> to access the Internet. Use only a corporate network.</li>
 			</ul>
 		</td>
 	</tr>
@@ -106,7 +106,7 @@ The following options are available for choosing your network topology:
 	<tr>
 		<td>Corporate Peering</td>
 		<td><ul>
-				<li>SNAT for corporate resources. This requires 3 corporate IPs.</li>
+				<li>SNAT for corporate resources. This requires three corporate IPs.</li>
 				<li>Routable IP Addresses for VPC using /20 or a larger CIDR block necessary.</li>
 			</ul></td>
 	</tr>
@@ -114,17 +114,13 @@ The following options are available for choosing your network topology:
 
 ### <a id="rds"></a> RDS
 
-Use a single RDS instance for BOSH and <%= vars.app_runtime_abbr %>. This instance requires several databases. For more information, see the following sections of the installation documentation:
-
-* [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_
-
-* [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring <%= vars.app_runtime_abbr %>_
+Use a single RDS instance for BOSH and <%= vars.app_runtime_abbr %>. This instance requires several databases. For more information, see [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_ and [External System Database Configuration](../../customizing/configure-pas.html#create-dbs) in _Configuring <%= vars.app_runtime_abbr %>_.
 
 ### <a id="blobstore"></a> Blobstore Storage Accounts
 
-Pivotal Operations Manager requires a bucket for the BOSH blobstore.
+<%= vars.ops_manager_full %> requires a bucket for the BOSH blobstore.
 
-<%= vars.app_runtime_abbr %> requires the following buckets:
+<%= vars.app_runtime_abbr %> requires these buckets:
 
 * Buildpacks
 * Droplets
@@ -135,16 +131,16 @@ These buckets require an associated role for read/write access.
 
 ### <a id="identity-management"></a> Identity Management
 
-For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. For more informationee [Step 2: AWS Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-awsconfig).
+For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. For more information, see [Step 2: AWS Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-awsconfig) in _Configuring BOSH Director on AWS_.
 
 
 ## <a id="pks"></a> <%= vars.k8s_runtime_abbr %>
 
-This section describes a reference architecture for a <%= vars.k8s_runtime_abbr %> installation on AWS.
+These sections describe a reference architecture for a <%= vars.k8s_runtime_abbr %> installation on AWS.
 
 ### <a id="pks-diagram"></a> Diagram
 
-The following diagram illustrates the reference architecture for <%= vars.k8s_runtime_abbr %> on AWS.
+The diagram below illustrates the reference architecture for <%= vars.k8s_runtime_abbr %> on AWS.
 
 ![This diagram illustrates <%= vars.k8s_runtime_abbr %> on AWS. For specific details about the components and communication represented by the diagram, see the base and AWS reference architectures.](../images/v2/export/PKS_AWS.png)
 
@@ -152,7 +148,7 @@ The following diagram illustrates the reference architecture for <%= vars.k8s_ru
 
 ### <a id="pks-networking"></a> Networking
 
-The following sections provide guidance about networking resources.
+These sections provide guidance about networking resources.
 
 #### <a id="pks-dns"></a> DNS
 
@@ -168,9 +164,9 @@ For deployed workloads, Kubernetes can automatically create load balancers when 
 
 #### <a id="pks-subnets"></a> Networks, Subnets, and IP Spacing Planning
 
-The following list provides considerations related to networks, subnets, and IP spacing planning.
+When planning networks, subnets, and IP spacing, some things to consider are:
 
-* In AWS, each AZ requires its own subnet of which the first 5 IPs are reserved.
+* In AWS, each AZ requires its own subnet of which the first five IPs are reserved.
 
 * If you want the front end of <%= vars.k8s_runtime_abbr %> to be accessible from your corporate network or the services running on <%= vars.k8s_runtime_abbr %> to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
 
@@ -178,7 +174,7 @@ The following list provides considerations related to networks, subnets, and IP 
 
 #### <a id="pks-alternatives"></a> Alternative Network Layouts
 
-The following options are available for choosing your network topology:
+These options are available for choosing your network topology:
 
 <table>
   <tr>
@@ -188,16 +184,16 @@ The following options are available for choosing your network topology:
   <tr>
     <td>Internet Ingress</td>
     <td><ul>
-        <li>Allow internet ingress by associating load balancers with elastic IPs.</li>
-        <li>Do not allow internet ingress.</li>
+        <li>Allow Internet ingress by associating load balancers with elastic IPs.</li>
+        <li>Do not allow Internet ingress.</li>
       </ul></td>
   </tr>
   <tr>
     <td>Internet Egress</td>
     <td>
       <ul>
-        <li>Allow nodes and pods to access the internet through a NAT gateway.</li>
-        <li>Do not allow nodes or pods to access the internet. Use only a corporate network.</li>
+        <li>Allow nodes and pods to access the Internet through a NAT gateway.</li>
+        <li>Do not allow nodes or pods to access the Internet. Use only a corporate network.</li>
       </ul>
     </td>
   </tr>
@@ -212,7 +208,7 @@ The following options are available for choosing your network topology:
   <tr>
     <td>Corporate Peering</td>
     <td><ul>
-        <li>SNAT for corporate resources. This requires 3 corporate IPs.</li>
+        <li>SNAT for corporate resources. This requires three corporate IPs.</li>
         <li>Routable IP Addresses for VPC using /20 or a larger CIDR block necessary.</li>
       </ul></td>
   </tr>
@@ -220,10 +216,10 @@ The following options are available for choosing your network topology:
 
 ### <a id="pks-rds"></a> RDS
 
-Use a single RDS instance for BOSH. This instance requires a database. For more information, see the [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) section of the _Configuring BOSH Director on AWS_ topic.
+Use a single RDS instance for BOSH. This instance requires a database. For more information, see [Step 3: Director Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-dirconfig) in _Configuring BOSH Director on AWS_.
 
 ### <a id="pks-id"></a> Identity Management
 
-To create and manage Kubernetes master and worker nodes, use Instance Profiles. For more information, see the [Kubernetes Cloud Provider](https://docs.pivotal.io/pks/installing-pks-aws.html#cloud-provider) section of the _Installing Enterprise <%= vars.k8s_runtime_abbr %> on AWS_ topic.
+To create and manage Kubernetes master and worker nodes, use Instance Profiles. For more information, see [Kubernetes Cloud Provider](https://docs.pivotal.io/pks/installing-pks-aws.html#cloud-provider) in _Installing Enterprise <%= vars.k8s_runtime_abbr %> on AWS_.
 
 For information about installing the required AWS constructs for <%= vars.k8s_runtime_abbr %>, see [Installing <%= vars.platform_name %> on AWS](../../customizing/aws.html).

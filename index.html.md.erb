@@ -1,30 +1,30 @@
 ---
-breadcrumb: <%= vars.product_name %> Documentation
+breadcrumb: <%= vars.platform_name %> Documentation
 title: Platform Architecture and Planning Overview
 owner: Customer0
 ---
 
-This documentation describes reference architectures and other plans for installing <%= vars.product_name  %> on any infrastructure to support the runtime environments Pivotal Application Service (PAS) and Pivotal Container Service (PKS).
+This topic describes reference architectures and other plans for installing <%= vars.platform_name %> on any infrastructure to support the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) runtime environments.
 
 
 ## <a id="overview"></a> Overview
 
-A <%= vars.product_name  %> reference architecture describes a proven approach for deploying <%= vars.product_name %> on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. <%= vars.product_name %> reference architectures meet the following requirements:
+A <%= vars.platform_name  %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. <%= vars.platform_name %> reference architectures meet these requirements:
 
-  - Secure
-  - Publicly-accessible
-  - Includes common <%= vars.product_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
-  - Can host at least 100 app instances, or far more
-  - Have been deployed and validated by Pivotal to support Pivotal Operations Manager, PAS, and PKS
+* Secure
+* Publicly accessible
+* Includes common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Can host at least 100 app instances
+* Have been deployed and validated by Pivotal to support <%= vars.ops_manager_full %>, <%= vars.app_runtime_abbr %>, and <%= vars.k8s_runtime_abbr %>
 
-You can use <%= vars.product_name %> reference architectures to help plan the best configuration for your <%= vars.product_name %> deployment on your IaaS.
+You can use <%= vars.platform_name %> reference architectures to help plan the best configuration for your <%= vars.platform_name %> deployment on your IaaS.
 
 
 ## <a id="topics"></a> Reference Architecture and Planning Topics
 
-All <%= vars.product_name %> reference architectures start with the [Base PAS Architecture](#pas-base) and [Base PKS Architecture](#pks-base), below.
+All <%= vars.platform_name %> reference architectures start with the base <%= vars.app_runtime_abbr %> architecture and base <%= vars.k8s_runtime_abbr %> architecture.
 
-The following infrastructure-specific topics build on these two common base architectures:
+These IaaS-specific topics build on these two common base architectures:
 
 * [AWS Reference Architecture](./aws/aws_ref_arch.html)
 * [Azure Reference Architecture](./azure/azure_ref_arch.html)
@@ -32,195 +32,180 @@ The following infrastructure-specific topics build on these two common base arch
 * [OpenStack Reference Architecture](./openstack/openstack_ref_arch.html)
 * [vSphere Reference Architecture](./vsphere/vsphere_ref_arch.html)
 
-The following topic describes a broader architecture that automates the installation and updating of multiple <%= vars.product_name %> foundations, multiple instances of each architecture above:
+[Control Plane Reference Architectures](control.html) describes a broader architecture that automates the installation and updating of multiple <%= vars.platform_name %> foundations, or multiple instances of each architecture above.
 
-* [Control Plane Reference Architectures](./control.html)
+These topics address aspects of platform architecture and planning that the <%= vars.platform_name %> reference architectures do not cover:
 
-The following topics address aspects of platform architecture and planning that the <%= vars.product_name %> reference architectures do not cover:
-
-* [Implementing a Multi-Foundation PKS Deployment](https://docs.pivotal.io/pks/nsxt-multi-pks.html)
-* [Using Global DNS Load Balancers for Multi-Foundation](./global-dns-lb.html)
+* [Implementing a Multi-Foundation <%= vars.k8s_runtime_abbr %> Deployment](https://docs.pivotal.io/pks/nsxt-multi-pks.html)
+* [Using Global DNS Load Balancers for Multi-Foundation](global-dns-lb.html)
 
 
-## <a id="pas-base"></a> PAS Architecture
+## <a id="pas-base"></a> <%= vars.app_runtime_abbr %> Architecture
 
-The following diagram shows a base architecture for PAS, and how its network topology places and replicates <%= vars.product_name %> and PAS components across subnets and Availability Zones.
+The diagram below illustrates a base architecture for <%= vars.app_runtime_abbr %> and how its network topology places and replicates <%= vars.platform_name %> and <%= vars.app_runtime_abbr %> components across subnets and Availability Zones (AZs).
 
 <%# Image from PAS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
-![PAS Base Deployment Topology](./images/v2/export/PAS_Base.png)
+![<%= vars.app_runtime_abbr %> Base Deployment Topology](./images/v2/export/PAS_Base.png)
 
 [View a larger version of this diagram](./images/v2/export/PAS_Base.png)
 
 ### <a id="pas-components"></a> Internal Components
 
-The following table describes the internal component placements shown in the diagram above:
+The table below describes the internal component placements shown in the diagram above:
 
-| **Component**           | **Placement and Access Notes**                                                                                                                                         |
-|---------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ops Manager**         | Deployed on one of the three public subnets.  Accessible by FQDN or through an optional jumpbox.                                                                       |
-| **BOSH Director**       | Deployed on the infrastructure subnet.                                                                                                                                   |
-| **Jumpbox**            | Optional. Deployed on the infrastructure subnet for accessing PAS management components such as Ops Manager and the Cloud Foundry command-line interface (cf CLI).                                            |
-| **Gorouters** (HTTP routers in CF)          | Deployed on all three PAS subnets, one per Availability Zone (AZ).<br \>  Accessed through the HTTP, HTTPS, and SSL load balancers.                          |
-| **Diego Brain**        | Deployed on all three PAS subnets, one per AZ.<br \>  The Diego Brain component is required, but SSH container access support through the Diego Brain is optional, and enabled through the SSH load balancers.  |
-| **TCP Routers**         | Optional. Deployed on all three PAS subnets, one per AZ, to support TCP routing.                                                                                         |
-| **Service Tiles**       | Service brokers and shared services instances are deployed to the Services subnet.<br \>  Dedicated on-demand service instances are deployed to an On-demand services subnet.          |
-| **Isolation Segments**  | Deployed on an Isolation Segment subnet.  Includes Diego Cells and Gorouters for running and accessing apps hosted within isolation segments.                             |
+| Component | Placement and Access Notes |
+| ------------- | ------------------------------ |
+| <%= vars.ops_manager %> | Deployed on one of the three public subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| BOSH Director | Deployed on the infrastructure subnet. |
+| Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.app_runtime_abbr %> management components such as <%= vars.ops_manager %> and the Cloud Foundry Command Line Interface (cf CLI). |
+| Gorouters (HTTP routers in <%= vars.platform_name %>) | Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ. Accessed through the HTTP, HTTPS, and SSL load balancers. |
+| Diego Brain | Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ. The Diego Brain component is required, but SSH container access support through the Diego Brain is optional, and enabled through the SSH load balancers. |
+| TCP routers | Optional. Deployed on all three P<%= vars.app_runtime_abbr %> subnets, one per AZ, to support TCP routing. |
+| Service tiles | Service brokers and shared services instances are deployed to the Services subnet. Dedicated on-demand service instances are deployed to an on-demand services subnet. |
+| Isolation segments | Deployed on an isolation segment subnet. Includes Diego Cells and Gorouters for running and accessing apps hosted within isolation segments. |
 
 ### <a id="pas-network"></a> Networks
 
-Pivotal recommends defining your networks and load-balancing their incoming requests as follows:
+These sections describe <%= vars.app_runtime_abbr %>'s recommendations for defining your networks and load-balancing their incoming requests:
 
 #### <a id="pas-subnets"></a> Required Subnets
 
-PAS requires the following statically-defined networks to host its main component systems.
+<%= vars.app_runtime_abbr %> requires these statically-defined networks to host its main component systems:
 
-  - Infrastructure subnet - `/24` segment
-    This subnet contains VMs that require access only for Platform Administrators, for example Ops Manager, the BOSH Director, and an optional jumpbox.
-  - PAS subnet - `/24` segment
-    This subnet contains PAS runtime VMs, such as Gorouters, Diego Cells and Cloud Controllers.
-  - Services subnet - `/24` segment
-    The Services and On-Demand Services networks support Ops Manager tiles that
-    you might add in addition to PAS.
-    You can think of them as the the “everything not PAS” networks.
-    Some services tiles can call for additional network capacity to grow into on-demand.
-    If you use services with this capability, Pivotal recommends that you add an On-Demand Services network for each on-demand service, as described below.
-  - On-Demand Services subnet(s) - `/24` segments
-    This is for services that can allocate network capacity on-demand from BOSH for their worker VMs; see the Services subnet above.
-    Pivotal recommends allocating a dedicated subnet to each on-demand service. For example, you can configure the Redis tile as follows:
-      - **Network**: enter the existing `Services` network, to host the service broker
-      - **Services Network**: deploy a new network `OD-Services1`, to host the Redis worker VMs
+* Infrastructure subnet - `/24` segment<br>This subnet contains VMs that require access only for Platform Administrators, such as <%= vars.ops_manager %>, the BOSH Director, and an optional jumpbox.
 
-    Another on-demand service tile can then also use `Services` for its broker and a new `OD-Services2` network for its workers, and so on.
-  - Isolation Segments subnet(s) - `/24` segments
-    You can add one or more Isolation Segment tiles to an PAS installation to compartmentalize hosting and routing resources.
-    For each Isolation Segment you deploy, you should designate a `/24` network for its range of address space.
+* <%= vars.app_runtime_abbr %> subnet - `/24` segment<br>This subnet contains <%= vars.app_runtime_abbr %> runtime VMs, such as Gorouters, Diego Cells, and Cloud Controllers.
+
+* Services subnet - `/24` segment<br>The services and on-demand services networks support <%= vars.ops_manager %> tiles that you might add in addition to <%= vars.app_runtime_abbr %>. In other words, they are the networks for everything that is not <%= vars.app_runtime_abbr %>. Some services tiles can call for additional network capacity to grow into on-demand. If you use services with this capability, <%= vars.recommended_by %> recommends that you add an on-demand services network for each on-demand service.
+
+* On-demand services subnets - `/24` segments<br>This is for services that can allocate network capacity on-demand from BOSH for their worker VMs. <%= vars.recommended_by %> recommends allocating a dedicated subnet to each on-demand service. For example, you can configure the Redis tile as follows:
+  * **Network:** Enter the existing `Services` network, to host the service broker.
+  * **Services network:** Deploy a new network `OD-Services1`, to host the Redis worker VMs.
+  <br>
+  Another on-demand service tile can then also use `Services` for its broker and a new `OD-Services2` network for its workers, and so on.
+
+* Isolation segment subnets - `/24` segments<br>You can add one or more isolation segment tiles to a <%= vars.app_runtime_abbr %> installation to compartmentalize hosting and routing resources. For each isolation segment you deploy, you should designate a `/24` network for its range of address space.
 
 #### <a id="pas-lb"></a> Load Balancing
 
-Any PAS installation needs a suitable load balancer to send incoming HTTP, HTTPS, SSH, and SSL traffic to its Gorouters and application containers. All installations approaching production-level use rely on external load balancing from hardware appliance vendors or other network-layer solutions.
+Any <%= vars.app_runtime_abbr %> installation needs a suitable load balancer to send incoming HTTP, HTTPS, SSH, and SSL traffic to its Gorouters and app containers. All installations approaching production-level use rely on external load balancing from hardware appliance vendors or other network-layer solutions.
 
 The load balancer can also perform Layer 4 or Layer 7 load balancing functions. SSL can be terminated at the load balancer or used as a pass-through to the Gorouter.
 
-Common deployments of load balancing in PAS are:
+Common deployments of load balancing in <%= vars.app_runtime_abbr %> are:
 
-  - HTTP/HTTPS traffic to and from Gorouters
-  - TCP traffic to and from TCP routers
-  - Traffic from the Diego Brain, when developers access app containers via SSH
+* HTTP/HTTPS traffic to and from Gorouters
+* TCP traffic to and from TCP routers
+* Traffic from the Diego Brain, when developers access app containers through SSH
 
-To balance load across multiple PAS foundations, use an IaaS- or vendor-specific Global Traffic Manager or Global DNS load balancer.
+To load-balance across multiple <%= vars.app_runtime_abbr %> foundations, use an IaaS- or vendor-specific Global Traffic Manager or Global DNS load balancer.
 
-For additional information, see [Global DNS Load Balancers for Multi-Foundation Environments](./global-dns-lb.html).
+For more information, see [Global DNS Load Balancers for Multi-Foundation Environments](global-dns-lb.html).
 
 ### <a id="pas-ha"></a> High Availability
 
-PAS is not considered High Availability (HA) until it runs across at least two Availability Zones (AZs). Pivotal recommends defining three AZs.
+<%= vars.app_runtime_abbr %> is not considered high availability (HA) until it runs across at least two AZs. <%= vars.recommended_by %> recommends defining three AZs.
 
-On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a <%= vars.product_name %> HA topology provides the best of both worlds. Multiple AZs give <%= vars.product_name %> redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
+On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a <%= vars.platform_name %> HA topology provides the best of both worlds. Multiple AZs give <%= vars.platform_name %> redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
 
 To back up and restore a foundation externally, use BOSH Backup and Restore (BBR). For more information, see the [BOSH Backup and Restore](https://docs.cloudfoundry.org/bbr/) documentation.
 
 ### <a id="pas-storage"></a> Storage
 
-PAS requires disk storage for each component, for both persistent data and to allocate to ephemeral data. You size these disks in the **Resource Config** pane of the PAS tile. For details on storage configuration and capacity planning, see the corresponding chapter for the specific IaaS.
+<%= vars.app_runtime_abbr %> requires disk storage for each component, for both persistent data and to allocate to ephemeral data. You size these disks in the **Resource Config** pane of the <%= vars.app_runtime_abbr %> tile. For more information about storage configuration and capacity planning, see the corresponding section in the [reference architecture for your IaaS](#topics).
 
-The platform also requires you to configure file storage for large shared objects. These blobstores can be external or internal. For details, see [Configuring File Storage for PAS](../customizing/pas-file-storage.html).
+The platform also requires you to configure file storage for large shared objects. These blobstores can be external or internal. For details, see [Configuring File Storage for <%= vars.app_runtime_abbr %>](../customizing/pas-file-storage.html).
 
 ### <a id="pas-security"></a> Security
 
-See the topics below for how PAS implements security:
+For information about how <%= vars.app_runtime_abbr %> implements security, see:
 
-* [<%= vars.product_name %> Infrastructure Security
+* [<%= vars.platform_name %> Infrastructure Security
 ](../security/pcf-infrastructure/index.html)
 
 * [Security Concepts](../security/concepts/)
 
-* [Certificates and TLS in <%= vars.product_name %>](../security/pcf-infrastructure/certificates-index.html)
+* [Certificates and TLS in <%= vars.platform_name %>](../security/pcf-infrastructure/certificates-index.html)
 
-* [Network Communication Paths in <%= vars.product_name %>](../security/networking/#net_commpaths) - includes firewall ports
+* [Network Communication Paths in <%= vars.platform_name %>](../security/networking/#net_commpaths) in _Network Security_
 
 ### <a id="pas-domains"></a> Domain Names
 
-PAS requires following domain names to be registered:
+<%= vars.app_runtime_abbr %>  requires these domain names to be registered:
 
-- System domain, for PAS and other tiles: `sys.domain.name`
-- App domain, for your applications: `app.domain.name`
+* System domain, for <%= vars.app_runtime_abbr %>  and other tiles: `sys.domain.name`
+* App domain, for your apps: `app.domain.name`
 
-You must also define the following wildcard domain names and include them when creating certificates that access PAS and its hosted apps:
+You must also define these wildcard domain names and include them when creating certificates that access <%= vars.app_runtime_abbr %>  and its hosted apps:
 
-  - \*.SYSTEM-DOMAIN
-  - \*.APPS-DOMAIN
-  - \*.login.SYSTEM-DOMAIN
-  - \*.uaa.SYSTEM-DOMAIN
+* \*.SYSTEM-DOMAIN
+* \*.APPS-DOMAIN
+* \*.login.SYSTEM-DOMAIN
+* \*.uaa.SYSTEM-DOMAIN
 
 ### <a id="pas-scaling"></a> Component Scaling
 
-See [Scaling PAS](../opsguide/scaling-ert-components.html) for recommendations on how to scale PAS for different deployment scenarios.
+For recommendations on scaling <%= vars.app_runtime_abbr %> for different deployment scenarios, see [Scaling <%= vars.app_runtime_abbr %> ](../opsguide/scaling-ert-components.html).
 
 
-## <a id="pks-base"></a> PKS Architecture
+## <a id="pks-base"></a> <%= vars.k8s_runtime_abbr %> Architecture
 
-The following diagram shows a base architecture for PKS, and how its network topology places and replicates <%= vars.product_name %> and PKS components across subnets and Availability Zones.
+The diagram below illustrates a base architecture for <%= vars.k8s_runtime_abbr %> and how its network topology places and replicates <%= vars.platform_name %> and <%= vars.k8s_runtime_abbr %> components across subnets and AZs:
 
 <%# Image from PKS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
-![PAS Base Deployment Topology](./images/v2/export/PKS_Base.png)
+![<%= vars.k8s_runtime_abbr %> Base Deployment Topology](./images/v2/export/PKS_Base.png)
 
 [View a larger version of this diagram](./images/v2/export/PKS_Base.png)
 
 ### <a id="pks-components"></a> Internal Components
 
-The following table describes the internal component placements shown in the diagram above:
+The table below describes the internal component placements shown in the diagram above:
 
-| **Component**           | **Placement and Access Notes**                                                                                                                                         |
-|---------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ops Manager**         | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox.   |
-| **BOSH Director**         | Deployed on the infrastructure subnet.   |
-| **Jumpbox**         | Optional. Deployed on the infrastructure subnet for accessing PKS management components such as Ops Manager and the PKS + Kubectl command-line interface.   |
-| **PKS API**         | Deployed as a service broker VM on the PKS Services subnet.  Handles PKS API and service adapter requests, and manages PKS clusters.  For more information, see [Pivotal Container Service (PKS)](https://docs.pivotal.io/pks/index.html#components) |
-| **Harbor Tile**         | Optional container images registry, typically deployed to the Services subnet.   |
-| **PKS Cluster**         | Deployed to a dynamically-created, dedicated PKS cluster subnet. Each cluster consists of worker nodes that run the workloads (applications) and one or more master nodes.   |
+| Component | Placement and Access Notes |
+| --------- | -------------------------- |
+| <%= vars.ops_manager %> | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| BOSH Director | Deployed on the infrastructure subnet. |
+| Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.k8s_runtime_abbr %> management components such as <%= vars.ops_manager %> and the `kubectl` command line interface. |
+| <%= vars.k8s_runtime_abbr %> API | Deployed as a service broker VM on the <%= vars.k8s_runtime_abbr %> services subnet. Handles <%= vars.k8s_runtime_abbr %> API and service adapter requests, and manages <%= vars.k8s_runtime_abbr %> clusters. For more information, see [Enterprise PKS Components](https://docs.pivotal.io/pks/index.html#components) in _Enterprise <%= vars.k8s_runtime_full %> (Enterprise <%= vars.k8s_runtime_abbr %>)_. |
+| Harbor tile | Optional container images registry, typically deployed to the services subnet. |
+| <%= vars.k8s_runtime_abbr %> Cluster** | Deployed to a dynamically-created, dedicated <%= vars.k8s_runtime_abbr %> cluster subnet. Each cluster consists of worker nodes that run the workloads, or apps, and one or more master nodes. |
 
 ### <a id="pks-network"></a> Networks
 
-Pivotal recommends defining your networks and load-balancing their incoming requests as follows:
+These sections describe <%= vars.recommended_by %>'s recommendations for defining your networks and load-balancing their incoming requests.
 
 #### <a id="pks-subnets"></a> Subnets Requirements
 
-PKS requires two defined networks to host the main elements that compose it.
+<%= vars.k8s_runtime_abbr %> requires two defined networks to host the main elements that compose it:
 
-  - Infrastructure subnet - `/24`
-    Contains VMs that require access only for Platform Administrators, for example Ops Manager, BOSH Director and an optional jumpbox.
-  - PKS Services subnet - `/24`
-    Hosts PKS API VM and other optional service tiles such as
-    Harbor.
-  - PKS Clusters subnets - each one a `/24` from a pool of pre-allocated IPs
-    Hosts PKS clusters.
+* Infrastructure subnet - `/24`<br>This subnet contains VMs that require access only for Platform Administrators, such as <%= vars.ops_manager %>, BOSH Director, and an optional jumpbox.
+
+* <%= vars.k8s_runtime_abbr %> services subnet - `/24`<br>This subnet hosts <%= vars.k8s_runtime_abbr %> API VM and other optional service tiles such as Harbor.
+
+* <%= vars.k8s_runtime_abbr %> cluster subnets - each one a `/24` from a pool of pre-allocated IPs<br>These subnets host <%= vars.k8s_runtime_abbr %> clusters.
 
 #### <a id="pks-lb"></a> Load Balancing
 
-Load balancers can be used to manage traffic across master nodes of a PKS cluster or for deployed workloads. For more information on how to configure load balancers for PKS, refer to the corresponding documentation for the specific IaaS.
+Load balancers can be used to manage traffic across master nodes of a <%= vars.k8s_runtime_abbr %> cluster or for deployed workloads. For more information on how to configure load balancers for <%= vars.k8s_runtime_abbr %>, see the corresponding section in the [reference architecture for your IaaS](#topics).
 
 ### <a id="pks-ha"></a> High Availability
 
-PKS has no inherent HA capabilities to design for. Make the best efforts to have HA design at the IaaS, storage, power and access layers to support PKS.
+<%= vars.k8s_runtime_abbr %> has no inherent HA capabilities to design for. Make the best efforts to have HA design at the IaaS, storage, power and access layers to support <%= vars.k8s_runtime_abbr %>.
 
 ### <a id="pks-storage"></a> Storage
 
-PKS requires shared storage across all Availability Zones for the deployed workloads to appropriately allocate their required storage.
+<%= vars.k8s_runtime_abbr %> requires shared storage across all AZs for the deployed workloads to appropriately allocate their required storage.
 
 ### <a id="pks-security"></a> Security
 
-See the topics below for how PKS implements security:
-
-* [Enterprise PKS Security](https://docs.pivotal.io/pks/security.html)
-
-* [Firewall Ports](https://docs.pivotal.io/pks/ports-protocols-nsx-t.html)
+For information about how <%= vars.k8s_runtime_abbr %> implements security, see [Enterprise <%= vars.k8s_runtime_abbr %> Security](https://docs.pivotal.io/pks/security.html) and [Firewall Ports](https://docs.pivotal.io/pks/ports-protocols-nsx-t.html).
 
 ### <a id="pks-domains"></a> Domain Names
 
-PKS requires the following domain names to be registered when creating a wildcard certificate and PKS tile configurations: `*.pks.domain.name`
+<%= vars.k8s_runtime_abbr %> requires the `*.pks.domain.name` domain name to be registered when creating a wildcard certificate and <%= vars.k8s_runtime_abbr %> tile configurations.
 
-The wildcard certificate covers both the PKS API domain e.g. `api.pks.domain.name` and the PKS Clusters domains e.g. `mycluster.pks.domain.name`.
+The wildcard certificate covers both the <%= vars.k8s_runtime_abbr %> API domain, such as `api.pks.domain.name`, and the <%= vars.k8s_runtime_abbr %> clusters domains, such as `cluster.pks.domain.name`.
 
 ### <a id="pks-management"></a> Cluster Management
 
-See [Managing Clusters](https://docs.pivotal.io/pks/managing-clusters.html) for recommendations on managing Enterprise PKS clusters.
+For information about managing <%= vars.k8s_runtime_abbr %> clusters, see [Managing Clusters](https://docs.pivotal.io/pks/managing-clusters.html).

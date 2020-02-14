@@ -4,29 +4,14 @@ title: Global DNS Load Balancers for Multi-Foundation Environments
 
 This topic describes global DNS load balancers (GLBs) for multi-foundation environments. This topic also describes concepts such as foundation affinity and healthchecks.
 
-<p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated to one <%= vars.product_name %> foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for PAS</a>.</p>
+<p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated to one <%= vars.platform_name %> foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for <%= vars.app_runtime_abbr %></a>.</p>
 
 
 ## <a id="multi-foundation"></a> About Multi-Foundation Environments
 
-Multi-foundation environments are multiple instances of BOSH and Ops Manager that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
+Multi-foundation environments are multiple instances of BOSH and <%= vars.ops_manager_full %> that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
 
-Multi-foundation environments are commonly deployed in an active-active or active-passive pattern. See below for descriptions of each term:
-
-<table>
-  <tr>
-    <th>Term</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td style="min-width: 10em;"><strong>Active-active pattern</strong></td>
-    <td>Instances of apps run on two foundations and they are both in use.</td>
-  </tr>
-  <tr>
-    <td><strong>Active-passive pattern</strong></td>
-    <td>Instances of apps run on two foundations, but the instances may only be active on one foundation. The other foundation becomes active only in the event of a failover.</td>
-  </tr>
-</table>
+Multi-foundation environments are commonly deployed in an active-active or active-passive pattern. An _active-active pattern_ is when instances of apps run on two foundations and they are both in use. An _active-passive pattern_ is when instances of apps run on two foundations, but the instances may only be active on one foundation, and the other foundation becomes active only in the event of a failover.
 
 
 ## <a id="configure-glb"></a> Configure Your GLB
@@ -35,11 +20,11 @@ The typical setup for foundation failover requires the GLB be authoritative for 
 
 To configure your GLB:
 
-- Find and record your wildcard app domain. For Pivotal Application Service (PAS), your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the PAS tile. For more information, see the [Configure Domains](../customizing/configure-pas.html#domains) section of the _Configuring PAS_ topic.
+1. Find and record your wildcard app domain. For <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>), your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile. For more information, see [Configure Domains](../customizing/configure-pas.html#domains) in _Configuring <%= vars.app_runtime_abbr %>_ topic.
 
-- Add the domain you recorded to both <%= vars.product_name %> foundations using a shared domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf CLI). For more information about the cf CLI command to create shared domains, see [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in the cf CLI reference guide.
+1. Add the domain you recorded to both <%= vars.platform_name %> foundations using a shared domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf CLI). For more information about the cf CLI command to create shared domains, see [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in the Cloud Foundry CLI reference guide.
 
-- To support failover, set the time-to-live (TTL) in the wildcard DNS record. Set the TTL to about 30 to 180 seconds. When determining your TTL, consider the tradeoff between the app performance impact and the resulting time for failover to occur.
+1. To support failover, set the time-to-live (TTL) in the wildcard DNS record to about 30 to 180 seconds. When determining your TTL, consider the tradeoff between the app performance impact and the resulting time for failover to occur.
 
 
 ## <a id="foundation-affinity"></a> About Foundation Affinity
@@ -49,62 +34,54 @@ _Foundation affinity_ occurs when the GLB favors one foundation over another dur
 Different GLBs have their own mechanisms to achieve this. See the following table for common concepts:
 
 <table>
-  <tr>
-  <th colspan="2">Foundation Affinity Concepts</th>
-  <tr>
-  <tr>
-    <th>Term</th>
-    <th>Description</th>
-  </tr>
-  <tr>
+<tr><th colspan="2">Foundation Affinity Concepts</th><tr>
+<tr>
+  <th>Term</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><strong>Topology/geographically-based affinity</strong></td>
-    <td>The GLB attempts to direct traffic to the graphically nearest foundation based on IP geolocation or provided topology for private networks of the LDNS server performing the lookup.
-</td>
-  </tr>
-  <tr>
+  <td>The GLB attempts to direct traffic to the graphically nearest foundation based on IP geolocation or provided topology for private networks of the LDNS server performing the lookup.</td>
+</tr>
+<tr>
   <td><strong>Static-persist/member-hashing affinity</strong></td>
-    <td>The GLB attempts to direct traffic to the graphically nearest foundation based on IP geolocation or provided topology for private networks of the LDNS server performing the lookup.</td>
-  </tr>
-  <tr>
-    <td><strong>Active/passive foundations</strong></td>
-    <td>If one foundation is usually idle, you can always pick the active foundation IP as long as it remains available.
-    </td>
-  </tr>
-    <tr>
-    <td><strong>Microservice-to-microservice affinity</strong></td>
-    <td>
-      For microservice apps, you typically use a Services Registry to manage traffic between microservices. There are two ways to do this:
+  <td>The GLB attempts to direct traffic to the graphically nearest foundation based on IP geolocation or provided topology for private networks of the LDNS server performing the lookup.</td>
+</tr>
+<tr>
+  <td><strong>Active-passive foundations</strong></td>
+  <td>If one foundation is usually idle, you can always pick the active foundation IP as long as it remains available.</td>
+</tr>
+<tr>
+  <td><strong>Microservice-to-microservice affinity</strong></td>
+  <td>For microservice apps, you typically use a Services Registry to manage traffic between microservices. There are two ways to do this:
     <ul>
-      <li style="margin:0"> If the microservices are using the domain which maps to the GLB, then their traffic is routed through the GLB.</li>
-
-      <li>If the microservices are communicating using IP address or internal domains, such as when using Envoy, then the traffic does not pass through the GLB.</li>
+      <li style="margin:0"> If the microservices are using the domain which maps to the GLB, their traffic is routed through the GLB.</li>
+      <li>If the microservices are communicating using IP address or internal domains, such as when using an Envoy proxy, the traffic does not pass through the GLB.</li>
     </ul>
-    </td>
-  </tr>
-
+  </td>
+</tr>
 </table>
 
 
-## <a id="healthchecks"></a> About Healthchecks
+## <a id="healthchecks"></a> About Health Checks
 
-_Healthchecks_ determine whether a foundation for an app is healthy or not.
+_Health checks_ determine whether a foundation for an app is healthy or not.
 
-See the following table for the levels at which you can check the health of your foundation:
+For the levels at which you can check the health of your foundation, see the table below:
 
 <table>
-  <tr>
-    <th>Level</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>Foundation</td>
-    <td>GLB relies on a local load balancer in front of the <%= vars.product_name %> Gorouters to determine the
-    overall health of the foundation. GLB can perform healthchecks on TCP port 443 or 80 or on the local load balancer.
-    The local load balancer healthchecks the back end pool of Gorouters on port 8080.</td>
-  </tr>
-  <tr>
-    <td>App</td>
-    <td>Healthchecks are set only for apps which have instances on both foundations. Each app instance has canary DNS records. The canary DNS records are the same for the app instances on each foundation. You would also need to add more VIPs dedicated to these canary apps that would be used to check their health. </td>
-  </tr>
+<tr>
+  <th>Level</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Foundation</td>
+  <td>The GLB relies on a local load balancer in front of the <%= vars.platform_name %> Gorouters to determine the overall health of the foundation. The GLB can perform health checks on TCP port 443 or 80 or on the local load balancer. The local load balancer checks the health of the back end pool of Gorouters on port 8080.</td>
+</tr>
+<tr>
+  <td>App</td>
+  <td>Health checks are set only for apps which have instances on both foundations. Each app instance has canary DNS records. The canary DNS records are the same for the app instances on each foundation. You would also need to add more VIPs dedicated to these canary apps that would be used to check their health.</td>
+</tr>
 </table>
-<p class="note warning"><strong>Warning:</strong> Pivotal does not recommend setting healthchecks at the app level. Configuring healthchecks in this way can cause more frequent failover and delays while pushing apps. Complete failover of a foundation affects all apps on the platform. Healthchecks on a per-app basis can require additional overhead beyond the control of an app developer.</p>
+
+<p class="note warning"><strong>Warning:</strong> <%= vars.recommended_by %> does not recommend setting health checks at the app level. Configuring health checks in this way can cause more frequent failover and delays while pushing apps. Complete failover of a foundation affects all apps on the platform. Health checks on a per-app basis can require additional overhead beyond the control of an app developer.</p>

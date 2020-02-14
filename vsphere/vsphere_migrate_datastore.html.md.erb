@@ -12,14 +12,14 @@ This topic describes how to migrate your <%= vars.platform_name %> installation 
 
 Both the new and existing vSphere datastores must reside in the same datacenter.
 
-To avoid service disruption, Pivotal recommends that you configure your overall <%= vars.platform_name %> deployment for [high availability](../../concepts/high-availability.html). In addition, check for configurations necessary to achieve high availability in each of your installed product tiles.
+To avoid service disruption, <%= vars.recommended_by %> recommends that you configure your overall <%= vars.platform_name %> deployment for high availability (HA). In addition, check for configurations necessary to achieve HA in each of your installed product tiles.
 
 If your environment has any single points of failure, service may be disrupted as a result of the migration.
 
 
 ## <a id="prep"></a> Before You Begin
 
-This section describes the steps you should perform prior to the migration.
+These sections describe the steps you should perform prior to the migration.
 
 ### <a id="backup"></a> Step 1: Back Up Your Environment
 
@@ -31,31 +31,36 @@ For more information about how to back up <%= vars.platform_name %>, see [Backin
 
 Document your current environment settings before proceeding with the datastore migration. Record which VMs are running and in which datastore they reside. If you experience any issues during or after the migration, you must have this information to restore your environment.
 
-To obtain this information, perform the following steps:
+To obtain this information:
 
-1. Run the `bosh instances` command.
-  * If you use [BOSH CLI v2+](https://bosh.io/docs/cli-v2), run the following command, replacing `MY-ENV` with the alias you assigned to your BOSH Director:
-    <pre class="terminal">
-    $ bosh -e MY-ENV instances --details > instances.txt
-    </pre>
-  * If you use the original version of the BOSH CLI, run the following command:
-    <pre class="terminal">
-    $ bosh-old instances --details > instances.txt
-    </pre>
+1. Run one of these commands:
+    * If you use BOSH CLI v2, run:
 
-1. Save the resulting file `instances.txt` to a safe location.
+      ```
+      bosh -e BOSH-ENVIRONMENT instances --details > instances.txt
+      ```
+      Where `BOSH-ENVIRONMENT` is the alias you assigned to your BOSH Director.
+    * If you use the original version of the BOSH CLI, run:
+
+      ```
+      bosh-old instances --details > instances.txt
+      ```
+
+1. Save the resulting `instances.txt` file to a safe location.
 
 1. Note the datastore where each VM resides in vSphere.
 
 ### <a id="system_health"></a> Step 3: Check System Health
 
-In Pivotal Application Service (PAS), check the **Status** tab and make sure there are no errors or reported issues.
+In <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>), check the **Status** tab and make sure there are no errors or reported issues.
 
 ### <a id="tile_heatlh"></a> Step 4: Check Installed Products Health
 
 In each tile installed in your <%= vars.platform_name %> deployment, check the **Status** tab and make sure there are no errors or reported issues.
 
 ### <a id="opsman_health"></a> Step 5: Check BOSH Director Status
+
+To check the status of your BOSH Director:
 
 1. Check that there are no pending changes and that the status of all tiles is green.
 
@@ -66,32 +71,42 @@ In each tile installed in your <%= vars.platform_name %> deployment, check the *
 
 ## <a id="migrate_proc"></a> Procedure: Migrate <%= vars.platform_name %> to a New Datastore
 
-1. In BOSH Director, navigate to the **vCenter Config** page.
+To migrate your <%= vars.platform_name %> deployment to a new datastore:
 
-1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** field to reflect the new datastore names, then click **Save**.
-    <p class="note"><strong>Note:</strong> If you use the Datastore Clustering feature in vSphere, provide only the individual names of the datastores in the cluster. Do not provide the name of the cluster that contains them.</p>
+1. Navigate to the <%= vars.ops_manager %> Installation Dashboard.
+
+1. Click the BOSH Director tile.
+
+1. Select **vCenter Config**.
+
+1. Update the **Ephemeral Datastore Names** and **Persistent Datastore Names** fields to reflect the new datastore names.
+    <p class="note"><strong>Note:</strong> If you use the datastore clustering feature in vSphere, provide only the individual names of the datastores in the cluster. Do not provide the name of the cluster that contains them.</p>
+
+1. Click **Save**.
 
 1. Click **Review Pending Changes**, then **Apply Changes**.
 
 1. Confirm that the BOSH Director VM has persistent disk on the new datastore.
-   1. Navigate to **vCenter Resource Pools** and select the **Resource Pool** that contains your <%= vars.platform_name %> deployment VMs and new datastore.
+   1. Select **vCenter Resource Pools** and select the **Resource Pool** that contains your <%= vars.platform_name %> deployment VMs and new datastore.
    1. Click the **Related Objects** and **Virtual Machines**.
-   1. Locate the Pivotal Operations Manager VM and verify that the VM has an expected value in the **Provisioned Space** column.
+   1. Locate the <%= vars.ops_manager %> VM and verify that the VM has an expected value in the **Provisioned Space** column.
     <%= image_tag('vsphere-web-client.png') %>
 
-1. In BOSH Director, navigate to the **Director Config** page, and select the **Recreate all VMs** option.
+1. In the BOSH Director tile, select **Director Config**.
+
+1. Select the **Recreate all VMs** option.
 
 1. Click **Review Pending Changes**, then **Apply Changes**.
 
 
 ## <a id="after"></a> After the Migration
 
-When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`.
+When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`. These sections describe how to resolve and prevent out-of-sync errors.
 
 ### <a id="fix_sync_error"></a> Fix Failed BOSH Deployment with Out-of-Sync Error
 
-If your <%= vars.platform_name %> deployment gets into this state, you can resolve the issue by performing the steps in the KB article [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment).
+If your <%= vars.platform_name %> deployment gets into this state, follow the procedure in [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment) in the Pivotal Knowledge Base.
 
 ### <a id="prevent_sync_error"></a> Prevent Out-of-Sync Error
 
-You can also prevent the `out of sync` BOSH error by increasing the CPI timeout to a larger value before performing the migration. Follow the instructions in the KB article [How to Increase the Timeout on BOSH CPI Command Calls in Pivotal Cloud Foundry](https://community.pivotal.io/s/article/how-to-increase-the-timeout-on-bosh-cpi-command-calls).
+You can prevent the `out of sync` BOSH error by increasing the CPI timeout to a larger value before performing the migration. To prevent the error, follow the procedure in [How to Increase the Timeout on BOSH CPI Command Calls in Pivotal Cloud Foundry](https://community.pivotal.io/s/article/how-to-increase-the-timeout-on-bosh-cpi-command-calls) in the Pivotal Knowledge Base.
