@@ -47,9 +47,9 @@ The diagram below illustrates reference architecture for <%= vars.app_runtime_ab
 
 [View a larger version of this diagram](../images/v2/export/PAS_vSphere_NSX-T.png).
 
-<%= vars.app_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three availability zones (AZs).
+<%= vars.app_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three Availability Zones (AZs).
 
-A NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
+An NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
 
 Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> and infrastructure subnets, connect to the Tier-0 router.
 
@@ -101,7 +101,7 @@ The requirements and recommendations related to networks, subnets, and IP spacin
 
 * <%= vars.app_runtime_abbr %> requires statically-defined networks to host <%= vars.app_runtime_abbr %> component VMs.
 
-* The client side of a NSX-T deployment uses a series of non-routable address blocks when using DNAT/SNAT at the Tier-0 interface.
+* The client side of an NSX-T deployment uses a series of non-routable address blocks when using DNAT/SNAT at the Tier-0 interface.
 
 * The reference architecture for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments uses a pattern in which all networks are calculated on the `/24` 8-bit network boundary. The network octet is numerically sequential.
 
@@ -161,8 +161,8 @@ For information about security requirements and recommendations for <%= vars.app
 
 <%= vars.recommended_by %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
 
-* **Production environments**: Use a S3 storage appliance as the blobstore.
-* **Non-production environments**: Use a NFS/WebDAV blobstore.
+* **Production environments**: Use an S3 storage appliance as the blobstore.
+* **Non-production environments**: Use an NFS/WebDAV blobstore.
 
 <p class="note"><strong>Note:</strong> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. <%= vars.app_runtime_abbr %> deployments experience downtime during events such as storage upgrades or migrations to new disks.</p>
 
@@ -183,9 +183,9 @@ The diagram below illustrates the reference architecture for <%= vars.app_runtim
 
 [View a larger version of this diagram](../images/v2/export/PAS_vSphere_NSX-V.png).
 
-<%= vars.app_runtime_abbr %> deployments with NSX-V are deployed with three clusters and three availability zones (AZs).
+<%= vars.app_runtime_abbr %> deployments with NSX-V are deployed with three clusters and three AZs.
 
-<%= vars.app_runtime_abbr %> deployments with NSX-V also include a NSX-V Edge router on the front end. You can install the NSX-V Edge router as an Edge services gateway (ESG) or as a distributed logical router (DLR).
+<%= vars.app_runtime_abbr %> deployments with NSX-V also include an NSX-V Edge router on the front end. You can install the NSX-V Edge router as an Edge services gateway (ESG) or as a distributed logical router (DLR).
 
 The Edge router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure VLAN routing from the routed backbone into NSX-V through the Edge router.
 
@@ -267,8 +267,8 @@ For information about security requirements and recommendations for <%= vars.app
 
 <%= vars.recommended_by %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
 
-* **Production environments**: Use a S3 storage appliance as the blobstore.
-* **Non-production environments**: Use a NFS/WebDAV blobstore.
+* **Production environments**: Use an S3 storage appliance as the blobstore.
+* **Non-production environments**: Use an NFS/WebDAV blobstore.
 
 <p class="note"><strong>Note:</strong> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. <%= vars.app_runtime_abbr %> deployments experience downtime during events such as storage upgrades or migrations to new disks.</p>
 
@@ -287,9 +287,9 @@ The diagram below illustrates the reference architecture for <%= vars.k8s_runtim
 
 [View a larger version of this diagram](../images/v2/export/PKS_vSphere_NSX-T.png).
 
-<%= vars.k8s_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three availability zones (AZs).
+<%= vars.k8s_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three AZs.
 
-A NSX-T Tier-0 router is on the front end of the <%= vars.k8s_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.k8s_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router.
+An NSX-T Tier-0 router is on the front end of the <%= vars.k8s_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.k8s_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router.
 
 Several Tier-1 routers, such as the router for the infrastructure subnet, connect to the Tier-0 router. New Tier-1 routers are created on-demand as new clusters and namespaces are added to <%= vars.k8s_runtime_abbr %>.
 
