@@ -368,7 +368,7 @@ These considerations and recommendations apply to networks, subnets, and IP spac
 
 * Allocate a large network block for <%= vars.k8s_runtime_abbr %> clusters and pods:
 	* **<%= vars.k8s_runtime_abbr %> clusters:** Configure a `172.24.0.0/14` network block.
-	* **<%= vars.k8s_runtime_abbr %> pods:** Configure a `172.24.0.0/14` network block.
+	* **<%= vars.k8s_runtime_abbr %> pods:** Configure a `172.28.0.0/14` network block.
   <br>
   <br>
 	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or pod is created. You can configure this CIDR range for <%= vars.k8s_runtime_abbr %> in <%= vars.ops_manager %>.
