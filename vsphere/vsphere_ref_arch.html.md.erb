@@ -362,7 +362,7 @@ The following considerations and recommendations apply to networks, subnets, and
 
 * Allocate a large network block for PKS clusters and pods:
 	* **PKS Clusters**: Configure a `172.24.0.0/14` network block.
-	* **PKS Pods**: Configure a `172.24.0.0/14` network block.
+	* **PKS Pods**: Configure a `172.28.0.0/14` network block.
 
 	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or pod is created. You can configure this CIDR range for PKS in Ops Manager. 
 
