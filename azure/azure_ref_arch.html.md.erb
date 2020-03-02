@@ -3,51 +3,64 @@ title: Azure Reference Architecture
 owner: Customer0
 ---
 
-This topic describes a reference architecture for <%= vars.platform_name %> on Azure. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html).
+This topic describes a reference architecture for <%= vars.platform_name %> on Azure. It builds on the common base
+architectures described in [Platform Architecture and Planning](../index.html).
 
-For additional requirements and installation instructions for running <%= vars.platform_name %> on Azure, see [Installing <%= vars.platform_name %> on Azure](../../customizing/azure.html).
-
+For additional requirements and installation instructions for running <%= vars.platform_name %> on Azure, see
+[Installing <%= vars.platform_name %> on Azure](../../customizing/azure.html).
 
 ## <a id="overview"></a> Overview
 
-Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers.  For more information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
+Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers. For more
+information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
-When installing <%= vars.platform_name %>, you can use this model to place resources in resource groups. For example, a <%= vars.platform_name %> installation contains:
+When installing <%= vars.platform_name %>, you can use this model to place resources in resource groups. For example, a
+<%= vars.platform_name %> installation contains:
 
 * **Hub**:
-	* A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and security policies.
+  * A central IT resource group included in Azure VDC setup. This is where you define firewall, access control, and
+security policies.
+
 * **Spokes**:
   * A Network resource group for all network resources.
-  * <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) or <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) resource groups for all <%= vars.app_runtime_abbr %> or <%= vars.k8s_runtime_abbr %> resources.
+  * <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) or
+    <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) resource groups for all <%= vars.app_runtime_abbr %> or
+    <%= vars.k8s_runtime_abbr %> resources.
 
 ### <a id="overview"></a> Diagram
 
-The diagram below illustrates the reference architecture for <%= vars.platform_name %> on Azure using the hub and spoke model described above:
+The diagram below illustrates the reference architecture for <%= vars.platform_name %> on Azure using the hub and spoke
+model described above:
 
 ![This diagram illustrates <%= vars.platform_name %> with <%= vars.app_runtime_abbr %> on Azure using Availability Sets. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure.png)
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
 
-The sections below provide guidance about the resources you use for running <%= vars.platform_name %> on Azure.
-
+The sections below provide guidance about the resources that you use for running <%= vars.platform_name %> on Azure.
 
 ## <a id="networking"></a> Networking
 
-These sections provide guidance about networking resources.
+The following sections provide guidance about networking resources.
 
 ### <a id="network-considerations"></a> General Requirements and Recommendations
 
-The general requirements and recommendations related to networking when running <%= vars.platform_name %> on Azure are:
+The following are general requirements and recommendations related to networking when running <%= vars.platform_name %>
+on Azure:
 
-* You must enable Virtual Network peering between hub and spoke resource groups. For more information, see [Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview) in the Microsoft Azure documentation.
+* You must enable Virtual Network peering between hub and spoke resource groups. For more information, see
+[Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview) in
+the Microsoft Azure documentation.
 
 * You must have separate subscriptions for each resource group. This includes:
-	* The central network resource group. This is the hub.
-	* Each workspace where workloads run. These are the spokes.
+  * The central network resource group. This is the hub.
+  * Each workspace where workloads run. These are the spokes.
 
-* Use ExpressRoutes for a dedicated connection from an on-premises datacenter to VDC. For more information, see the [ExpressRoute documentation](https://docs.microsoft.com/en-us/azure/expressroute/). As a back up for when ExpressRoutes goes down, you can use Azure VPN Gateways, whichi pass encrypted data into VDC through the Internet.
+* Use ExpressRoutes for a dedicated connection from an on-premises datacenter to VDC. For more information, see the
+[ExpressRoute documentation](https://docs.microsoft.com/en-us/azure/expressroute/). As a back up for when ExpressRoutes
+goes down, you can use Azure VPN Gateways, which pass encrypted data into VDC through the internet.
 
-* Use a central firewall in the hub resource group and a network appliance to prevent data infiltration and exfiltration.
+* Use a central firewall in the hub resource group and a network appliance to prevent data infiltration and
+exfiltration.
 
 * You can place network resources, such as DNS and NTP servers, either on-premises or on Azure Cloud.
 
@@ -55,65 +68,89 @@ The general requirements and recommendations related to networking when running 
 
 For your <%= vars.platform_name %> domains, use a sub-zone of an Azure DNS zone.
 
-Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, if your company’s domain is `example.com`, your <%= vars.platform_name %> zone in Azure DNS would be `<%= vars.product_name_lc %>.example.com`.
+Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, a company domain of `example.com` has a <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
 
 Azure DNS does not support recursion. To properly configure Azure DNS:
 
-1. Create an `NS `record with your registrar that points to the four name servers supplied by your Azure DNS Zone configuration.
+1. Create an `NS` record with your registrar that points to the four name servers supplied by your Azure DNS Zone
+configuration.
 
-1. Create the required wildcard `A` records for the <%= vars.platform_name %> app and system domains, as well as any other records desired for your <%= vars.platform_name %> deployments.
+1. Create the required wildcard `A` records for the <%= vars.platform_name %> app and system domains, as well as any
+other records desired for your <%= vars.platform_name %> deployments.
 
 You do not need to make any configuration changes in <%= vars.platform_name %> to support Azure DNS.
 
 ### <a id="lb-types"></a> Load Balancing
 
-Use Standard Azure Load Balancers (ALBs). If you want Internet ingress, you must create the ALBs with elastic IPs.
+Use Standard Azure Load Balancers (ALBs). To allow internet ingress, you must create the ALBs with elastic IP addresses.
 
-During installation, you configure ALBs for <%= vars.app_runtime_abbr %> Gorouters. For more information, see [Create Load Balancers](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/azure/deploy-manual.html#lb) in _Deploying Ops Manager on Azure Manually_. When applicable, TCP routers and SSH Proxies also require load balancers.
+During installation, you configure ALBs for <%= vars.app_runtime_abbr %> Gorouters. For more information, see
+[Create Load Balancers](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-')  %>/azure/deploy-manual.html#lb)
+in _Deploying <%= vars.ops_manager %> on Azure Manually_. When applicable, TCP routers and SSH Proxies also require load balancers.
 
-The <%= vars.app_runtime_abbr %> system and app domains must resolve to your ALB and have either a private or a public IP address assigned. You set these domains in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile.
+The <%= vars.app_runtime_abbr %> system and app domains must resolve to your ALBs and have either a private or a public
+IP address assigned. You set these domains in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile.
 
 ### <a id="networks"></a> Networks
 
-<%= vars.platform_name %> requires the networks defined in the base reference architectures for <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %>. For more information, see the _Networks_ sections in [Platform Architecture and Planning Overview](../index.html).
+<%= vars.platform_name %> requires the networks defined in the base reference architectures for
+<%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %>. For more information, see the _Networks_ sections in
+[Platform Architecture and Planning Overview](../index.html).
 
 ### <a id="pas-single-azure-resource"></a> <%= vars.app_runtime_abbr %> on a Single Resource Group
 
-If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy <%= vars.platform_name %> and define network constructs.
-
+If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy
+<%= vars.platform_name %> and define network constructs.
 
 ## <a id="ha-considerations"></a> High Availability (HA)
 
-<p class="note"><strong>Note:</strong> As of <%= vars.platform_name %> v2.5.3, <%= vars.platform_name %> on Azure supports both availability zones (AZs) and Availability Sets.</p>
+<p class="note"><strong>Note:</strong> As of <%= vars.platform_name %> v2.5.3, <%= vars.platform_name %> on Azure
+supports both availability zones (AZs) and Availability Sets.</p>
 
-Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the placement group pinning issue associated with Availability Sets and allow greater control when defining high-availability configuration when using multiple Azure services.
+Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the placement group
+pinning issue associated with Availability Sets and allow greater control when defining high-availability
+configuration when using multiple Azure services.
 
 For additional guidance depending on your use case, see the table below:
 
 <table>
-<tr>
-<th style="width: 30%">Foundation Type</th>
-<th>Guidance</th>
-</tr>
-<tr>
-<td>New foundation</td>
-<td>If you do not have strict requirements, select AZ-enabled regions. Examples of strict requirements include existing ExpressRoute connections from non-AZ enabled regions to customer data centers and app-specific latency requirements.</td>
-</tr>
-<tr>
-<td>Existing foundation in AZ-enabled region</td>
-<td>Migrate to a new <%= vars.platform_name %> v2.5.3 or later foundation so that you can use AZs. These existing foundations, especially those using older families of VMs such as  <code>DS_v2</code>, risk running out of capacity as they scale.</td>
-</tr>
-<tr>
-<td>Existing foundation <strong>not</strong> in AZ-enabled region</td>
-<td>Evaluate your requirements to determine the cost/benefit of migrating to an AZ enabled region.</td>
-</tr>
+  <tr>
+    <th style="width: 30%">Foundation Type</th>
+    <th>Guidance</th>
+  </tr>
+  <tr>
+    <td>New foundation</td>
+    <td>If you do not have strict requirements, select AZ-enabled regions. Examples of strict requirements include
+        existing ExpressRoute connections from non-AZ enabled regions to customer data centers and app-specific latency
+        requirements.
+    </td>
+  </tr>
+  <tr>
+    <td>Existing foundation in AZ-enabled region</td>
+    <td>Migrate to a new <%= vars.platform_name %> v2.5.3 or later foundation so that you can use AZs. These existing
+        foundations, especially those using older families of VMs such as <code>DS_v2</code>, risk running out of
+        capacity as they scale.
+    </td>
+  </tr>
+  <tr>
+    <td>Existing foundation <strong>not</strong> in AZ-enabled region</td>
+    <td>Evaluate your requirements to determine the cost/benefit of migrating to an AZ enabled region.</td>
+  </tr>
 </table>
 
-For more information about availability modes in Azure, see [Availability Zones](#AZ) and [Availability Sets](#AS), as well as [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability) in the Microsoft Azure documentation.
+For more information about availability modes in Azure, see the following:
+
+* [Availability Zones](#AZ)
+
+* [Availability Sets](#AS)
+
+* [Manage the availability of Windows virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-manage-availability)
+in the Microsoft Azure documentation.
 
 ### <a id="AZ"></a> Availability Zones
 
-AZs are an Azure primitive that supports HA within a region. They are physically separate data centers in the same region, each with of separate power, cooling, and network.
+AZs are an Azure primitive that supports HA within a region. They are physically separate data centers in the same
+region, each with of separate power, cooling, and network.
 
 The diagram below illustrates <%= vars.app_runtime_abbr %> deployed on Azure using AZs:
 
@@ -121,38 +158,47 @@ The diagram below illustrates <%= vars.app_runtime_abbr %> deployed on Azure usi
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure_with_AZs.png).
 
-AZs have these advantages:
+AZs have the following advantages:
 
-* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the placement group pinning issue associated with Availability Sets.
+* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and
+avoid the placement group pinning issue associated with Availability Sets.
 
 * Zonal services are effectively in separate Update Domains as updates are rolled out to one zone at a time.
 
-* AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same physical zone. This allows services of different types to take advantage of the highly available qualities a zone provides.
+* AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same
+physical zone. This allows services of different types to take advantage of the highly available qualities a zone
+provides.
 
 ### <a id="AS"></a> Availability Sets
 
 Availability Sets were the first Azure primitive to support HA within a region.
 
-<p class="note warning"><strong>Warning:</strong> Availability Sets are implemented at the hardware rack level, which can cause issues when deploying <%= vars.platform_name %> on Azure. For more information, see <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
+<p class="note warning"><strong>Warning:</strong> Availability Sets are implemented at the hardware rack level, which
+can cause issues when deploying <%= vars.platform_name %> on Azure. For more information, see
+<a href="#placement-group-pinning">Placement Group Pinning Issues</a> below.</p>
 
-Availability Sets have these properties:
+Availability Sets have the following properties:
 
-* They are a logical concept that ensures multiple VMs in the same set are spread evenly across three Fault Domains and either five or 20 Update Domains.
+* They are a logical concept that ensures multiple VMs in the same set are spread evenly across three Fault Domains and
+either five or 20 Update Domains.
 
-* When a hardware issue occurs, VMs on independent Fault Domains are guaranteed not to share power supply or networking and therefore maintain availability of a subset of VMs in the set.
+* When a hardware issue occurs, VMs on independent Fault Domains are guaranteed not to share power supply or networking
+and therefore maintain availability of a subset of VMs in the set.
 
-* When updates are rolled out to a Cluster, VMs in independent Update Domains are not updated at the same time, ensuring downtime incurred by an update does not affect the availability of the set.
+* When updates are rolled out to a Cluster, VMs in independent Update Domains are not updated at the same time,
+ensuring downtime incurred by an update does not affect the availability of the set.
 
 #### <a id="placement-group-pinning"></a> Placement Group Pinning Issues
 
-In <%= vars.platform_name %> on Azure in Availability Set HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job within the same Availability Set.
+In <%= vars.platform_name %> on Azure in Availability Set HA mode, VMs for a particular job are pinned to a placement
+group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job
+within the same Availability Set.
 
 Cluster-pinning causes:
 
 * Issues migrating jobs from one family of VMs to another, backed by different hardware, such as `DS_v2` and `DS_v3`
 
 * Issues scaling up if there is no capacity remaining in the placement group
-
 
 ## <a id="storage-considerations"></a> Storage
 
@@ -161,36 +207,47 @@ For storage, <%= vars.recommended_by %> recommends:
 * For the storage account type, use the premium performance tier.
 
 * Configure storage accounts for Zone Redundant Storage (ZRS) in AZ-enabled Regions.
-	<p class="note"><strong>Note:</strong> In non-AZ enabled regions, locally Redundant Storage (LRS) is sufficient.</p>
+  <p class="note"><strong>Note:</strong> In non-AZ enabled regions, locally Redundant Storage (LRS) is sufficient.</p>
 
-* Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as HA for the VMs.
+* Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure
+feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as HA for the
+VMs.
 
-* Use five storage accounts. <%= vars.platform_name %> on Azure requires five storage accounts: one for BOSH, one for <%= vars.ops_manager %>, and three for <%= vars.app_runtime_abbr %>. Each account comes with a set amount of disk. Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit of 20 VMs each.
-
+* Use five storage accounts. <%= vars.platform_name %> on Azure requires five storage accounts: one for BOSH, one for
+<%= vars.ops_manager %>, and three for <%= vars.app_runtime_abbr %>. Each account comes with a set amount of disk.
+Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit
+of 20 VMs each.
 
 ## <a id="sql-server"></a> SQL Server
 
 The Internal MySQL database provided by <%= vars.app_runtime_abbr %> is sufficient for production use.
 
-
 ## <a id="blobstore-storage-accts"></a> Blobstore Storage Account
 
-Use Azure Blob Storage as the external file storage option for <%= vars.platform_name %>. This provides redundancy for high-availability deployments of <%= vars.platform_name %> and unlimited scaling. Azure Blob Storage provides fully-redundant hot, cold, or archival storage in either local, regional, or global offerings.
+Use Azure Blob Storage as the external file storage option for <%= vars.platform_name %>. This provides redundancy for
+high-availability deployments of <%= vars.platform_name %> and unlimited scaling. Azure Blob Storage provides
+fully-redundant hot, cold, or archival storage in either local, regional, or global offerings.
 
 <%= vars.ops_manager %> requires a bucket for the BOSH blobstore.
 
-<%= vars.app_runtime_abbr %> requires these buckets:
+<%= vars.app_runtime_abbr %> requires the following buckets:
 
-*   Buildpacks
-*   Droplets
-*   Packages
-*   Resources
+* Buildpacks
+
+* Droplets
+
+* Packages
+
+* Resources
 
 These buckets require an associated role for read/write access.
 
-
 ## <a id="identity-management"></a> Identity Management
 
-Use unique managed identities to deploy <%= vars.ops_manager %>, BOSH Director, Microsoft Azure Service Broker, and any other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege necessary to operate.
+Use unique managed identities to deploy <%= vars.ops_manager %>, BOSH Director, Microsoft Azure Service Broker, and any
+other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege
+necessary to operate.
 
-Azure uses managed identities to handle service authorization. For more information, see [What is managed identities for Azure resources?](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in the Microsoft Azure documentation.
+Azure uses managed identities to handle service authorization. For more information, see
+[What is managed identities for Azure resources?](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview)
+in the Microsoft Azure documentation.
