@@ -24,7 +24,7 @@ When installing <%= vars.platform_name %>, you can use this model to place resou
 
 The diagram below illustrates the reference architecture for <%= vars.platform_name %> on Azure using the hub and spoke model described above:
 
-![This diagram illustrates <%= vars.platform_name %> with <%= vars.app_runtime_abbr %> on Azure using ASes. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure.png)
+![This diagram illustrates <%= vars.platform_name %> with <%= vars.app_runtime_abbr %> on Azure using Availability Sets. For specific details about the components and communication represented in this diagram, see the base and Azure reference architectures.](../images/PAS_Azure.png)
 
 [View a larger version of this diagram](https://raw.githubusercontent.com/pivotal-cf/docs-pcf-refarch/master/images/PAS_Azure.png).
 
@@ -84,9 +84,9 @@ If shared network resources do not exist in an Azure subscription, you can use a
 
 ## <a id="ha-considerations"></a> High Availability (HA)
 
-<p class="note"><strong>Note:</strong> As of <%= vars.platform_name %> v2.5.3, <%= vars.platform_name %> on Azure supports both availability zones (AZs) and Availability Sets (ASes).</p>
+<p class="note"><strong>Note:</strong> As of <%= vars.platform_name %> v2.5.3, <%= vars.platform_name %> on Azure supports both availability zones (AZs) and Availability Sets.</p>
 
-Use AZs instead of ASes in all Azure regions where they are available. AZs solve the placement group pinning issue associated with ASes and allow greater control when defining high-availability configuration when using multiple Azure services.
+Use AZs instead of Availability Sets in all Azure regions where they are available. AZs solve the placement group pinning issue associated with Availability Sets and allow greater control when defining high-availability configuration when using multiple Azure services.
 
 For additional guidance depending on your use case, see the table below:
 
@@ -123,7 +123,7 @@ The diagram below illustrates <%= vars.app_runtime_abbr %> deployed on Azure usi
 
 AZs have these advantages:
 
-* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the placement group pinning issue associated with ASes.
+* VMs and other zonal services deployed to independent zones provide greater physical separation than Fault Domains and avoid the placement group pinning issue associated with Availability Sets.
 
 * Zonal services are effectively in separate Update Domains as updates are rolled out to one zone at a time.
 
@@ -131,11 +131,11 @@ AZs have these advantages:
 
 ### <a id="AS"></a> Availability Sets
 
-ASes were the first Azure primitive to support HA within a region.
+Availability Sets were the first Azure primitive to support HA within a region.
 
-<p class="note warning"><strong>Warning:</strong> ASes are implemented at the hardware rack level, which can cause issues when deploying <%= vars.platform_name %> on Azure. For more information, see <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
+<p class="note warning"><strong>Warning:</strong> Availability Sets are implemented at the hardware rack level, which can cause issues when deploying <%= vars.platform_name %> on Azure. For more information, see <a href="#placement-group-pinning">Placement Group Pinning Issues</a>.</p>
 
-ASes have these properties:
+Availability Sets have these properties:
 
 * They are a logical concept that ensures multiple VMs in the same set are spread evenly across three Fault Domains and either five or 20 Update Domains.
 
@@ -145,7 +145,7 @@ ASes have these properties:
 
 #### <a id="placement-group-pinning"></a> Placement Group Pinning Issues
 
-In <%= vars.platform_name %> on Azure in AS HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the AS is provisioned. This is because BOSH places VMs for each job within the same AS.
+In <%= vars.platform_name %> on Azure in Availability Set HA mode, VMs for a particular job are pinned to a placement group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job within the same Availability Set.
 
 Cluster-pinning causes:
 
