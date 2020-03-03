@@ -4,7 +4,7 @@ owner: Customer0
 ---
 
 This topic describes a reference architecture for <%= vars.platform_name %> on Azure. It builds on the common base
-architectures described in [Platform Architecture and Planning](../index.html).
+architectures described in [Platform Architecture and Planning Overview](../index.html).
 
 For additional requirements and installation instructions for running <%= vars.platform_name %> on Azure, see
 [Installing <%= vars.platform_name %> on Azure](../../customizing/azure.html).
@@ -68,7 +68,8 @@ exfiltration.
 
 For your <%= vars.platform_name %> domains, use a sub-zone of an Azure DNS zone.
 
-Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, a company domain of `example.com` has a <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
+Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, a company
+domain of `example.com` has a <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
 
 Azure DNS does not support recursion. To properly configure Azure DNS:
 
@@ -127,9 +128,9 @@ For additional guidance depending on your use case, see the table below:
   </tr>
   <tr>
     <td>Existing foundation in AZ-enabled region</td>
-    <td>Migrate to a new <%= vars.platform_name %> v2.5.3 or later foundation so that you can use AZs. These existing
-        foundations, especially those using older families of VMs such as <code>DS_v2</code>, risk running out of
-        capacity as they scale.
+    <td>Migrate to a new <%= vars.platform_name %> foundation, or to a Pivotal Cloud Foundry v2.5.3 or later foundation
+        so that you can use AZs. These existing foundations, especially those using older families of VMs such as
+        <code>DS_v2</code>, risk running out of capacity as they scale.
     </td>
   </tr>
   <tr>
@@ -166,12 +167,12 @@ avoid the placement group pinning issue associated with Availability Sets.
 * Zonal services are effectively in separate Update Domains as updates are rolled out to one zone at a time.
 
 * AZs are visible and configurable. Two zonal services placed in the same logical zone are also placed in the same
-physical zone. This allows services of different types to take advantage of the highly available qualities a zone
+physical zone. This allows services of different types to take advantage of the highly available qualities that a zone
 provides.
 
 ### <a id="AS"></a> Availability Sets
 
-Availability Sets were the first Azure primitive to support HA within a region.
+Availability Sets were the first Azure primitive to support high availability within a region.
 
 <p class="note warning"><strong>Warning:</strong> Availability Sets are implemented at the hardware rack level, which
 can cause issues when deploying <%= vars.platform_name %> on Azure. For more information, see
@@ -210,11 +211,11 @@ For storage, <%= vars.recommended_by %> recommends:
   <p class="note"><strong>Note:</strong> In non-AZ enabled regions, locally Redundant Storage (LRS) is sufficient.</p>
 
 * Configure VMs to use managed disks instead of manually-managed VHDs on storage accounts. Managed disks are an Azure
-feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as HA for the
-VMs.
+feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high
+availability for the VMs.
 
 * Use five storage accounts. <%= vars.platform_name %> on Azure requires five storage accounts: one for BOSH, one for
-<%= vars.ops_manager %>, and three for <%= vars.app_runtime_abbr %>. Each account comes with a set amount of disk.
+<%= vars.ops_manager %>, and three for <%= vars.app_runtime_abbr %>. Each account comes with a set amount of disk space.
 Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit
 of 20 VMs each.
 
