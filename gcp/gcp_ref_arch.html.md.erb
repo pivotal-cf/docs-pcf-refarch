@@ -19,7 +19,7 @@ A <%= vars.platform_name %> reference architecture must meet these requirements:
 * Include common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
 * Be able to host at least 100 app instances
 
-Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
+<%= vars.recommended_by %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
 
 
 ## <a id="shared-vs-single"></a> Shared vs Single-Project VPCs
@@ -67,11 +67,11 @@ To speed communication between data centers, use Google Cloud Interconnect, as s
 
 GCP allocates resources using a hierarchy that centers around projects. To create a VPC, architects define a _host project_ that allocates network resources for the VPC, such as address space and firewall rules. Then they can define one or more _service projects_ to run within the VPC, which share the network resources allocated by the host project and include their own non-network resources, such as VMs and storage buckets.
 
-To install <%= vars.platform_name %> in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running <%= vars.platform_name %>.
+To install <%= vars.platform_name %>, <%= vars.app_runtime_abbr %>, and services in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running <%= vars.platform_name %>, <%= vars.app_runtime_abbr %>, and services.
 
 #### <a id="host-resources"></a> Host Project Resources
 
-The host project centrally manages these shared VPC network resources for <%= vars.platform_name %>:
+The host project centrally manages these shared VPC network resources:
 
 * Infra subnet (<%= vars.ops_manager_full %> and BOSH Director)
 * <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) subnet
@@ -84,7 +84,7 @@ The host project centrally manages these shared VPC network resources for <%= va
 
 #### <a id="service-resources"></a> Service Project Resources
 
-The <%= vars.platform_name %> service project manages these resources:
+The service project manages these resources:
 
 * Google Cloud Compute instances (VMs)
     * BOSH
@@ -98,7 +98,7 @@ The <%= vars.platform_name %> service project manages these resources:
     * Droplets
     * Packages
 
-* Service account and a service account key for <%= vars.platform_name %> to access the storage buckets
+* Service account and a service account key for <%= vars.app_runtime_abbr %> to access the storage buckets
 
 * A service account for <%= vars.platform_name %>
 
@@ -129,18 +129,18 @@ The table below lists the components that are part of a reference architecture d
 | **TCP routers** | Optional feature for TCP routing. Deployed on the <%= vars.app_runtime_abbr %> subnet, one job per AZ.|
 | **Database** | Reference architecture uses GCP Cloud SQL rather than internal databases. Configure your database with a strong password and limit access only to components that require database access. |
 | **Blob Storage and Buckets** | For buildpacks, droplets, packages, and resources. Reference architecture uses Google Cloud Storage rather than internal file storage. |
-| **Services** | Deployed on the <%= vars.platform_name %>-managed services subnet. Each service is deployed to each AZ. |
+| **Services** | Deployed on the managed services subnet. Each service is deployed to each AZ. |
 
-### <a id="common_network"></a> Alternative GCP Network Layouts for <%= vars.platform_name %>
+### <a id="common_network"></a> Alternative GCP Network Layouts
 
-This section describes the possible network layouts for <%= vars.platform_name %> deployments as covered by the reference architecture of <%= vars.platform_name %> on GCP.
+This section describes the possible network layouts for <%= vars.app_runtime_abbr %> deployments as covered by the reference architecture of <%= vars.platform_name %> on GCP.
 
-At a high level, there are currently two possible ways of granting public Internet access to <%= vars.platform_name %> as described by the reference architecture:
+At a high level, there are currently two possible ways of granting public Internet access to <%= vars.app_runtime_abbr %> as described by the reference architecture:
 
-* NAT provides connectivity from <%= vars.platform_name %> internals to the public Internet.
+* NAT provides connectivity from <%= vars.app_runtime_abbr %> internals to the public Internet.
 	* The procedures in [Installing <%= vars.platform_name %> on GCP Manually](../../customizing/gcp-manual.html) use this method.
 
-* Every <%= vars.platform_name %> VM receives its own public IP address (no NAT).
+* Every VM receives its own public IP address (no NAT).
 	* The procedures in [Installing <%= vars.platform_name %> on GCP Using Terraform](../../customizing/gcp-terraform.html) use this method.
 
 However, if you require NAT, see [NAT-Based Solution](#nat_network_diagram).
@@ -155,7 +155,7 @@ The diagram below illustrates the case where you want to expose only a minimal n
 
 #### <a id="no_nat"></a> Public IP Addresses Solution
 
-If you prefer not to use a NAT solution, you can configure <%= vars.platform_name %> on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between <%= vars.platform_name %> components are routed through the front end load balancer and the Gorouter.
+If you prefer not to use a NAT solution, you can configure <%= vars.app_runtime_abbr %> on GCP to assign public IP addresses for all components. This type of deployment may be more performant since most of the network traffic between <%= vars.app_runtime_abbr %> components are routed through the front end load balancer and the Gorouter.
 
 #### <a id="network_components"></a> Network Objects
 
@@ -165,9 +165,9 @@ The table below lists the network objects expected for each type of reference ar
 | ------------------ | --------- | ----------------------------- | --------------------------------------- |
 | **External IPs** | For a NAT solution, use global IP address for apps and system access, and <%= vars.ops_manager %> or an optional jumpbox. | 2 | 30+ |
 | **NAT** | One NAT per AZ. | 3 | 0 |
-| **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment of <%= vars.platform_name %> likely only ever requires one GCP Network object. | 1 | 1 |
+| **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment likely only ever requires one GCP Network object. | 1 | 1 |
 | **Subnets** | Separate subnets for infrastructure (<%= vars.ops_manager %>, BOSH Director, Jumpbox), <%= vars.app_runtime_abbr %>, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
-| **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy <%= vars.platform_name %> without public IP addresses. | 3+ | 3|
+| **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy <%= vars.app_runtime_abbr %> without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source and destination fields in a rule. The preferred method used in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers** | Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP router load balancer used for TCP routing and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
 | **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to Pivotal Network to download tiles. Using a jumpbox is particularly useful in IaaSes where <%= vars.ops_manager %> does not have a public IP address. In these cases, you can SSH into <%= vars.ops_manager %> or any other component through the jumpbox. | (1) | (1)|
@@ -179,7 +179,7 @@ These sections provide more background on the reasons behind certain network con
 
 ### <a id='lb-to-gorouter'></a> Load Balancer to Gorouter Communications and TLS Termination
 
-In a <%= vars.platform_name %> on GCP deployment, the Gorouter receives two types of traffic:
+In a <%= vars.app_runtime_abbr %> on GCP deployment, the Gorouter receives two types of traffic:
 
 * Unencrypted HTTP traffic on port 80 that is decrypted by the HTTP(S) load balancer.
 
@@ -187,7 +187,7 @@ In a <%= vars.platform_name %> on GCP deployment, the Gorouter receives two type
 
 TLS is terminated for HTTPS on the HTTP load balancer and is terminated for WebSockets (WSS) traffic on the Gorouter.
 
-<%= vars.platform_name %> deployments on GCP use two load balancers to handle Gorouter traffic because HTTP load balancers currently do not support WebSockets.
+<%= vars.app_runtime_abbr %> deployments on GCP use two load balancers to handle Gorouter traffic because HTTP load balancers currently do not support WebSockets.
 
 ### <a id='icmp'></a> ICMP
 
