@@ -66,7 +66,7 @@ exfiltration.
 
 ### <a id="dns"></a> DNS
 
-For your <%= vars.platform_name %> domains, use a sub-zone of an Azure DNS zone.
+For your domains, use a sub-zone of an Azure DNS zone.
 
 Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, a company
 domain of `example.com` has a <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
@@ -76,7 +76,7 @@ Azure DNS does not support recursion. To properly configure Azure DNS:
 1. Create an `NS` record with your registrar that points to the four name servers supplied by your Azure DNS Zone
 configuration.
 
-1. Create the required wildcard `A` records for the <%= vars.platform_name %> app and system domains, as well as any
+1. Create the required wildcard `A` records for the <%= vars.app_runtime_abbr %> app and system domains, as well as any
 other records desired for your <%= vars.platform_name %> deployments.
 
 You do not need to make any configuration changes in <%= vars.platform_name %> to support Azure DNS.
@@ -128,7 +128,7 @@ For additional guidance depending on your use case, see the table below:
   </tr>
   <tr>
     <td>Existing foundation in AZ-enabled region</td>
-    <td>Migrate to a new <%= vars.platform_name %> foundation, or to a Pivotal Cloud Foundry v2.5.3 or later foundation
+    <td>Migrate to a new <%= vars.platform_name %> foundation, or to a <%= vars.platform_name %> v2.5.3 or later foundation
         so that you can use AZs. These existing foundations, especially those using older families of VMs such as
         <code>DS_v2</code>, risk running out of capacity as they scale.
     </td>
@@ -191,7 +191,7 @@ ensuring downtime incurred by an update does not affect the availability of the 
 
 #### <a id="placement-group-pinning"></a> Placement Group Pinning Issues
 
-In <%= vars.platform_name %> on Azure in Availability Set HA mode, VMs for a particular job are pinned to a placement
+In Availability Set HA mode, VMs for a particular job are pinned to a placement
 group determined when the first VM in the Availability Set is provisioned. This is because BOSH places VMs for each job
 within the same Availability Set.
 
