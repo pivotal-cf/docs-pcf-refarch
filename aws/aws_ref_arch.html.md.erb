@@ -68,7 +68,7 @@ When planning networks, subnets, and IP spacing, some things to consider are:
 		</tr>
 	</table>
 
-* If you plan to install [<%= vars.platform_name %> Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
+* If you plan to install [VMware Tanzu Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
 
 #### <a id="alternatives"></a> Alternative Network Layouts
 
@@ -134,9 +134,9 @@ These buckets require an associated role for read/write access.
 For identity management, use Instance Profiles whenever possible. For example, the **AWS Config Page** of the BOSH Director tile provides a **Use AWS Instance Profile** option. For more information, see [Step 2: AWS Config Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/aws/config-manual.html#pcfaws-om-awsconfig) in _Configuring BOSH Director on AWS_.
 
 
-## <a id="pks"></a> <%= vars.k8s_runtime_abbr %>
+## <a id="pks"></a> <%= vars.k8s_runtime_full %>
 
-These sections describe a reference architecture for a <%= vars.k8s_runtime_abbr %> installation on AWS.
+These sections describe a reference architecture for a <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) installation on AWS.
 
 ### <a id="pks-diagram"></a> Diagram
 
