@@ -17,7 +17,7 @@ A <%= vars.platform_name %> reference architecture describes a proven approach f
 * Includes common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
 * Can host at least 100 app instances
 
-Pivotal provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
+<%= vars.recommended_by %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
 
 
 ## <a id='base'></a> Base OpenStack Reference Architecture
@@ -93,7 +93,7 @@ The table below lists the components that are part of a base reference architect
   	<td><%= vars.recommended_by %> recommends two service accounts: one for OpenStack "paving," and the other for <%= vars.ops_manager %> and BOSH.<br><br>
       <ul>
         <li><strong>Admin Account:</strong> Concourse uses this account to provision required OpenStack resources as well as a Keystone service account.</li>
-  		  <li><strong>Keystone Service Account:</strong> This service account is automatically provisioned with restricted access only to resources needed by <%= vars.platform_name %>.
+  		  <li><strong>Keystone Service Account:</strong> This service account is automatically provisioned with restricted access only to resources needed by <%= vars.ops_manager %> and BOSH.
       </ul>
   	 </td>
   </tr>
@@ -118,7 +118,7 @@ The table below lists the network objects in this reference architecture.
   </tr>
   <tr>
     <td><strong>Project</strong></td>
-    <td>One per deployment. A <%= vars.platform_name %> deployment exists within a single project and a single OpenStack region, but should distribute <%= vars.platform_name %> jobs and instances across three OpenStack AZs to ensure high availability.</td>
+    <td>One per deployment. A deployment exists within a single project and a single OpenStack region, but should distribute <%= vars.app_runtime_abbr %> jobs and service instances across three OpenStack AZs to ensure high availability.</td>
     <td>1</td>
   </tr>
   <tr>
