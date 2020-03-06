@@ -12,7 +12,7 @@ For additional requirements and installation instructions for <%= vars.platform_
 
 The vSphere reference architecture for the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure.
 
-<%= vars.platform_name %> supports these configurations for <%= vars.platform_name %> on vSphere deployments:
+<%= vars.platform_name %> supports these configurations vSphere deployments:
 
 * <%= vars.app_runtime_abbr %> on vSphere with NSX-T. For more information, see [<%= vars.app_runtime_abbr %> on vSphere with NSX-T](#pas-nsx-t).
 
@@ -59,7 +59,7 @@ Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> 
 
 The NSX-T Container Plugin enables a container networking stack and integrates with NSX-T.
 
-<p class="note"><strong>Note:</strong> To use NSX-T with <%= vars.app_runtime_abbr %>, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the <%= vars.app_runtime_abbr %> tile. To download the NSX-T Container Plugin, go to the <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in for <%= vars.platform_name %></a> page on Pivotal Network.</p>
+<p class="note"><strong>Note:</strong> To use NSX-T with <%= vars.app_runtime_abbr %>, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the <%= vars.app_runtime_abbr %> tile. To download the NSX-T Container Plugin, go to the <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in</a> page on Pivotal Network.</p>
 
 ### <a id="pas-nsx-t-networking"></a> Networking
 
@@ -141,7 +141,7 @@ With this arrangement, all VMs in the same installation and cluster share a dedi
 
 <p class="note"><strong>Note:</strong> <%= vars.platform_name %> does not support using vSphere Storage Clusters with the latest versions of <%= vars.platform_name %> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
-<p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.platform_name %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate <%= vars.platform_name %> to a New Datastore in vSphere</a>.</p>
+<p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.platform_name %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">Migrating <%= vars.platform_name %> to a New Datastore in vSphere</a>.</p>
 
 For more information about general storage requirements and recommendations for <%= vars.app_runtime_abbr %>, see [Storage](../index.html#pas-storage) in _Platform Architecture and Planning Overview_.
 
@@ -232,7 +232,7 @@ For information about HA requirements and recommendations for <%= vars.app_runti
 
 ### <a id="pas-nsx-v-shared-storage"></a> Shared Storage
 
-<%= vars.platform_name %> requires shared storage. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
+<%= vars.app_runtime_abbr %> requires shared storage. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
 
 For information about horizontal and vertical shared storage, see [Shared Storage](#pas-nsx-v-shared-storage).
 
@@ -275,9 +275,9 @@ For information about security requirements and recommendations for <%= vars.app
 For more information about blobstore storage requirements and recommendations, see [Configure File Storage](../../upgrading/configuring.html#file-storage) in _Configuring <%= vars.app_runtime_abbr %> for Upgrades_.
 
 
-## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T
+## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
 
-These sections describe the reference architecture for <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
+These sections describe the reference architecture for <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
 
 ### <a id="pks-nsx-t-diagram"></a> Architecture
 
