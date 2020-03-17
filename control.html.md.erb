@@ -4,22 +4,22 @@ title: Control Plane Reference Architectures
 owner: Customer0
 ---
 
-This topic describes topologies and best practices for deploying Concourse on BOSH and using Concourse to manage <%= vars.platform_name %> foundations. For production environments, <%= vars.recommended_by %> recommends deploying Concourse with BOSH.
+This topic describes topologies and best practices for deploying Concourse on BOSH and using Concourse to manage <%= vars.platform_name %> foundations. For production environments, <%= vars.company_name %> recommends deploying Concourse with BOSH.
 
 
 ## <a id="overview"></a> Overview
 
-Concourse is the main continuous integration and continuous delivery (CI/CD) tool that the Pivotal and open-source Cloud Foundry communities use to develop, test, deploy and manage <%= vars.platform_name %> foundations.
+Concourse is the main continuous integration and continuous delivery (CI/CD) tool that <%= vars.company_name %> and the open-source Cloud Foundry communities use to develop, test, deploy and manage <%= vars.platform_name %> foundations.
 
 [//]: # ( <img src="images/concourse-hero.png" align="right" width="50%"> commented out decorative image )
 
 The three topologies described in this topic govern the network placement and relationship between two systems:
 
-* The **control plane** runs Concourse to gather sources for, integrate, update, and otherwise manage <%= vars.platform_name %> foundations. This layer may also host internal Docker registries, S3 buckets, Git repositories, and other tools.
+* The **control plane** runs Concourse to gather sources for, integrate, update, and otherwise manage foundations. This layer may also host internal Docker registries, S3 buckets, Git repositories, and other tools.
 
-* Each **<%= vars.platform_name %> foundation** runs <%= vars.platform_name %> on an instance of BOSH.
+* Each **foundation** runs <%= vars.platform_name %> on an instance of BOSH.
 
-Each topology described below has been developed and validated in multiple <%= vars.platform_name %> customer and Pivotal Labs environments.
+Each topology described below has been developed and validated in multiple customer and Pivotal Labs by VMware environments.
 
 
 ## <a id="topologies"></a> Deployment Topologies
@@ -279,11 +279,11 @@ For information about setting up a load balancer to handle traffic across multip
 
 ### <a id='platform-pipelines'></a> <%= vars.platform_name %> Pipelines
 
-<%= vars.platform_name %> Platform Automation with Concourse (<%= vars.platform_name %> Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Pivotal Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download <%= vars.platform_name %> Platform Automation with Concourse, go to the [<%= vars.platform_name %> Platform Automation](https://network.pivotal.io/products/platform-automation) page on Pivotal Network.
+Platform Automation with Concourse (<%= vars.platform_name %> Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Pivotal Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download <%= vars.platform_name %> Platform Automation with Concourse, go to the [<%= vars.platform_name %> Platform Automation](https://network.pivotal.io/products/platform-automation) page on Pivotal Network.
 
-<p class="note warning"><strong>Warning:</strong> At time of publication, the PCF Pipelines repository is undergoing planned deprecation.</p>
+<p class="note warning"><strong>Warning:</strong> At time of publication, the PCF Pipelines repository is no longer supported.</p>
 
-To run <%= vars.platform_name %> Pipelines, you need:
+To run Pipelines, you need:
 
 * <%= vars.ops_manager %> web UI, API, and VM installed
 * vCenter API installed (for vSphere environments)
@@ -292,13 +292,13 @@ To run <%= vars.platform_name %> Pipelines, you need:
   * [Pivotal Network](https://network.pivotal.io): `network.pivotal.io`
   * `bosh.io`
 
-### <a id='bbr-pipelines'></a> BOSH Backup and Restore (BBR) <%= vars.platform_name %> Pipelines
+### <a id='bbr-pipelines'></a> BOSH Backup and Restore (BBR) Pipelines
 
-BBR <%= vars.platform_name %> Pipelines automate <%= vars.platform_name %> foundation backups. For more information, see the [BBR PCF Pipeline Tasks](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks) repository on GitHub.
+BBR Pipelines automate <%= vars.platform_name %> foundation backups. For more information, see the [BBR PCF Pipeline Tasks](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks) repository on GitHub.
 
-To run BBR <%= vars.platform_name %> Pipelines, you need an S3 repository for storing backup artifacts.
+To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
 
-<p class="note"><strong>Note:</strong> BBR <%= vars.platform_name %> Pipelines is a <%= vars.platform_name %> community project not officially supported by Pivotal.</p>
+<p class="note"><strong>Note:</strong> BBR Pipelines is a community project not officially supported by Pivotal.</p>
 
 ### <a id='orchestration-frameworks'></a> Pipelines Orchestration Frameworks
 
@@ -331,6 +331,6 @@ Dedicating a Concourse team to each <%= vars.platform_name %> foundation has the
 
 ### <a id="app-dev"></a> Concourse Teams for App Development Orgs and Spaces
 
-When a Concourse server hosts pipelines for an app development team, <%= vars.recommended_by %> recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) user authentication and authorization (UAA) server.
+When a Concourse server hosts pipelines for an app development team, <%= vars.company_name %> recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) user authentication and authorization (UAA) server.
 
 Associating Concourse teams with <%= vars.app_runtime_abbr %> org and space member lists synchronizes access between <%= vars.app_runtime_abbr %> and Concourse, allowing developers to see and operate the build pipelines for the apps they develop.

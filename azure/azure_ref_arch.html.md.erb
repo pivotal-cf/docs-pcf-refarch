@@ -214,7 +214,7 @@ For storage, <%= vars.recommended_by %> recommends:
 feature that handles the correct distribution of VHDs over storage accounts to maintain high IOPS as well as high
 availability for the VMs.
 
-* Use five storage accounts. <%= vars.platform_name %> on Azure requires five storage accounts: one for BOSH, one for
+* Use five storage accounts. Each foundation on Azure requires five storage accounts: one for BOSH, one for
 <%= vars.ops_manager %>, and three for <%= vars.app_runtime_abbr %>. Each account comes with a set amount of disk space.
 Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit
 of 20 VMs each.
