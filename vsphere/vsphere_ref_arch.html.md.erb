@@ -297,6 +297,16 @@ In addition, keep in mind that non-SDN environments have the following character
 * Client SSL termination needs to happen either at the load balancer or Gorouters, or both. Plan for certificates to accomplish this.
 * Firewall layer is accomplished external to the <%= vars.platform_name %> environment.
 
+### <a id="changing-to-nsx"></a> Changing Your CNI to NSX-T
+
+<%= vars.company_name %> recommends configuring NSX-T as your CNI for greenfield deployments of <%= vars.platform_name %>
+rather than migrating an active <%= vars.platform_name %> installation from a non-SDN environment to NSX-T.
+
+To change your container-to-container networking from non-NSX (Flannel) to NSX-T you need NSX-T infrastructure and the [VMware NSX-T Container Plug-In](https://network.pivotal.io/products/vmware-nsx-t) tile.
+
+For information about deploying PAS on vSphere with NSX-T internal networking using the
+VMware NSX-T Container Plug-In for PCF tile, see Deploying PAS with NSX-T Networking.
+
 ## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
 
 These sections describe the reference architecture for <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
