@@ -121,7 +121,7 @@ Concourse worker VMs in each <%= vars.platform_name %> foundation network zone o
 
 * Have outbound connection access to the Concourse web/ATC server on port 2222. This allows them to handshake with the Concourse server to open a reverse SSH tunnel for ongoing communication between them and the Concourse ATC.
 
-For more information, see [Concourse Architecture](https://docs.pivotal.io/p-concourse/v5/architecture/) in the <%= vars.platform_name %> Concourse documentation.
+For more information, see [Concourse Architecture](https://docs.pivotal.io/p-concourse/v5/architecture/) in the Concourse documentation.
 
 **Performance Notes**
 
@@ -277,9 +277,9 @@ For information about setting up a load balancer to handle traffic across multip
 
 ## <a id="pipelines"></a> <%= vars.platform_name %> CI/CD Pipelines
 
-### <a id='platform-pipelines'></a> <%= vars.platform_name %> Pipelines
+### <a id='platform-pipelines'></a> PCF Pipelines
 
-Platform Automation with Concourse (<%= vars.platform_name %> Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Pivotal Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download <%= vars.platform_name %> Platform Automation with Concourse, go to the [<%= vars.platform_name %> Platform Automation](https://network.pivotal.io/products/platform-automation) page on Pivotal Network.
+Platform Automation with Concourse (PCF Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download <%= vars.platform_name %> Platform Automation with Concourse, go to the [Platform Automation](https://network.pivotal.io/products/platform-automation) page on VMware Tanzu Network.
 
 <p class="note warning"><strong>Warning:</strong> At time of publication, the PCF Pipelines repository is no longer supported.</p>
 
@@ -289,20 +289,20 @@ To run Pipelines, you need:
 * vCenter API installed (for vSphere environments)
 * For proxy- or Internet-connected environments, put these sites on your allow list:
   * [Docker Hub](https://hub.docker.io): `hub.docker.io`
-  * [Pivotal Network](https://network.pivotal.io): `network.pivotal.io`
+  * [VMware Tanzu Network](https://network.pivotal.io): `network.pivotal.io`
   * `bosh.io`
 
 ### <a id='bbr-pipelines'></a> BOSH Backup and Restore (BBR) Pipelines
 
-BBR Pipelines automate <%= vars.platform_name %> foundation backups. For more information, see the [BBR PCF Pipeline Tasks](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks) repository on GitHub.
+BBR Pipelines automate foundation backups. For more information, see the [BBR PCF Pipeline Tasks](https://github.com/pivotal-cf/bbr-pcf-pipeline-tasks) repository on GitHub.
 
 To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
 
-<p class="note"><strong>Note:</strong> BBR Pipelines is a community project not officially supported by Pivotal.</p>
+<p class="note"><strong>Note:</strong> BBR Pipelines is a community project not officially supported by VMware.</p>
 
 ### <a id='orchestration-frameworks'></a> Pipelines Orchestration Frameworks
 
-<%= vars.platform_name %> Pipelines Maestro uses a Maestro framework to:
+PCF Pipelines Maestro uses a Maestro framework to:
 
 * Automate pipeline creation and management for multiple <%= vars.platform_name %> foundations
 
@@ -310,7 +310,7 @@ To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
 
 For more information, see the [PCF Pipelines Maestro](https://github.com/pivotalservices/pcf-pipelines-maestro) repository on GitHub.
 
-<p class="note"><strong>Note:</strong> <%= vars.platform_name %> Pipelines Maestro is a <%= vars.platform_name %> community project not officially supported by Pivotal.</p>
+<p class="note"><strong>Note:</strong> PCF Pipelines Maestro is a community project not officially supported by <%= vars.company_name %>.</p>
 
 
 ## <a id="team"></a> Concourse Team Management Best Practices
@@ -325,7 +325,7 @@ Dedicating a Concourse team to each <%= vars.platform_name %> foundation has the
 
 * **It avoids the risk of operators running a pipeline for the wrong foundation.** When a single team hosts maintenance pipelines for multiple foundations, the clutter of dozens of pipelines may lead operators to accidentally run a pipeline targeted at the wrong <%= vars.platform_name %> foundation.
 
-* **It allows for more granular access control settings per team.** <%= vars.platform_name %> pipelines for higher environments may require a more restricted access control than ones from lower environments. Authentication settings for Concourse teams enable that level of control.
+* **It allows for more granular access control settings per team.** Pipelines for higher environments may require a more restricted access control than ones from lower environments. Authentication settings for Concourse teams enable that level of control.
 
 * **It allows workers to be assigned to pipelines of a specific foundation.** Concourse deployment configuration allows for the assignment of workers to a single team. If that team contains pipelines of only one foundation, then the corresponding group of workers run pipelines only for that foundation. This is useful when security policy requires tooling and automation for a foundation to run on specific VMs.
 

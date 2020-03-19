@@ -4,12 +4,12 @@ title: Global DNS Load Balancers for Multi-Foundation Environments
 
 This topic describes global DNS load balancers (GLBs) for multi-foundation environments. This topic also describes concepts such as foundation affinity and healthchecks.
 
-<p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated to one <%= vars.platform_name %> foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for <%= vars.app_runtime_abbr %></a>.</p>
+<p class="note"><strong>Note:</strong> If you want to configure a load balancer dedicated to one foundation and you are using an F5 LTM, see <a href="../customizing/f5-lb.html">Configuring an F5 Load Balancer for <%= vars.app_runtime_abbr %></a>.</p>
 
 
 ## <a id="multi-foundation"></a> About Multi-Foundation Environments
 
-Multi-foundation environments are multiple instances of BOSH and <%= vars.ops_manager_full %> that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
+Multi-foundation environments are multiple instances of <%= vars.ops_manager_full %> and <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
 
 Multi-foundation environments are commonly deployed in an active-active or active-passive pattern. An _active-active pattern_ is when instances of apps run on two foundations and they are both in use. An _active-passive pattern_ is when instances of apps run on two foundations, but the instances may only be active on one foundation, and the other foundation becomes active only in the event of a failover.
 
@@ -20,9 +20,9 @@ The typical setup for foundation failover requires the GLB be authoritative for 
 
 To configure your GLB:
 
-1. Find and record your wildcard app domain. For <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>), your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile. For more information, see [Configure Domains](../customizing/configure-pas.html#domains) in _Configuring <%= vars.app_runtime_abbr %>_ topic.
+1. Find and record your wildcard app domain. For <%= vars.app_runtime_abbr %>, your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile. For more information, see [Configure Domains](../customizing/configure-pas.html#domains) in _Configuring <%= vars.app_runtime_abbr %>_ topic.
 
-1. Add the domain you recorded to both <%= vars.platform_name %> foundations using a shared domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf CLI). For more information about the cf CLI command to create shared domains, see [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in the Cloud Foundry CLI reference guide.
+1. Add the domain you recorded to both <%= vars.app_runtime_abbr %> foundations using a shared domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf CLI). For more information about the cf CLI command to create shared domains, see [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in the Cloud Foundry CLI reference guide.
 
 1. To support failover, set the time-to-live (TTL) in the wildcard DNS record to about 30 to 180 seconds. When determining your TTL, consider the tradeoff between the app performance impact and the resulting time for failover to occur.
 
@@ -76,7 +76,7 @@ For the levels at which you can check the health of your foundation, see the tab
 </tr>
 <tr>
   <td>Foundation</td>
-  <td>The GLB relies on a local load balancer in front of the <%= vars.platform_name %> Gorouters to determine the overall health of the foundation. The GLB can perform health checks on TCP port 443 or 80 or on the local load balancer. The local load balancer checks the health of the back end pool of Gorouters on port 8080.</td>
+  <td>The GLB relies on a local load balancer in front of the Gorouters to determine the overall health of the foundation. The GLB can perform health checks on TCP port 443 or 80 or on the local load balancer. The local load balancer checks the health of the back end pool of Gorouters on port 8080.</td>
 </tr>
 <tr>
   <td>App</td>
@@ -84,4 +84,4 @@ For the levels at which you can check the health of your foundation, see the tab
 </tr>
 </table>
 
-<p class="note warning"><strong>Warning:</strong> <%= vars.recommended_by %> does not recommend setting health checks at the app level. Configuring health checks in this way can cause more frequent failover and delays while pushing apps. Complete failover of a foundation affects all apps on the platform. Health checks on a per-app basis can require additional overhead beyond the control of an app developer.</p>
+<p class="note warning"><strong>Warning:</strong> <%= vars.company_name %> does not recommend setting health checks at the app level. Configuring health checks in this way can cause more frequent failover and delays while pushing apps. Complete failover of a foundation affects all apps on the platform. Health checks on a per-app basis can require additional overhead beyond the control of an app developer.</p>
