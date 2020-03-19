@@ -18,6 +18,8 @@ The vSphere reference architecture for the <%= vars.app_runtime_full %> (<%= var
 
 * <%= vars.app_runtime_abbr %> on vSphere with NSX-V. For more information, see [<%= vars.app_runtime_abbr %> on vSphere with NSX-V](#pas-nsx-v).
 
+* <%= vars.app_runtime_abbr %> on vSphere without NSX. For more information, see [<%= vars.app_runtime_abbr %> on vSphere without NSX](#pas-no-nsx).
+
 * <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T. For more information, see [<%= vars.k8s_runtime_abbr %> on vSphere with NSX-T](#pks-nsx-t)
 
 
@@ -274,6 +276,26 @@ For information about security requirements and recommendations for <%= vars.app
 
 For more information about blobstore storage requirements and recommendations, see [Configure File Storage](../../upgrading/configuring.html#file-storage) in _Configuring <%= vars.app_runtime_abbr %> for Upgrades_.
 
+## <a id="pas-no-nsx"></a> <%= vars.app_runtime_abbr %> on vSphere without NSX
+
+This section provides information about VLAN and container-to-container networking considerations for <%= vars.platform_name %> deployments
+that do not rely on software-defined networking (SDN) such as vSphere NSX.
+
+### <a id="vlan-considerations"></a> VLAN Considerations
+
+Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
+For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particular alignment.
+
+<%= image_tag('../images/load-balancing.png') %>
+
+[View a larger version of this diagram](../images/load-balancing.png)
+
+If you are designing a non-SDN environment, ensure that VLANs and address space for <%= vars.app_runtime_abbr %> do not overlap.
+In addition, keep in mind that non-SDN environments have the following characteristics: 
+
+* Load balancing is performed externally to the <%= vars.platform_name %> installation.
+* Client SSL termination needs to happen either at the load balancer or Gorouters, or both. Plan for certificates to accomplish this.
+* Firewall layer is accomplished external to the <%= vars.platform_name %> environment.
 
 ## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
 
