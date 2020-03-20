@@ -279,7 +279,7 @@ For more information about blobstore storage requirements and recommendations, s
 ## <a id="pas-no-nsx"></a> <%= vars.app_runtime_abbr %> on vSphere without NSX
 
 This section provides information about VLAN and container-to-container networking considerations
-for <%= vars.platform_name %> deployments that do not rely on software-defined networking (SDN)
+for <%= vars.platform_name %> deployments that do not rely on software-defined networking (SDN),
 such as vSphere NSX.
 
 ### <a id="vlan-considerations"></a> VLAN Considerations
@@ -291,11 +291,13 @@ For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particul
 
 [View a larger version of this diagram](../images/pas-without-nsxt.png)
 
-If you are designing a non-SDN environment, ensure that VLANs and address space for <%= vars.app_runtime_abbr %> do not overlap.
+If you are designing a non-SDN environment, ensure that VLANs and address space
+for <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %> do not overlap.
 In addition, keep in mind that non-SDN environments have the following characteristics: 
 
 * Load balancing is performed externally to the <%= vars.platform_name %> installation.
-* Client SSL termination needs to happen either at the load balancer or Gorouters, or both. Plan for certificates to accomplish this.
+* Client SSL termination needs to happen either at the load balancer or Gorouters, or both.
+  Ensure your certificates can accomplish this.
 * Firewall layer is accomplished external to the <%= vars.platform_name %> environment.
 
 ### <a id="changing-to-nsx"></a> Changing Your CNI to NSX-T
@@ -303,10 +305,12 @@ In addition, keep in mind that non-SDN environments have the following character
 <%= vars.company_name %> recommends configuring NSX-T as your CNI for greenfield deployments of <%= vars.platform_name %>
 rather than migrating an active <%= vars.platform_name %> installation from a non-SDN environment to NSX-T.
 
-To change your container-to-container networking from non-NSX (Flannel) to NSX-T you need NSX-T infrastructure and the [VMware NSX-T Container Plug-In](https://network.pivotal.io/products/vmware-nsx-t) tile.
+To change your container-to-container networking from non-NSX (Flannel) to NSX-T,
+you need NSX-T infrastructure and the VMware NSX-T Container Plug-in tile.
 
 For information about deploying PAS on vSphere with NSX-T internal networking using the
-VMware NSX-T Container Plug-In for PCF tile, see Deploying PAS with NSX-T Networking.
+VMware NSX-T Container Plug-In tile, see [Deploying PAS with NSX-T
+Networking](https://docs.pivotal.io/platform/application-service/<%= vars.current_major_version.sub('.', '-') %>/operating/vsphere-nsx-t.html).
 
 ## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
 
