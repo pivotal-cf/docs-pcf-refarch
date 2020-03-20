@@ -109,7 +109,7 @@ The requirements and recommendations related to networks, subnets, and IP spacin
 
 * NSX-T dynamically assigns <%= vars.app_runtime_abbr %> org networks and adds a Tier-1 router. These org networks are automatically instantiated based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in <%= vars.ops_manager_full %>. The default is `/24`. This means that every org in <%= vars.app_runtime_abbr %> is assigned a new `/24` network.
 
-For more information about PAS subnets, see [Required Subnets](../index.html#pas-network) in _Platform Architecture and Planning Overview_.
+For more information about <%= vars.app_runtime_abbr %> subnets, see [Required Subnets](../index.html#pas-network) in _Platform Architecture and Planning Overview_.
 
 ### <a id="pas-nsx-t-ha"></a> High Availability
 
@@ -282,14 +282,23 @@ This section provides information about VLAN and container-to-container networki
 for <%= vars.platform_name %> deployments that do not rely on software-defined networking (SDN),
 such as vSphere NSX.
 
-### <a id="vlan-considerations"></a> VLAN Considerations
 
-Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
-For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particular alignment.
+<p class="note"><strong>Note:</strong> This architecture was validated for earlier versions of <%= vars.app_runtime_abbr %>.
+However, it has not been validated for <%= vars.app_runtime_abbr %> <%= vars.current_major_version %>.
+</p>
+
+### <a id="without-nsx"></a> Architecture
+
+The diagram below illustrates the architecture for <%= vars.app_runtime_abbr %> without an SDN.
 
 <%= image_tag('../images/pas-without-nsxt.png') %>
 
 [View a larger version of this diagram](../images/pas-without-nsxt.png)
+
+### <a id="vlan-considerations"></a> VLAN Considerations
+
+Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
+For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particular alignment.
 
 
 If you are designing a non-SDN environment, ensure that the <%= vars.app_runtime_abbr %>
@@ -309,8 +318,8 @@ rather than migrating an active <%= vars.platform_name %> installation from a no
 To change your container-to-container networking from non-NSX (Flannel) to NSX-T,
 you need NSX-T infrastructure and the VMware NSX-T Container Plug-in tile.
 
-For information about deploying PAS on vSphere with NSX-T internal networking using the
-VMware NSX-T Container Plug-In tile, see [Deploying PAS with NSX-T
+For information about deploying <%= vars.app_runtime_abbr %> on vSphere with NSX-T internal networking using the
+VMware NSX-T Container Plug-In tile, see [Deploying <%= vars.app_runtime_abbr %> with NSX-T
 Networking](https://docs.pivotal.io/platform/application-service/<%= vars.current_major_version.sub('.', '-') %>/operating/vsphere-nsx-t.html).
 
 ## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
