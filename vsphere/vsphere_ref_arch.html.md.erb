@@ -291,8 +291,9 @@ For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particul
 
 [View a larger version of this diagram](../images/pas-without-nsxt.png)
 
-If you are designing a non-SDN environment, ensure that VLANs and address space
-for <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %> do not overlap.
+
+If you are designing a non-SDN environment, ensure that the <%= vars.app_runtime_abbr %>
+VLANs and address spaces do not overlap with those of <%= vars.k8s_runtime_abbr %>.
 In addition, keep in mind that non-SDN environments have the following characteristics: 
 
 * Load balancing is performed externally to the <%= vars.platform_name %> installation.
