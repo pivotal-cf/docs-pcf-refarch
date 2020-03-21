@@ -18,7 +18,7 @@ The vSphere reference architecture for the <%= vars.app_runtime_full %> (<%= var
 
 * <%= vars.app_runtime_abbr %> on vSphere with NSX-V. For more information, see [<%= vars.app_runtime_abbr %> on vSphere with NSX-V](#pas-nsx-v).
 
-* <%= vars.app_runtime_abbr %> on vSphere without NSX. For more information, see [<%= vars.app_runtime_abbr %> on vSphere without NSX](#pas-no-nsx).
+* <%= vars.app_runtime_abbr %> on vSphere without NSX. For more information, see [<%= vars.app_runtime_abbr %> on vSphere without SDN](#pas-no-nsx).
 
 * <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T. For more information, see [<%= vars.k8s_runtime_abbr %> on vSphere with NSX-T](#pks-nsx-t)
 
@@ -276,51 +276,30 @@ For information about security requirements and recommendations for <%= vars.app
 
 For more information about blobstore storage requirements and recommendations, see [Configure File Storage](../../upgrading/configuring.html#file-storage) in _Configuring <%= vars.app_runtime_abbr %> for Upgrades_.
 
-## <a id="pas-no-nsx"></a> <%= vars.app_runtime_abbr %> on vSphere without NSX
+## <a id="pas-no-nsx"></a> <%= vars.app_runtime_abbr %> on vSphere without SDN
 
-This section provides information about VLAN and container-to-container networking considerations
-for <%= vars.platform_name %> deployments that do not rely on software-defined networking (SDN),
-such as vSphere NSX.
 
+These sections describe the architecture for <%= vars.app_runtime_abbr %> on vSphere without software-defined networking deployments.
 
 <p class="note"><strong>Note:</strong> This architecture was validated for earlier versions of <%= vars.app_runtime_abbr %>.
-However, it has not been validated for <%= vars.app_runtime_abbr %> <%= vars.current_major_version %>.
+However, it has not been validated for <%= vars.app_runtime_abbr %> v<%= vars.current_major_version %>.
 </p>
 
-### <a id="without-nsx"></a> Architecture
+### <a id="pas-routed-networking"></a> Networking
 
-The diagram below illustrates the architecture for <%= vars.app_runtime_abbr %> without an SDN.
+Without an SDN, IP allocations all come from routed network space. Discussions and planning within your organization are essential to acquiring the necessary amount of IP space for a <%= vars.app_runtime_abbr %> deployment with future growth considerations. This is because routed IP address space is a premium resource, and adding more later is difficult, costly, and time-consuming.
 
-<%= image_tag('../images/pas-without-nsxt.png') %>
+Below is a best-guess layout for IP space utilization in a single <%= vars.app_runtime_abbr %> deployment:
 
-[View a larger version of this diagram](../images/pas-without-nsxt.png)
+* Infrastructure - /28
 
-### <a id="vlan-considerations"></a> VLAN Considerations
+* <%= vars.app_runtime_abbr %> deployment - /23<br>This size is almost completely dependent on the estimated desired capacity for containers. It can be smaller, but <%= vars.recommended_by %> does not recommend using a larger size in a single deployment.
 
-Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
-For this approach, you need to deploy <%= vars.app_runtime_abbr %> in a particular alignment.
+* Services - /23<br>This size is almost completely dependent on the estimated desired capacity for services. Resize as necessary.
 
+### <a id="pas-routed-iso-seg"></a> Isolation Segments
 
-If you are designing a non-SDN environment, ensure that the <%= vars.app_runtime_abbr %>
-VLANs and address spaces do not overlap with those of <%= vars.k8s_runtime_abbr %>.
-In addition, keep in mind that non-SDN environments have the following characteristics: 
-
-* Load balancing is performed externally to the <%= vars.platform_name %> installation.
-* Client SSL termination needs to happen either at the load balancer or Gorouters, or both.
-  Ensure your certificates can accomplish this.
-* Firewall layer is accomplished external to the <%= vars.platform_name %> environment.
-
-### <a id="changing-to-nsx"></a> Changing Your CNI to NSX-T
-
-<%= vars.company_name %> recommends configuring NSX-T as your CNI for greenfield deployments of <%= vars.platform_name %>
-rather than migrating an active <%= vars.platform_name %> installation from a non-SDN environment to NSX-T.
-
-To change your container-to-container networking from non-NSX (Flannel) to NSX-T,
-you need NSX-T infrastructure and the VMware NSX-T Container Plug-in tile.
-
-For information about deploying <%= vars.app_runtime_abbr %> on vSphere with NSX-T internal networking using the
-VMware NSX-T Container Plug-In tile, see [Deploying <%= vars.app_runtime_abbr %> with NSX-T
-Networking](https://docs.pivotal.io/platform/application-service/<%= vars.current_major_version.sub('.', '-') %>/operating/vsphere-nsx-t.html).
+Isolation segments can help with satisfying IP address space needs in a routed network design. You can build smaller groups of Gorouters and Diego Cells aligned to a particular service. Smaller groups use less IP address space.
 
 ## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
 
