@@ -17,7 +17,8 @@ For PAS deployments, the VMware NSX-T Container Plugin for <%= vars.product_name
 
 * PAS on vSphere with NSX-T. See [PAS on vSphere with NSX-T](#pas-nsx-t).
 * PAS on vSphere with NSX-V. See [PAS on vSphere with NSX-V](#pas-nsx-v).
-
+* PAS on vSphere without NSX. For more information, see [PAS on vSphere without NSX](#pas-no-nsx).
+* PKS on vSphere with NSX-T. See [PKS on vSphere with NSC-T](#pks-nsx-t).
 
 ## <a id="pas-nsx-t"></a> PAS on vSphere with NSX-T
 
@@ -268,6 +269,52 @@ Pivotal recommends that you use the following blobstore storage for production a
 <p class="note"><b>Note:</b> For non-production environments, the NFS/WebDAV blobstore can be the primary consumer of storage, as the NFS/WebDAV blobstore must be actively maintained. There will be down time for deployment during events such as storage upgrades or migrations to new disks. </p>  
 
 For more information about blobstore storage requirements and recommendations, see the [Configure File Storage](https://docs.pivotal.io/pivotalcf/2-7/upgrading/configuring.html#file-storage) section of _Configuring PAS for Upgrades_.
+
+## <a id="pas-no-nsx"></a> PAS on vSphere without NSX
+
+This section provides information about VLAN and container-to-container networking considerations
+for PCF deployments that do not rely on software-defined networking (SDN),
+such as vSphere NSX.
+
+
+<p class="note"><strong>Note:</strong> This architecture was validated for earlier versions of PAS.
+However, it has not been validated for PAS v<%= vars.current_major_version %>.
+</p>
+
+### <a id="without-nsx"></a> Architecture
+
+The diagram below illustrates the architecture for PAS without an SDN.
+
+<%= image_tag('../images/pas-without-nsxt.png') %>
+
+[View a larger version of this diagram](../images/pas-without-nsxt.png)
+
+### <a id="vlan-considerations"></a> VLAN Considerations
+
+Without an SDN environment, you draw network address space and broadcast domains from the greater data center pool.
+For this approach, you need to deploy PAS in a particular alignment.
+
+
+If you are designing a non-SDN environment, ensure that the PAS
+VLANs and address spaces do not overlap with those of PKS.
+In addition, keep in mind that non-SDN environments have the following characteristics:
+
+* Load balancing is performed externally to the PCF installation.
+* Client SSL termination needs to happen either at the load balancer or Gorouters, or both.
+  Ensure your certificates can accomplish this.
+* Firewall layer is accomplished external to the PCF environment.
+
+### <a id="changing-to-nsx"></a> Changing Your CNI to NSX-T
+
+Pivotal recommends configuring NSX-T as your CNI for greenfield deployments of PCF
+rather than migrating an active PCF installation from a non-SDN environment to NSX-T.
+
+To change your container-to-container networking from non-NSX (Flannel) to NSX-T,
+you need NSX-T infrastructure and the VMware NSX-T Container Plug-in tile.
+
+For information about deploying PAS on vSphere with NSX-T internal networking using the
+VMware NSX-T Container Plug-In tile, see [Deploying PAS with NSX-T
+Networking](https://docs.pivotal.io/platform/application-service/<%= vars.current_major_version.sub('.', '-') %>/operating/vsphere-nsx-t.html).
 
 ## <a id="pks-nsx-t"></a> PKS on vSphere with NSX-T
 
