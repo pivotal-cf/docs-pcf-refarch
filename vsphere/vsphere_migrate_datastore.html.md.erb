@@ -29,22 +29,23 @@ For more information about how to back up <%= vars.platform_name %>, see [Backin
 
 ### <a a id="doc"></a> Step 2: Document Current Environment Settings
 
-Document your current environment settings before proceeding with the datastore migration. Record which VMs are running and in which datastore they reside. If you experience any issues during or after the migration, you must have this information to restore your environment.
+Document your current environment settings before proceeding with the datastore migration. Record which VMs are running
+and in which datastore they reside. If you experience any issues during or after the migration, you must have this
+information to restore your environment.
 
 To obtain this information:
 
 1. Run one of these commands:
     * If you use BOSH CLI v2, run:
-
-      ```
+      <pre>
       bosh -e BOSH-ENVIRONMENT instances --details > instances.txt
-      ```
+      </pre>
       Where `BOSH-ENVIRONMENT` is the alias you assigned to your BOSH Director.
+      <pre>
     * If you use the original version of the BOSH CLI, run:
-
-      ```
+      <pre>
       bosh-old instances --details > instances.txt
-      ```
+      </pre>
 
 1. Save the resulting `instances.txt` file to a safe location.
 
