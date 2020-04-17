@@ -34,12 +34,13 @@ Document your current environment settings before proceeding with the datastore 
 To obtain this information, perform the following steps:
 
 1. Run the `bosh instances` command.
-  * If you use [BOSH CLI v2+](https://bosh.io/docs/cli-v2), run the following command, replacing `MY-ENV` with the alias you assigned to your BOSH Director:
-    <pre class="terminal">
-    $ bosh -e MY-ENV instances --details > instances.txt
+  * If you use BOSH CLI v2, run:
+    <pre>
+    bosh -e BOSH-ENVIRONMENT instances --details > instances.txt
     </pre>
-  * If you use the original version of the BOSH CLI, run the following command:
-    <pre class="terminal">
+    Where `BOSH-ENVIRONMENT` is the alias you assigned to your BOSH Director.
+  * If you use the original version of the BOSH CLI, run:
+    <pre>
     $ bosh-old instances --details > instances.txt
     </pre>
 
