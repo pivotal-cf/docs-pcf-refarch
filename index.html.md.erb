@@ -36,7 +36,7 @@ These IaaS-specific topics build on these two common base architectures:
 
 These topics address aspects of platform architecture and planning that the <%= vars.platform_name %> reference architectures do not cover:
 
-* [Implementing a Multi-Foundation <%= vars.k8s_runtime_abbr %> Deployment](https://docs.pivotal.io/pks/nsxt-multi-pks.html)
+* [Implementing a Multi-Foundation <%= vars.k8s_runtime_abbr %> Deployment](https://docs.pivotal.io/tkgi/nsxt-multi-pks.html)
 * [Using Global DNS Load Balancers for Multi-Foundation](global-dns-lb.html)
 
 
@@ -60,7 +60,7 @@ The table below describes the internal component placements shown in the diagram
 | Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.app_runtime_abbr %> management components such as <%= vars.ops_manager %> and the Cloud Foundry Command Line Interface (cf CLI). |
 | Gorouters (HTTP routers in <%= vars.platform_name %>) | Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ. Accessed through the HTTP, HTTPS, and SSL load balancers. |
 | Diego Brain | Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ. The Diego Brain component is required, but SSH container access support through the Diego Brain is optional, and enabled through the SSH load balancers. |
-| TCP routers | Optional. Deployed on all three P<%= vars.app_runtime_abbr %> subnets, one per AZ, to support TCP routing. |
+| TCP routers | Optional. Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ, to support TCP routing. |
 | Service tiles | Service brokers and shared services instances are deployed to the Services subnet. Dedicated on-demand service instances are deployed to an on-demand services subnet. |
 | Isolation segments | Deployed on an isolation segment subnet. Includes Diego Cells and Gorouters for running and accessing apps hosted within isolation segments. |
 
@@ -166,7 +166,7 @@ The table below describes the internal component placements shown in the diagram
 | <%= vars.ops_manager %> | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
 | BOSH Director | Deployed on the infrastructure subnet. |
 | Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.k8s_runtime_abbr %> management components such as <%= vars.ops_manager %> and the `kubectl` command line interface. |
-| <%= vars.k8s_runtime_abbr %> API | Deployed as a service broker VM on the <%= vars.k8s_runtime_abbr %> services subnet. Handles <%= vars.k8s_runtime_abbr %> API and service adapter requests, and manages <%= vars.k8s_runtime_abbr %> clusters. For more information, see [Enterprise PKS Components](https://docs.pivotal.io/pks/index.html#components) in _Enterprise <%= vars.k8s_runtime_full %> (Enterprise <%= vars.k8s_runtime_abbr %>)_. |
+| <%= vars.k8s_runtime_abbr %> API | Deployed as a service broker VM on the <%= vars.k8s_runtime_abbr %> services subnet. Handles <%= vars.k8s_runtime_abbr %> API and service adapter requests, and manages <%= vars.k8s_runtime_abbr %> clusters. For more information, see [<%= vars.k8s_runtime_abbr %> Architecture](https://docs.pivotal.io/tkgi/control-plane.html). |
 | Harbor tile | Optional container images registry, typically deployed to the services subnet. |
 | <%= vars.k8s_runtime_abbr %> Cluster** | Deployed to a dynamically-created, dedicated <%= vars.k8s_runtime_abbr %> cluster subnet. Each cluster consists of worker nodes that run the workloads, or apps, and one or more master nodes. |
 
@@ -198,7 +198,7 @@ Load balancers can be used to manage traffic across master nodes of a <%= vars.k
 
 ### <a id="pks-security"></a> Security
 
-For information about how <%= vars.k8s_runtime_abbr %> implements security, see [Enterprise <%= vars.k8s_runtime_abbr %> Security](https://docs.pivotal.io/pks/security.html) and [Firewall Ports](https://docs.pivotal.io/pks/ports-protocols-nsx-t.html).
+For information about how <%= vars.k8s_runtime_abbr %> implements security, see [Enterprise <%= vars.k8s_runtime_abbr %> Security](https://docs.pivotal.io/tkgi/security.html) and [Firewall Ports](https://docs.pivotal.io/tkgi/ports-protocols-nsx-t.html).
 
 ### <a id="pks-domains"></a> Domain Names
 
@@ -208,4 +208,4 @@ The wildcard certificate covers both the <%= vars.k8s_runtime_abbr %> API domain
 
 ### <a id="pks-management"></a> Cluster Management
 
-For information about managing <%= vars.k8s_runtime_abbr %> clusters, see [Managing Clusters](https://docs.pivotal.io/pks/managing-clusters.html).
+For information about managing <%= vars.k8s_runtime_abbr %> clusters, see [Managing Clusters](https://docs.pivotal.io/tkgi/managing-clusters.html).
