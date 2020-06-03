@@ -30,7 +30,7 @@ You can use AWS Route 53 for DNS resolution to host your <%= vars.app_runtime_ab
 
 #### <a id="lb"></a> Load Balancing
 
-AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). <%= vars.recommended_by %> recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex layer 7 routing rules, you can front or replace the NLB with an ALB.
+AWS offer Application Load Balancers (ALBs) and Network Load Balancers (NLBs). <%= vars.company_name %> recommends using NLBs because of the simplicity and security of leaving all encrypted traffic in place until it reaches the Gorouters. If you require Amazon Certificate Management or more complex Layer 7 routing rules, you can front or replace the NLB with an ALB.
 
 #### <a id="subnets"></a> Networks, Subnets, and IP Spacing Planning
 
@@ -38,7 +38,7 @@ When planning networks, subnets, and IP spacing, some things to consider are:
 
 * In AWS, each availability zone (AZ) requires its own subnet of which the first five IPs are reserved.
 
-* Your organization might not have the IP space necessary to deploy <%= vars.app_runtime_abbr %> in a consistent manner. To alleviate this, <%= vars.recommended_by %> recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.platform_name %> deployment can use few IP addresses.
+* Your organization might not have the IP space necessary to deploy <%= vars.app_runtime_abbr %> in a consistent manner. To alleviate this, <%= vars.company_name %> recommends using the `100.64` address space to deploy a NAT instance and router so that the <%= vars.platform_name %> deployment can use few IP addresses.
 
 * If you want the front end of <%= vars.app_runtime_abbr %> to be accessible from your corporate network or the services running on <%= vars.app_runtime_abbr %> to be able to access corporate resources, you must either provide routable IPs to your VPC or use NAT.
 
@@ -59,16 +59,16 @@ When planning networks, subnets, and IP spacing, some things to consider are:
 			<td>Create the NAT Gateway toward the Internet.</td>
 		</tr>
 		<tr>
-			<td>Corporate Ingress</td>
+			<td>Corporate ingress</td>
 			<td>Create load balancers on your corporate subnet.</td>
 		</tr>
 		<tr>
-			<td>Corporate Egress (For accessing corporate resources)</td>
+			<td>Corporate egress (for accessing corporate resources)</td>
 			<td>Create the NAT instance on your corporate subnet or if business requirements dictate, make the entire VPC corporate-routable.</td>
 		</tr>
 	</table>
 
-* If you plan to install [VMware Tanzu Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS managed instances.
+* If you plan to install [VMware Tanzu Service Broker for AWS](https://docs.pivotal.io/aws-services/index.html), you might want to create another set of networks in addition to those outlined in the base reference architecture. This set of networks would be used for RDS and other AWS-managed instances.
 
 #### <a id="alternatives"></a> Alternative Network Layouts
 
@@ -80,14 +80,14 @@ These options are available for choosing your network topology:
 		<th>Options</th>
 	</tr>
 	<tr>
-		<td>Internet Ingress</td>
+		<td>Internet ingress</td>
 		<td><ul>
 				<li>Allow Internet ingress by associating load balancers with elastic IPs.</li>
 				<li>Do not allow Internet ingress.</li>
 			</ul></td>
 	</tr>
 	<tr>
-		<td>Internet Egress</td>
+		<td>Internet egress</td>
 		<td>
 			<ul>
 				<li>Allow <%= vars.app_runtime_abbr %> to access the Internet through a NAT gateway.</li>
@@ -98,16 +98,16 @@ These options are available for choosing your network topology:
 	<tr>
 		<td>Peering</td>
 		<td><ul>
-				<li>Isolated. This is normally internet-only facing.</li>
+				<li>Isolated. This is normally Internet-only facing.</li>
 				<li>Peered with corporate or other VPCs through Transit Gateway.</li>
 				<li>Peered directly with other VPCs and corporate connections.</li>
 			</ul></td>
 	</tr>
 	<tr>
-		<td>Corporate Peering</td>
+		<td>Corporate peering</td>
 		<td><ul>
 				<li>SNAT for corporate resources. This requires three corporate IPs.</li>
-				<li>Routable IP Addresses for VPC using /20 or a larger CIDR block necessary.</li>
+				<li>Routable IP addresses for VPC using <code>/20</code> or a larger CIDR block necessary.</li>
 			</ul></td>
 	</tr>
 </table>
@@ -118,7 +118,7 @@ Use a single RDS instance for BOSH and <%= vars.app_runtime_abbr %>. This instan
 
 ### <a id="blobstore"></a> Blobstore Storage Accounts
 
-<%= vars.ops_manager_full %> requires a bucket for the BOSH blobstore.
+<%= vars.ops_manager %> requires a bucket for the BOSH blobstore.
 
 <%= vars.app_runtime_abbr %> requires these buckets:
 
@@ -158,7 +158,7 @@ You can use AWS Route 53 for DNS resolution to host your <%= vars.k8s_runtime_ab
 
 You can configure a front end load balancer to enable public access to the <%= vars.k8s_runtime_abbr %> API VM.
 
-For each <%= vars.k8s_runtime_abbr %> cluster, <%= vars.recommended_by %> recommends creating a load balancer for the corresponding master node or nodes. For more information, see [Creating and Configuring an AWS Load Balancer for Enterprise <%= vars.k8s_runtime_abbr %> Clusters](https://docs.pivotal.io/tkgi/aws-cluster-load-balancer.html).
+For each <%= vars.k8s_runtime_abbr %> cluster, <%= vars.company_name %> recommends creating a load balancer for the corresponding master node or nodes. For more information, see [Creating and Configuring an AWS Load Balancer for Enterprise <%= vars.k8s_runtime_abbr %> Clusters](https://docs.pivotal.io/tkgi/aws-cluster-load-balancer.html).
 
 For deployed workloads, Kubernetes can automatically create load balancers when applying the service definition to the app instances. For more information, see [Deploying and Exposing Basic Workloads](https://docs.pivotal.io/tkgi/deploy-workloads.html).
 
