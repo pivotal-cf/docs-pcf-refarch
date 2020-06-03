@@ -9,11 +9,11 @@ This topic describes reference architectures and other plans for installing <%= 
 
 ## <a id="overview"></a> Overview
 
-A <%= vars.platform_name  %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. <%= vars.platform_name %> reference architectures meet these requirements:
+An <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as AWS, Azure, GCP, OpenStack, or vSphere. <%= vars.platform_name %> reference architectures meet these requirements:
 
 * Secure
 * Publicly accessible
-* Includes common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Includes common <%= vars.platform_name %>-managed services such as VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
 * Can host at least 100 app instances
 * Have been deployed and validated by VMware to support <%= vars.ops_manager_full %>, <%= vars.app_runtime_abbr %>, and <%= vars.k8s_runtime_abbr %>
 
@@ -42,7 +42,7 @@ These topics address aspects of platform architecture and planning that the <%= 
 
 ## <a id="pas-base"></a> <%= vars.app_runtime_abbr %> Architecture
 
-The diagram below illustrates a base architecture for <%= vars.app_runtime_abbr %> and how its network topology places and replicates <%= vars.app_runtime_abbr %> components across subnets and Availability Zones (AZs).
+The diagram below illustrates a base architecture for <%= vars.app_runtime_abbr %> and how its network topology places and replicates <%= vars.app_runtime_abbr %> components across subnets and availability zones (AZs).
 
 <%# Image from PAS_Base canvas of /images/v2/PCF_Reference_Architecture_2019.graffle %>
 ![<%= vars.app_runtime_abbr %> Base Deployment Topology](./images/v2/export/PAS_Base.png)
@@ -76,9 +76,9 @@ These sections describe <%= vars.app_runtime_abbr %>'s recommendations for defin
 
 * <%= vars.app_runtime_abbr %> subnet - `/24` segment<br>This subnet contains <%= vars.app_runtime_abbr %> runtime VMs, such as Gorouters, Diego Cells, and Cloud Controllers.
 
-* Services subnet - `/24` segment<br>The services and on-demand services networks support <%= vars.ops_manager %> tiles that you might add in addition to <%= vars.app_runtime_abbr %>. In other words, they are the networks for everything that is not <%= vars.app_runtime_abbr %>. Some services tiles can call for additional network capacity to grow into on-demand. If you use services with this capability, <%= vars.recommended_by %> recommends that you add an on-demand services network for each on-demand service.
+* Services subnet - `/24` segment<br>The services and on-demand services networks support <%= vars.ops_manager %> tiles that you might add in addition to <%= vars.app_runtime_abbr %>. In other words, they are the networks for everything that is not <%= vars.app_runtime_abbr %>. Some services tiles can call for additional network capacity to grow into on-demand. If you use services with this capability, <%= vars.company_name %> recommends that you add an on-demand services network for each on-demand service.
 
-* On-demand services subnets - `/24` segments<br>This is for services that can allocate network capacity on-demand from BOSH for their worker VMs. <%= vars.recommended_by %> recommends allocating a dedicated subnet to each on-demand service. For example, you can configure the Redis tile as follows:
+* On-demand services subnets - `/24` segments<br>This is for services that can allocate network capacity on-demand from BOSH for their worker VMs. <%= vars.company_name %> recommends allocating a dedicated subnet to each on-demand service. For example, you can configure the Redis for VMware Tanzu tile as follows:
   * **Network:** Enter the existing `Services` network, to host the service broker.
   * **Services network:** Deploy a new network `OD-Services1`, to host the Redis worker VMs.
   <br>
@@ -104,7 +104,7 @@ For more information, see [Global DNS Load Balancers for Multi-Foundation Enviro
 
 ### <a id="pas-ha"></a> High Availability
 
-<%= vars.app_runtime_abbr %> is not considered high availability (HA) until it runs across at least two AZs. <%= vars.recommended_by %> recommends defining three AZs.
+<%= vars.app_runtime_abbr %> is not considered high availability (HA) until it runs across at least two AZs. <%= vars.company_name %> recommends defining three AZs.
 
 On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a <%= vars.app_runtime_abbr %> HA topology provides the best of both worlds. Multiple AZs give <%= vars.app_runtime_abbr %> redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
 
@@ -120,8 +120,7 @@ The platform also requires you to configure file storage for large shared object
 
 For information about how <%= vars.app_runtime_abbr %> implements security, see:
 
-* [<%= vars.platform_name %> Infrastructure Security
-](../security/pcf-infrastructure/index.html)
+* [<%= vars.platform_name %> Infrastructure Security](../security/pcf-infrastructure/index.html)
 
 * [Security Concepts](../security/concepts/)
 
@@ -172,7 +171,7 @@ The table below describes the internal component placements shown in the diagram
 
 ### <a id="pks-network"></a> Networks
 
-These sections describe <%= vars.recommended_by %>'s recommendations for defining your networks and load-balancing their incoming requests.
+These sections describe <%= vars.company_name %>'s recommendations for defining your networks and load-balancing their incoming requests.
 
 #### <a id="pks-subnets"></a> Subnets Requirements
 
@@ -180,7 +179,7 @@ These sections describe <%= vars.recommended_by %>'s recommendations for definin
 
 * Infrastructure subnet - `/24`<br>This subnet contains VMs that require access only for Platform Administrators, such as <%= vars.ops_manager %>, BOSH Director, and an optional jumpbox.
 
-* <%= vars.k8s_runtime_abbr %> services subnet - `/24`<br>This subnet hosts <%= vars.k8s_runtime_abbr %> API VM and other optional service tiles such as Harbor.
+* <%= vars.k8s_runtime_abbr %> services subnet - `/24`<br>This subnet hosts <%= vars.k8s_runtime_abbr %> API VM and other optional service tiles such as VMware Harbor Registry.
 
 * <%= vars.k8s_runtime_abbr %> cluster subnets - each one a `/24` from a pool of pre-allocated IPs<br>These subnets host <%= vars.k8s_runtime_abbr %> clusters.
 
@@ -190,7 +189,7 @@ Load balancers can be used to manage traffic across master nodes of a <%= vars.k
 
 ### <a id="pks-ha"></a> High Availability
 
-<%= vars.k8s_runtime_abbr %> has no inherent HA capabilities to design for. Make the best efforts to have HA design at the IaaS, storage, power and access layers to support <%= vars.k8s_runtime_abbr %>.
+<%= vars.k8s_runtime_abbr %> has no inherent HA capabilities to design for. Make the best efforts to have HA design at the IaaS, storage, power, and access layers to support <%= vars.k8s_runtime_abbr %>.
 
 ### <a id="pks-storage"></a> Storage
 
