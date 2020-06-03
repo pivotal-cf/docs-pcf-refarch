@@ -9,12 +9,13 @@ architectures described in [Platform Architecture and Planning Overview](../inde
 For additional requirements and installation instructions for running <%= vars.platform_name %> on Azure, see
 [Installing <%= vars.platform_name %> on Azure](../../customizing/azure.html).
 
+
 ## <a id="overview"></a> Overview
 
 Azure Virtual Data Center (VDC) uses a hub and spoke model for extending on-premises data centers. For more
 information about VDC, see the [Azure Virtual Datacenter e-book](https://azure.microsoft.com/en-us/resources/azure-virtual-datacenter/).
 
-When installing <%= vars.platform_name %>, you can use this model to place resources in resource groups. For example, a
+When installing <%= vars.platform_name %>, you can use this model to place resources in resource groups. For example, an
 <%= vars.platform_name %> installation contains:
 
 * **Hub**:
@@ -38,6 +39,7 @@ model described above:
 
 The sections below provide guidance about the resources that you use for running <%= vars.platform_name %> on Azure.
 
+
 ## <a id="networking"></a> Networking
 
 The following sections provide guidance about networking resources.
@@ -47,7 +49,7 @@ The following sections provide guidance about networking resources.
 The following are general requirements and recommendations related to networking when running <%= vars.platform_name %>
 on Azure:
 
-* You must enable Virtual Network peering between hub and spoke resource groups. For more information, see
+* You must enable virtual network peering between hub and spoke resource groups. For more information, see
 [Virtual network peering](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview) in
 the Microsoft Azure documentation.
 
@@ -56,8 +58,8 @@ the Microsoft Azure documentation.
   * Each workspace where workloads run. These are the spokes.
 
 * Use ExpressRoutes for a dedicated connection from an on-premises datacenter to VDC. For more information, see the
-[ExpressRoute documentation](https://docs.microsoft.com/en-us/azure/expressroute/). As a back up for when ExpressRoutes
-goes down, you can use Azure VPN Gateways, which pass encrypted data into VDC through the internet.
+[ExpressRoute documentation](https://docs.microsoft.com/en-us/azure/expressroute/). As a backup for when ExpressRoutes
+goes down, you can use Azure VPN Gateways, which pass encrypted data into VDC through the Internet.
 
 * Use a central firewall in the hub resource group and a network appliance to prevent data infiltration and
 exfiltration.
@@ -69,7 +71,7 @@ exfiltration.
 For your domains, use a sub-zone of an Azure DNS zone.
 
 Azure DNS supports DNS delegation, which allows sub-level domains to be hosted within Azure. For example, a company
-domain of `example.com` has a <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
+domain of `example.com` has an <%= vars.platform_name %> zone in Azure DNS of `pcf.example.com`.
 
 Azure DNS does not support recursion. To properly configure Azure DNS:
 
@@ -83,7 +85,7 @@ You do not need to make any configuration changes in <%= vars.platform_name %> t
 
 ### <a id="lb-types"></a> Load Balancing
 
-Use Standard Azure Load Balancers (ALBs). To allow internet ingress, you must create the ALBs with elastic IP addresses.
+Use Standard Azure Load Balancers (ALBs). To allow Internet ingress, you must create the ALBs with elastic IP addresses.
 
 During installation, you configure ALBs for <%= vars.app_runtime_abbr %> Gorouters. For more information, see
 [Create Load Balancers](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-')  %>/azure/deploy-manual.html#lb)
@@ -102,6 +104,7 @@ IP address assigned. You set these domains in the **Domains** pane of the <%= va
 
 If shared network resources do not exist in an Azure subscription, you can use a single resource group to deploy
 <%= vars.platform_name %> and define network constructs.
+
 
 ## <a id="ha-considerations"></a> High Availability (HA)
 
@@ -128,14 +131,14 @@ For additional guidance depending on your use case, see the table below:
   </tr>
   <tr>
     <td>Existing foundation in AZ-enabled region</td>
-    <td>Migrate to a new <%= vars.platform_name %> foundation, or to a <%= vars.platform_name %> v2.5.3 or later foundation
+    <td>Migrate to a new <%= vars.platform_name %> foundation, or to an <%= vars.platform_name %> v2.5.3 or later foundation
         so that you can use AZs. These existing foundations, especially those using older families of VMs such as
         <code>DS_v2</code>, risk running out of capacity as they scale.
     </td>
   </tr>
   <tr>
     <td>Existing foundation <strong>not</strong> in AZ-enabled region</td>
-    <td>Evaluate your requirements to determine the cost/benefit of migrating to an AZ enabled region.</td>
+    <td>Evaluate your requirements to determine the cost/benefit of migrating to an AZ-enabled region.</td>
   </tr>
 </table>
 
@@ -201,9 +204,10 @@ Cluster-pinning causes:
 
 * Issues scaling up if there is no capacity remaining in the placement group
 
+
 ## <a id="storage-considerations"></a> Storage
 
-For storage, <%= vars.recommended_by %> recommends:
+For storage, <%= vars.company_name %> recommends:
 
 * For the storage account type, use the premium performance tier.
 
@@ -219,9 +223,11 @@ availability for the VMs.
 Azure storage accounts have an IOPs limit of about 20k per account, which generally corresponds to a BOSH job/VM limit
 of 20 VMs each.
 
+
 ## <a id="sql-server"></a> SQL Server
 
 The Internal MySQL database provided by <%= vars.app_runtime_abbr %> is sufficient for production use.
+
 
 ## <a id="blobstore-storage-accts"></a> Blobstore Storage Account
 
@@ -243,10 +249,10 @@ fully-redundant hot, cold, or archival storage in either local, regional, or glo
 
 These buckets require an associated role for read/write access.
 
+
 ## <a id="identity-management"></a> Identity Management
 
-Use unique managed identities to deploy <%= vars.ops_manager %>, BOSH Director, Microsoft Azure Service Broker, and any
-other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege
+Use unique managed identities to deploy <%= vars.ops_manager %>, BOSH Director, Microsoft Azure Service Broker for VMware Tanzu, and any other tiles that require independent credentials. Ensure that each managed identity is scoped to the least privilege
 necessary to operate.
 
 Azure uses managed identities to handle service authorization. For more information, see
