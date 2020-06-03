@@ -3,33 +3,33 @@ title: GCP Reference Architecture
 owner: Customer0
 ---
 
-This topic describes two reference architectures for installing <%= vars.platform_name %> on Google Cloud Platform (GCP): on a shared virtual private cloud (VPC) and on a single-project VPC. This topic also outlines multiple networking variants for VPC deployment. The architectures are validated for production-grade <%= vars.platform_name %> deployments using multiple Availability Zones (AZs).
+This topic describes two reference architectures for installing <%= vars.platform_name %> on Google Cloud Platform (GCP): on a shared virtual private cloud (VPC) and on a single-project VPC. This topic also outlines multiple networking variants for VPC deployment. The architectures are validated for production-grade <%= vars.platform_name %> deployments using multiple availability zones (AZs).
 
 For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on GCP, see [<%= vars.platform_name %> on GCP Requirements](../../customizing/gcp.html)
 
 
 ## <a id="refarchs"></a> <%= vars.platform_name %> Reference Architectures
 
-A <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as GCP.
+An <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as GCP.
 
-A <%= vars.platform_name %> reference architecture must meet these requirements:
+An <%= vars.platform_name %> reference architecture must meet these requirements:
 
 * Be secure
 * Be publicly accessible
-* Include common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Include common <%= vars.platform_name %>-managed services such as VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
 * Be able to host at least 100 app instances
 
-<%= vars.recommended_by %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
+<%= vars.company_name %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
 
 
 ## <a id="shared-vs-single"></a> Shared vs Single-Project VPCs
 
-A shared VPC installation is harder to configure than a <%= vars.platform_name %> deployment on a single-project VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. <%= vars.recommended_by %> recommends the shared VPC model for:
+A shared VPC installation is harder to configure than an <%= vars.platform_name %> deployment on a single-project VPC, because the required account privileges and resource allocations are more granular and complex. But the shared VPC architecture allows network assets to be centrally located, which simplifies auditing and security. <%= vars.company_name %> recommends the shared VPC model for:
 
 * Deployments with deep auditing and security requirements
 * When networks hosting the foundation need to connect back to an internal network through a VPN or interconnect
 
-A single-project VPC lets the platform architect give <%= vars.platform_name %> full access to the VPC and its resources, which makes configuration easier. <%= vars.recommended_by %> recommends single-project VPC architecture for:
+A single-project VPC lets the platform architect give <%= vars.platform_name %> full access to the VPC and its resources, which makes configuration easier. <%= vars.company_name %> recommends single-project VPC architecture for:
 
 * Standalone deployments that do not connect to an internal network
 * Test and experimental deployments, and for projects which do not belong to an organization
@@ -67,20 +67,20 @@ To speed communication between data centers, use Google Cloud Interconnect, as s
 
 GCP allocates resources using a hierarchy that centers around projects. To create a VPC, architects define a _host project_ that allocates network resources for the VPC, such as address space and firewall rules. Then they can define one or more _service projects_ to run within the VPC, which share the network resources allocated by the host project and include their own non-network resources, such as VMs and storage buckets.
 
-To install <%= vars.platform_name %>, <%= vars.app_runtime_abbr %>, and services in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running <%= vars.platform_name %>, <%= vars.app_runtime_abbr %>, and services.
+To install <%= vars.platform_name %>, <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>), and services in a shared VPC on GCP, you create a host project for the VPC and a service project dedicated to running <%= vars.platform_name %>, <%= vars.app_runtime_abbr %>, and services.
 
 #### <a id="host-resources"></a> Host Project Resources
 
 The host project centrally manages these shared VPC network resources:
 
 * Infra subnet (<%= vars.ops_manager_full %> and BOSH Director)
-* <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) subnet
+* <%= vars.app_runtime_abbr %> subnet
 * Services subnet
-* Isolation Segments
+* Isolation segments
 * Firewall rules
 * NAT instances and gateway
 * VPN or Google Cloud Interconnect
-* Routes, such as egress internet through NAT or egress on-premises through a VPN
+* Routes, such as egress Internet through NAT or egress on-premises through a VPN
 
 #### <a id="service-resources"></a> Service Project Resources
 
@@ -166,7 +166,7 @@ The table below lists the network objects expected for each type of reference ar
 | **External IPs** | For a NAT solution, use global IP address for apps and system access, and <%= vars.ops_manager %> or an optional jumpbox. | 2 | 30+ |
 | **NAT** | One NAT per AZ. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment likely only ever requires one GCP Network object. | 1 | 1 |
-| **Subnets** | Separate subnets for infrastructure (<%= vars.ops_manager %>, BOSH Director, Jumpbox), <%= vars.app_runtime_abbr %>, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
+| **Subnets** | Separate subnets for infrastructure (<%= vars.ops_manager %>, BOSH Director, jumpbox), <%= vars.app_runtime_abbr %>, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy <%= vars.app_runtime_abbr %> without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source and destination fields in a rule. The preferred method used in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers** | Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP router load balancer used for TCP routing and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
@@ -191,4 +191,4 @@ TLS is terminated for HTTPS on the HTTP load balancer and is terminated for WebS
 
 ### <a id='icmp'></a> ICMP
 
-GCP routers do not respond to ICMP. <%= vars.recommended_by %> recommends disabling ICMP checks in your BOSH Director network configuration. For more information, see [Step 5: Create Networks Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/gcp/config-manual.html#network) in _Configuring BOSH Director on GCP Manually_.
+GCP routers do not respond to ICMP. <%= vars.company_name %> recommends disabling ICMP checks in your BOSH Director network configuration. For more information, see [Step 5: Create Networks Page](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-') %>/gcp/config-manual.html#network) in _Configuring BOSH Director on GCP Manually_.
