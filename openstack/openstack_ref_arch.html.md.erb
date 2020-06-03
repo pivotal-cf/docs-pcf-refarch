@@ -3,21 +3,21 @@ title: OpenStack Reference Architecture
 owner: Customer0
 ---
 
-This topic describes a reference architecture for <%= vars.platform_name  %> on OpenStack. This architecture is valid for most production-grade <%= vars.platform_name %> deployments in a single project using three availability zones (AZs).
+This topic describes a reference architecture for <%= vars.platform_name %> on OpenStack. This architecture is valid for most production-grade <%= vars.platform_name %> deployments in a single project using three availability zones (AZs).
 
 For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on OpenStack, see [OpenStack on <%= vars.platform_name %> Requirements](../../customizing/openstack.html).
 
 
 ## <a id="refarchs"></a><%= vars.platform_name %> Reference Architectures
 
-A <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as OpenStack, that meets these requirements:
+An <%= vars.platform_name %> reference architecture describes a proven approach for deploying <%= vars.platform_name %> on a specific IaaS, such as OpenStack, that meets these requirements:
 
 * Secure
 * Publicly-accessible
-* Includes common <%= vars.platform_name %>-managed services such as MySQL, RabbitMQ, and Spring Cloud Services
+* Includes common <%= vars.platform_name %>-managed services such as VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
 * Can host at least 100 app instances
 
-<%= vars.recommended_by %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
+<%= vars.company_name %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
 
 
 ## <a id='base'></a> Base OpenStack Reference Architecture
@@ -82,7 +82,7 @@ The table below lists the components that are part of a base reference architect
   </tr>
   <tr>
     <td><strong>Storage Buckets</strong></td>
-    <td>Reference architecture uses customer provided blobstore. Buckets are needed for BOSH and <%= vars.app_runtime_abbr %>.</td>
+    <td>Reference architecture uses customer-provided blobstore. Buckets are needed for BOSH and <%= vars.app_runtime_abbr %>.</td>
   </tr>
   <tr>
     <td><strong>Service Tiles</strong></td>
@@ -90,7 +90,7 @@ The table below lists the components that are part of a base reference architect
   </tr>
   <tr>
   	<td><strong>Service Accounts</strong></td>
-  	<td><%= vars.recommended_by %> recommends two service accounts: one for OpenStack "paving," and the other for <%= vars.ops_manager %> and BOSH.<br><br>
+  	<td><%= vars.company_name %> recommends two service accounts: one for OpenStack "paving," and the other for <%= vars.ops_manager %> and BOSH.<br><br>
       <ul>
         <li><strong>Admin Account:</strong> Concourse uses this account to provision required OpenStack resources as well as a Keystone service account.</li>
   		  <li><strong>Keystone Service Account:</strong> This service account is automatically provisioned with restricted access only to resources needed by <%= vars.ops_manager %> and BOSH.
@@ -99,7 +99,7 @@ The table below lists the components that are part of a base reference architect
   </tr>
   <tr>
   	 <td><strong>OpenStack Quota</strong></td>
-  	 <td>The default compute quota on a new OpenStack subscription is typically not enough to host a multi-AZ deployment. <%= vars.recommended_by %> recommends a quota of 100 for instances. Your OpenStack network quotas may also need to be increased.</td>
+  	 <td>The default compute quota on a new OpenStack subscription is typically not enough to host a multi-AZ deployment. <%= vars.company_name %> recommends a quota of 100 for instances. Your OpenStack network quotas may also need to be increased.</td>
   </tr>
 </table>
 
@@ -127,7 +127,7 @@ The table below lists the network objects in this reference architecture.
       <ul>
         <li>1 x (/24) <strong>Infrastructure</strong> (<%= vars.ops_manager %>, BOSH Director, Jumpbox).</li>
         <li>1 x (/20) <strong><%= vars.app_runtime_abbr %></strong> (Gorouters, Diego Cells, Cloud Controllers, etc.).</li>
-        <li>1 x (/20) <strong>Services</strong> (RabbitMQ, MySQL, Spring Cloud Services, etc.)</li>
+        <li>1 x (/20) <strong>Services</strong> (VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu, etc.)</li>
         <li>1 x (/24) <strong>On-demand services</strong> (various)</li>
       </ul>
       An Internet-facing network is also required:
@@ -142,7 +142,7 @@ The table below lists the network objects in this reference architecture.
     <td><strong>Routers</strong></td>
     <td>This reference architecture requires one router attached to all networks:
     	<ul>
-    	   <li><strong>VirtualRouter:</strong> This router table enables the ingress and egress routes to and from the Internet to the project networks and provides sNAT services.</li>
+    	   <li><strong>VirtualRouter:</strong> This router table enables the ingress and egress routes to and from the Internet to the project networks and provides SNAT services.</li>
     	</ul>
     </td>
     <td>1</td>
@@ -186,7 +186,7 @@ The table below lists the network objects in this reference architecture.
   </tr>
   <tr>
     <td><strong>Load Balancers</strong></td>
-    <td><%= vars.platform_name %> on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP, HTTPS, and TCP traffic. <%= vars.recommended_by %> recommends two load balancers: one to forward the traffic to the Gorouters, <code>AppsLB</code>; and the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
+    <td><%= vars.platform_name %> on OpenStack requires a load balancer, which can be configured with multiple listeners to forward HTTP, HTTPS, and TCP traffic. <%= vars.company_name %> recommends two load balancers: one to forward the traffic to the Gorouters, <code>AppsLB</code>; and the other to forward the traffic to the Diego Brain SSH proxy, <code>SSHLB</code>.
     <br><br>
     The table below describes the required listeners for each load balancer:
       <table>
