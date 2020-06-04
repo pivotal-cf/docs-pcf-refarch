@@ -5,7 +5,7 @@ owner: Customer0
 
 <% current_page.data.title = "Upgrading vSphere without " + vars.app_runtime_abbr + " Downtime"  %>
 
-This topic describes how to upgrade the vSphere components that host your <%= vars.app_runtime_abbr %> installation without service disruption.
+This topic describes how to upgrade the vSphere components that host your <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) installation without service disruption.
 
 
 ## <a id="overview"></a> Minimum Requirements
@@ -28,7 +28,7 @@ If you are running a <%= vars.app_runtime_abbr %> deployment as recommended by t
 * Three or more clusters
 * One (or HA pair) NSX Edge appliances
 
-<p class="note"><strong>Note:</strong> <%= vars.recommended_by %> recommends having at least three ESXi hosts in your cluster to maintain high availability (HA) during your upgrade.</p>
+<p class="note"><strong>Note:</strong> <%= vars.company_name %> recommends having at least three ESXi hosts in your cluster to maintain high availability (HA) during your upgrade.</p>
 
 
 ## <a id="upgrade_procedure"></a> Upgrade vSphere
@@ -46,9 +46,9 @@ After a successful vCenter upgrade, you must upgrade your ESXi hosts one at a ti
 To upgrade your ESXi hosts:
 
 1. Verify that your ESXi hosts have sufficient resources and headroom to evacuate the VM workload of a single ESXi host to the two remaining hosts.
-    <p class="note"><strong>Note:</strong> If you have enabled vSphere HA on your ESXi host, each ESXi host should have sufficient headroom capacity, since HA reserves 66% of available memory.</p>
+    <p class="note"><strong>Note:</strong> If you have enabled vSphere HA on your ESXi host, each ESXi host should have sufficient headroom capacity, since vSphere HA reserves 66% of available memory.</p>
 
-1. Use vMotion to move all the VMs on the host you want to upgrade to the other ESXi hosts. vMotion places the VMs on the other hosts based on available capacity. For more information, see [Migration with vMotion](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.vsphere.vcenterhost.doc/GUID-D19EA1CB-5222-49F9-A002-4F8692B92D63.html?hWord=N4IghgNiBcILIEsDmAnMAXBB7AdgAgHcF0ALPANzi01xAF8g) the vSphere documentation.
+1. Use vMotion to move all the VMs on the host you want to upgrade to the other ESXi hosts. vMotion places the VMs on the other hosts based on available capacity. For more information, see [Migration with vMotion](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.vsphere.vcenterhost.doc/GUID-D19EA1CB-5222-49F9-A002-4F8692B92D63.html?hWord=N4IghgNiBcILIEsDmAnMAXBB7AdgAgHcF0ALPANzi01xAF8g) in the vSphere documentation.
 
 1. Upgrade the evacuated ESXi host. For example, you may be upgrading from ESXi v6.0 to ESX v6.5. For more information, see [Upgrading ESXi Hosts](https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.esxi.upgrade.doc/GUID-122035F6-8433-463E-A0F7-B4FC71A05B04.html?hWord=N4IghgNiBcIKoAcDmAnMATAlgOyQAgFEBlADUzwAkB7AZwBcaQBfIA) in the vSphere documentation.
 
