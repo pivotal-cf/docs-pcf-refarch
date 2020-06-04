@@ -3,7 +3,7 @@ title: Using Edge Services Gateway on VMware NSX
 owner: Customer0
 ---
 
-This topic describes how to configure the NSX firewall, load balancing, and NAT/SNAT services for <%= vars.platform_name %> on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in <%= vars.app_runtime_full %>.
+This topic describes how to configure the NSX firewall, load balancing, and NAT/SNAT services for <%= vars.platform_name %> on vSphere installations. These NSX-provided services take the place of an external device or the bundled HAProxy VM in <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>).
 
 This document presents the reader with fundamental configuration options of an Edge Services Gateway (ESG) with <%= vars.platform_name %> and vSphere NSX. Its purpose is not to dictate the settings required on every deployment, but instead to empower the NSX Administrator with the ability to establish a known good "base" configuration and apply specific security configurations as required.
 
@@ -14,9 +14,9 @@ If you are using NSX, the specific configurations described here supersede any g
 
 This topic assumes that the reader has the level of skill required to install and configure these products:
 
-*	VMware vSphere v5.5 or greater
-*	NSX v6.1.x or greater
-*	<%= vars.platform_name %> v1.6 or greater
+*	VMware vSphere v5.5 or later
+*	NSX v6.1.x or later
+*	<%= vars.platform_name %> v1.6 or later
 
 For detailed installation and configuration information about these products, see:
 
@@ -42,7 +42,7 @@ The ESG can scale to accommodate very large deployments as needed.
 This cookbook focuses on a single-site deployment and makes these design assumptions:
 
 *	There are five non-routable networks on the tenant (inside) side of the ESG.
-   * The **infra** network is used to deploy <%= vars.ops_manager_full %> and BOSH Director.
+   * The **infra** network is used to deploy <%= vars.ops_manager %> and BOSH Director.
    * The **deployment** network is used exclusively by <%= vars.app_runtime_abbr %> to deploy Diego Cells that host apps and related elements.
    * The **tiles** network is used for all other deployed tiles in a <%= vars.platform_name %> installation.
    * The **services** network is used by BOSH Director for service tiles.
@@ -52,7 +52,7 @@ This cookbook focuses on a single-site deployment and makes these design assumpt
 
 * The service provider (outside) interface is connected appropriately to the network backbone of the environment, as either routed or non-routed depending on the design. This cookbook does not cover provisioning of the uplink interface.
 
-*	Routable IP addresses should be applied to the service provider (outside) interface of the ESG. <%= vars.recommended_by %> recommends that you apply 10 consecutive routable IP addresses to each ESG:
+*	Routable IP addresses should be applied to the service provider (outside) interface of the ESG. <%= vars.company_name %> recommends that you apply 10 consecutive routable IP addresses to each ESG:
   *	One reserved for NSX use (Controller to Edge I/F)
   *	One for NSX Load Balancer to Gorouters
   * One for NSX Load Balancer to Diego Brains for SSH to apps
@@ -60,7 +60,7 @@ This cookbook focuses on a single-site deployment and makes these design assumpt
   *	One routable IP address, used with SNAT egress
   *	Five for future use
 
-<%= vars.recommended_by %> recommends that operators deploy the ESGs as high availability (HA) pairs in vSphere. <%= vars.recommended_by %> also recommends that they be sized "large" or greater for any pre-production or production use. The deployed size of the ESG impacts its overall performance, including how many SSL tunnels it can terminate.
+<%= vars.company_name %> recommends that operators deploy the ESGs as high availability (HA) pairs in vSphere. <%= vars.company_name %> also recommends that they be sized "large" or greater for any pre-production or production use. The deployed size of the ESG impacts its overall performance, including how many SSL tunnels it can terminate.
 
 The ESGs have an interface in each port group used by the foundation as well as a port group on the service provider (outside), often called the "transit network". Each installation has a set of port groups in a vSphere DVS to support connectivity, so that the ESG arrangement is repeated for every install. It is not necessary to build a DVS for each ESG/foundation. You do not re-use an ESG amongst deployments. NSX Logical Switches (VXLAN vWires) are ideal candidates for use with this architecture.
 
@@ -165,7 +165,7 @@ To do this procedure, you need PEM files of SSL certificates provided by the cer
 
 In this procedure, you combine the ESG's IP address used for load balancing with a series of internal IP addresses provisioned for Gorouters in <%= vars.app_runtime_abbr %>. It is important to know the IP addresses used for the Gorouters beforehand.
 
-You can pre-select or reserved IP addresses prior to deployment. Otherwise, you can discover them after deployment by looking them up in BOSH Director, which lists them in the release information of your <%= vars.app_runtime_abbr %> installation. <%= vars.recommended_by %> recommends using IP addresses that you pre-select or reserve prior to deployment.
+You can pre-select or reserved IP addresses prior to deployment. Otherwise, you can discover them after deployment by looking them up in BOSH Director, which lists them in the release information of your <%= vars.app_runtime_abbr %> installation. <%= vars.company_name %> recommends using IP addresses that you pre-select or reserve prior to deployment.
 
 You do all of the procedures in these sections through the ESG UI.
 
@@ -270,7 +270,7 @@ To create the Application Rules:
 
 ### <a id="create_monitors"></a> Step 2.5: Create Monitors For Pools
 
-NSX ships with several load balancing monitoring types pre-defined. These types are for HTTP, HTTPS and TCP. For this installation, operators build new monitors matching the needs of each pool to ensure correct 1:1 monitoring for each pool type.
+NSX ships with several load balancing monitoring types pre-defined. These types are for HTTP, HTTPS, and TCP. For this installation, operators build new monitors matching the needs of each pool to ensure correct 1:1 monitoring for each pool type.
 
 To create monitors for pools:
 
