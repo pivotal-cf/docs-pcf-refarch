@@ -50,9 +50,9 @@ The diagram below illustrates reference architecture for <%= vars.app_runtime_ab
 
 [View a larger version of this diagram](../images/v2/export/PAS_vSphere_NSX-T.png).
 
-<%= vars.app_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three Availability Zones (AZs).
+<%= vars.app_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three availability zones (AZs).
 
-An NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the gateway Edge.
+An NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the edge gateway.
 
 Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> and infrastructure subnets, connect to the Tier-0 router.
 
@@ -91,8 +91,8 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
   * The domains for the <%= vars.app_runtime_abbr %> system and apps must resolve to the load balancer VIP.
   * You must assign either a private or a public IP address assigned to the domains for the <%= vars.app_runtime_abbr %> system and apps.
 
-* <%= vars.recommended_by %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
-  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.recommended_by %> does not recommend this approach, since it adds additional overhead processing.</p>
+* <%= vars.company_name %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
+  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> does not recommend this approach, since it adds additional overhead processing.</p>
 
 * Any TCP Gorouters and SSH Proxies within the platform also require NSX-T load balancers.
 
@@ -108,7 +108,7 @@ The requirements and recommendations related to networks, subnets, and IP spacin
 
 * The reference architecture for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments uses a pattern in which all networks are calculated on the `/24` 8-bit network boundary. The network octet is numerically sequential.
 
-* NSX-T dynamically assigns <%= vars.app_runtime_abbr %> org networks and adds a Tier-1 router. These org networks are automatically instantiated based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in <%= vars.ops_manager_full %>. The default is `/24`. This means that every org in <%= vars.app_runtime_abbr %> is assigned a new `/24` network.
+* NSX-T dynamically assigns <%= vars.app_runtime_abbr %> org networks and adds a Tier-1 router. These org networks are automatically instantiated based on a non-overlapping block of address space. You can configure the block of address space in the **NCP Configuration** section of the NSX-T tile in <%= vars.ops_manager %>. The default is `/24`. This means that every org in <%= vars.app_runtime_abbr %> is assigned a new `/24` network.
 
 For more information about <%= vars.app_runtime_abbr %> subnets, see [Required Subnets](../index.html#pas-network) in _Platform Architecture and Planning Overview_.
 
@@ -136,7 +136,7 @@ With this arrangement, all VMs in the same installation and cluster share a dedi
 
 ### <a id="pas-nsx-t-storage-capacity"></a> Storage Capacity
 
-<%= vars.recommended_by %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
+<%= vars.company_name %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
 
 * **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks.
 
@@ -162,7 +162,7 @@ For information about security requirements and recommendations for <%= vars.app
 
 ### <a id="pas-nsx-t-blobstore"></a> Blobstore Storage
 
-<%= vars.recommended_by %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
+<%= vars.company_name %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
 
 * **Production environments**: Use an S3 storage appliance as the blobstore.
 * **Non-production environments**: Use an NFS/WebDAV blobstore.
@@ -176,7 +176,7 @@ For more information about blobstore storage requirements and recommendations, s
 
 These sections describe the reference architecture for <%= vars.app_runtime_abbr %> on vSphere with NSX-V deployments. They also provide requirements and recommendations for deploying <%= vars.app_runtime_abbr %> on vSphere with NSX-V, such as network, load balancing, and storage capacity requirements and recommendations.
 
-<%= vars.app_runtime_abbr %> on vSphere with NSX-V enables services provided by NSX on the <%= vars.app_runtime_abbr %> platform, such as an Edge services gateway (ESG), load balancers, firewall services, and NAT/SNAT services.
+<%= vars.app_runtime_abbr %> on vSphere with NSX-V enables services provided by NSX on the <%= vars.app_runtime_abbr %> platform, such as an Edge Services Gateway (ESG), load balancers, firewall services, and NAT/SNAT services.
 
 ### <a id="pas-nsx-v-diagram"></a> Architecture
 
@@ -188,7 +188,7 @@ The diagram below illustrates the reference architecture for <%= vars.app_runtim
 
 <%= vars.app_runtime_abbr %> deployments with NSX-V are deployed with three clusters and three AZs.
 
-<%= vars.app_runtime_abbr %> deployments with NSX-V also include an NSX-V Edge router on the front end. You can install the NSX-V Edge router as an Edge services gateway (ESG) or as a distributed logical router (DLR).
+<%= vars.app_runtime_abbr %> deployments with NSX-V also include an NSX-V Edge router on the front end. You can install the NSX-V Edge router as an ESG or as a distributed logical router (DLR).
 
 The Edge router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure VLAN routing from the routed backbone into NSX-V through the Edge router.
 
@@ -216,14 +216,14 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
 
 * NSX-V includes an Edge router. The Edge router supports ESG. ESG provides load balancing and is configured to route to the <%= vars.app_runtime_abbr %> platform.
 
-* <%= vars.recommended_by %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
-  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.recommended_by %> does not recommend this approach, since it adds additional overhead processing.</p>
+* <%= vars.company_name %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
+  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> does not recommend this approach, since it adds additional overhead processing.</p>
 
 * The domains for the <%= vars.app_runtime_abbr %> system and apps must resolve to the load balancer. You must assign either a private or a public IP address assigned to the domains for the <%= vars.app_runtime_abbr %> system and apps.
 
 * Any TCP routers and SSH Proxies also require NSX-V load balancers.
 
-* <%= vars.recommended_by %> recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
+* <%= vars.company_name %> recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
 
 #### <a id="pas-nsx-v-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
@@ -241,7 +241,7 @@ For information about horizontal and vertical shared storage, see [Shared Storag
 
 ### <a id="pas-nsx-v-storage-capacity"></a> Storage Capacity
 
-<%= vars.recommended_by %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
+<%= vars.company_name %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
 
 * **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks.
 
@@ -268,7 +268,7 @@ For information about security requirements and recommendations for <%= vars.app
 
 ### <a id="pas-nsx-v-blobstore"></a> Blobstore Storage
 
-<%= vars.recommended_by %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
+<%= vars.company_name %> recommends that you use these blobstore storages for production and non-production <%= vars.app_runtime_abbr %> environments:
 
 * **Production environments**: Use an S3 storage appliance as the blobstore.
 * **Non-production environments**: Use an NFS/WebDAV blobstore.
@@ -279,11 +279,10 @@ For more information about blobstore storage requirements and recommendations, s
 
 ## <a id="pas-no-nsx"></a> <%= vars.app_runtime_abbr %> on vSphere without NSX
 
-
 These sections describe the architecture for <%= vars.app_runtime_abbr %> on vSphere without software-defined networking deployments.
 
 <p class="note"><strong>Note:</strong> This architecture was validated for earlier versions of <%= vars.app_runtime_abbr %>.
-However, it has not been validated for <%= vars.app_runtime_abbr %> v<%= vars.current_major_version %>.
+However, it has not been validated for <%= vars.app_runtime_abbr %> <%= vars.v_major_version %>.
 </p>
 
 ### <a id="pas-routed-networking"></a> Networking
@@ -292,19 +291,19 @@ Without an SDN, IP allocations all come from routed network space. Discussions a
 
 Below is a best-guess layout for IP space utilization in a single <%= vars.app_runtime_abbr %> deployment:
 
-* Infrastructure - /28
+* Infrastructure - `/28`
 
-* <%= vars.app_runtime_abbr %> deployment - /23<br>This size is almost completely dependent on the estimated desired capacity for containers. It can be smaller, but <%= vars.recommended_by %> does not recommend using a larger size in a single deployment.
+* <%= vars.app_runtime_abbr %> deployment - `/23`<br>This size is almost completely dependent on the estimated desired capacity for containers. It can be smaller, but <%= vars.company_name %> does not recommend using a larger size in a single deployment.
 
-* Services - /23<br>This size is almost completely dependent on the estimated desired capacity for services. Resize as necessary.
+* Services - `/23`<br>This size is almost completely dependent on the estimated desired capacity for services. Resize as necessary.
 
 ### <a id="pas-routed-iso-seg"></a> Isolation Segments
 
 Isolation segments can help with satisfying IP address space needs in a routed network design. You can build smaller groups of Gorouters and Diego Cells aligned to a particular service. Smaller groups use less IP address space.
 
-## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere with NSX-T
+## <a id="pks-nsx-t"></a> <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T
 
-These sections describe the reference architecture for <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
+These sections describe the reference architecture for <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
 
 ### <a id="pks-nsx-t-diagram"></a> Architecture
 
@@ -379,7 +378,7 @@ The load balancing requirements and recommendations for <%= vars.k8s_runtime_abb
 
 The routable IP requirements and recommendations for <%= vars.k8s_runtime_abbr %> with NSX-T deployments are:
 
-* **Deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingres:s** <%= vars.recommended_by %> recommends a `/25` network for deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
+* **Deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingres:s** <%= vars.company_name %> recommends a `/25` network for deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
 	</br>
 	</br>
 	Select a network range for the Tier-0 router with enough space so that the network can be separated into these two jobs:
@@ -387,7 +386,7 @@ The routable IP requirements and recommendations for <%= vars.k8s_runtime_abbr %
     * DNATs and SNATs, load balancer WIPs, and other <%= vars.platform_name %> components
 	<p class="note"><strong>Note:</strong> Compared to vSphere deployments with NSX-V, <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T consumes much more address space for SNATs.</p>
 
-* **Deployments with several load balancers:** <%= vars.recommended_by %> recommends a `/23` network for deployments that use several load balancers. Deployments with several load balancers have much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space.
+* **Deployments with several load balancers:** <%= vars.company_name %> recommends a `/23` network for deployments that use several load balancers. Deployments with several load balancers have much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space.
 
 #### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
 
@@ -414,7 +413,7 @@ For more information, see [Networks](../index.html#pks-network) in _Platform Arc
 
 For <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments, networks are created dynamically for both <%= vars.k8s_runtime_abbr %> clusters and pods.
 
-To accommodate these dynamically-created networks, <%= vars.recommended_by %> recommends that you use multiple clusters, rather than a single cluster with multiple namespaces.
+To accommodate these dynamically-created networks, <%= vars.company_name %> recommends that you use multiple clusters, rather than a single cluster with multiple namespaces.
 
 Multiple clusters provide additional features such as security, customization on a per-cluster basis, privileged containers, failure domains, and version choice. Namespaces should be used as a naming construct and not as a tenancy construct.
 
@@ -424,7 +423,7 @@ The <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T architecture supports mul
 
 You can define the number of master nodes per plan in the <%= vars.k8s_runtime_abbr %> tile in <%= vars.ops_manager %>. The number of master nodes should be an odd number to allow `etcd` to form a quorum.
 
-<%= vars.recommended_by %> recommends that you have at least one master node per AZ for HA and disaster recovery.
+<%= vars.company_name %> recommends that you have at least one master node per AZ for HA and disaster recovery.
 
 ### <a id="pks-nsx-t-ha"></a> High Availability
 
@@ -432,7 +431,7 @@ For information about HA requirements and recommendations, see [High Availabilit
 
 ### <a id="pks-nsx-t-storage-capacity"></a> Storage Capacity
 
-<%= vars.recommended_by %> recommends the following storage capacity allocation for production and non-production <%= vars.k8s_runtime_abbr %> environments:
+<%= vars.company_name %> recommends the following storage capacity allocation for production and non-production <%= vars.k8s_runtime_abbr %> environments:
 
 <%= vars.k8s_runtime_abbr %> on vSphere supports static persistent volume provisioning and dynamic persistent volume provisioning.
 
@@ -442,13 +441,13 @@ For more information about storage requirements and recommendations, see [Persis
 
 For information about security requirements and recommendations, see [Security](../index.html#pks-security) in _Platform Architecture and Planning Overview_.
 
-## <a id="pks-without-nsx-t"></a> <%= vars.k8s_runtime_full %> on vSphere without NSX-T
+## <a id="pks-without-nsx-t"></a> <%= vars.k8s_runtime_abbr %> on vSphere without NSX-T
 
 You can deploy <%= vars.k8s_runtime_abbr %> without NSX-T.
 If you want to deploy <%= vars.k8s_runtime_abbr %> without NSX-T, select
 **Flannel** as your container network interface in the **Networking** pane of
 the <%= vars.k8s_runtime_abbr %> tile.
 
-Select from networks already identified in Ops Manager to deploy the
+Select from networks already identified in <%= vars.ops_manager %> to deploy the
 <%= vars.k8s_runtime_abbr %> API and <%= vars.k8s_runtime_abbr %>-provisioned
 Kubernetes clusters.
