@@ -85,7 +85,7 @@ Concourse worker VMs must be allowed to connect to:
 
 Network data transfers between the control plane and each <%= vars.platform_name %> foundation network zone may carry large files such as <%= vars.platform_name %> tiles, release files, and <%= vars.platform_name %> foundation backup pipelines output.
 
-<%= vars.recommended_by %> recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
+<%= vars.company_name %> recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
 
 **Firewall Requirements**
 
@@ -127,7 +127,7 @@ For more information, see [Concourse Architecture](https://docs.pivotal.io/p-con
 
 Remote workers have to download large installation files from either the Internet or from a configured S3 artifacts repository. For <%= vars.platform_name %> backup pipelines, workers may also have to upload large backup files to the S3 repository.
 
-<%= vars.recommended_by %> recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
+<%= vars.company_name %> recommends that you test network throughput and latency between those network zones to make sure that data transfer rates do not make pipeline execution times unacceptably long.
 
 **Firewall Requirements**
 
@@ -211,9 +211,9 @@ These sections describe some best practices for control plane components that ap
 
 ### <a id="dedicated-director"></a> Dedicated BOSH Director
 
-<%= vars.recommended_by %> recommends deploying Concourse and other control plane tools on their own dedicated BOSH layer, with their own BOSH Director that runs separately from the <%= vars.platform_name %> foundations that the control plane manages.
+<%= vars.company_name %> recommends deploying Concourse and other control plane tools on their own dedicated BOSH layer, with their own BOSH Director that runs separately from the <%= vars.platform_name %> foundations that the control plane manages.
 
-<%= vars.recommended_by %> does _not_ recommend using an existing <%= vars.platform_name %> BOSH Director instance to deploy Concourse and other software such as Minio S3, a private Docker registry, or CredHub. Sharing the same BOSH Director with <%= vars.platform_name %> deployments increases the risk of accidental or undesired updates or deletion of those deployments.
+<%= vars.company_name %> does _not_ recommend using an existing <%= vars.platform_name %> BOSH Director instance to deploy Concourse and other software such as Minio S3, a private Docker registry, or CredHub. Sharing the same BOSH Director with <%= vars.platform_name %> deployments increases the risk of accidental or undesired updates or deletion of those deployments.
 
 Dedicating a BOSH Director to Concourse other control plane tools also provides higher flexibility for <%= vars.platform_name %> foundation upgrades and updates, such as stemcell patches.
 
@@ -258,11 +258,11 @@ BOSH and Concourse implement the concepts of infrastructure-as-code and pipeline
 
 <%= vars.platform_name %> CI/CD pipelines assume that their source code is kept in Git-compatible repositories. GitHub is the most popular Git-compatible repository for Internet-connected environments. GitLab, BitBucket, and [GOGS](https://github.com/cloudfoundry-community/gogs-boshrelease) are examples of Git servers that can be used for both connected and air-gapped environments.
 
-A Git server that contains configuration and pipeline code for a <%= vars.platform_name %> foundation must be accessible to the corresponding worker VMs that run CI/CD pipelines for that foundation.
+A Git server that contains configuration and pipeline code for an <%= vars.platform_name %> foundation must be accessible to the corresponding worker VMs that run CI/CD pipelines for that foundation.
 
 #### <a id="s3"></a> S3 Repository
 
-In all environments, Concourse requires an S3 repository to store <%= vars.platform_name %> backups and possibly other files. If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as Minio S3 and EMC Cloud Storage, to your control plane. For more information, see the [MinIO BOSH Release](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) repositories on GitHub
+In all environments, Concourse requires an S3 repository to store <%= vars.platform_name %> backups and possibly other files. If your deployment requires a private, internal S3 repository but your IaaS lacks built-in options, you can use BOSH to deploy your own S3 releases, such as Minio S3 and EMC Cloud Storage, to your control plane. For more information, see the [MinIO BOSH Release](https://github.com/minio/minio-boshrelease) and [EMC Cloud Storage](https://github.com/EMC-Dojo/ecs-release) repositories on GitHub.
 
 For air-gapped environments, an S3 repository is also the preferred method to store release files for <%= vars.platform_name %> tiles, stemcells, and buildpacks. Docker images can also be stored in an S3 repository as an alternative to a private Docker registry. For more information, see [Offline Pipelines for Airgapped Environments](https://github.com/pivotal-cf/pcf-pipelines/blob/master/docs/offline-pipelines.md) in the PCF Pipelines repository on GitHub.
 
@@ -272,18 +272,18 @@ For air-gapped environments, Docker images for Concourse pipelines must be store
 
 ### <a id="ha"></a> High Availability
 
-For information about setting up a load balancer to handle traffic across multiple instances of the ATC/web VM and deploying multiple worker instances, see [Concourse Architecture](https://docs.pivotal.io/p-concourse/v5/architecture/) in the <%= vars.platform_name %> Concourse documentation.
+For information about setting up a load balancer to handle traffic across multiple instances of the ATC/web VM and deploying multiple worker instances, see [Concourse Architecture](https://docs.pivotal.io/p-concourse/v5/architecture/) in the Concourse documentation.
 
 
 ## <a id="pipelines"></a> <%= vars.platform_name %> CI/CD Pipelines
 
-### <a id='platform-pipelines'></a> PCF Pipelines
+### <a id='platform-pipelines'></a> Platform Automation Tools
 
-Platform Automation with Concourse (PCF Pipelines) is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download <%= vars.platform_name %> Platform Automation with Concourse, go to the [Platform Automation](https://network.pivotal.io/products/platform-automation) page on VMware Tanzu Network.
+Platform Automation Tools is a collection of Concourse pipelines for installing and upgrading <%= vars.platform_name %>. For more information, see the [Platform Automation](https://docs.pivotal.io/platform-automation/v4.3/) documentation. To download Platform Automation Tools, go to the [Platform Automation Toolkit](https://network.pivotal.io/products/platform-automation) page on VMware Tanzu Network.
 
-<p class="note warning"><strong>Warning:</strong> At time of publication, the PCF Pipelines repository is no longer supported.</p>
+<p class="note warning"><strong>Warning:</strong> The PCF Pipelines repository is no longer supported.</p>
 
-To run Pipelines, you need:
+To run Platform Automation Tools, you need:
 
 * <%= vars.ops_manager %> web UI, API, and VM installed
 * vCenter API installed (for vSphere environments)
@@ -298,7 +298,7 @@ BBR Pipelines automate foundation backups. For more information, see the [BBR PC
 
 To run BBR Pipelines, you need an S3 repository for storing backup artifacts.
 
-<p class="note"><strong>Note:</strong> BBR Pipelines is a community project not officially supported by VMware.</p>
+<p class="note"><strong>Note:</strong> BBR Pipelines is a community project not officially supported by <%= vars.company_name %>.</p>
 
 ### <a id='orchestration-frameworks'></a> Pipelines Orchestration Frameworks
 
@@ -315,7 +315,7 @@ For more information, see the [PCF Pipelines Maestro](https://github.com/pivotal
 
 ## <a id="team"></a> Concourse Team Management Best Practices
 
-When a single Concourse server hosts CI/CD pipelines for more than one <%= vars.platform_name %> foundation, <%= vars.recommended_by %> recommends creating one Concourse team (not `main`) specific to each foundation and associating that team with all pipelines for that foundation, as shown in the diagram below:
+When a single Concourse server hosts CI/CD pipelines for more than one <%= vars.platform_name %> foundation, <%= vars.company_name %> recommends creating one Concourse team (not `main`) specific to each foundation and associating that team with all pipelines for that foundation, as shown in the diagram below:
 
 <%= image_tag('concourse-pipelines.png') %>
 
@@ -331,6 +331,6 @@ Dedicating a Concourse team to each <%= vars.platform_name %> foundation has the
 
 ### <a id="app-dev"></a> Concourse Teams for App Development Orgs and Spaces
 
-When a Concourse server hosts pipelines for an app development team, <%= vars.company_name %> recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) user authentication and authorization (UAA) server.
+When a Concourse server hosts pipelines for an app development team, <%= vars.company_name %> recommends creating a Concourse team associated with that development team, and associating Concourse team membership with org and space membership defined in the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) User Authentication and Authorization (UAA) server.
 
 Associating Concourse teams with <%= vars.app_runtime_abbr %> org and space member lists synchronizes access between <%= vars.app_runtime_abbr %> and Concourse, allowing developers to see and operate the build pipelines for the apps they develop.
