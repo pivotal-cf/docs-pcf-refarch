@@ -9,7 +9,7 @@ This topic describes global DNS load balancers (GLBs) for multi-foundation envir
 
 ## <a id="multi-foundation"></a> About Multi-Foundation Environments
 
-Multi-foundation environments are multiple instances of <%= vars.ops_manager_full %> and <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
+Multi-foundation environments are multiple instances of <%= vars.ops_manager %> and <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
 
 Multi-foundation environments are commonly deployed in an active-active or active-passive pattern. An _active-active pattern_ is when instances of apps run on two foundations and they are both in use. An _active-passive pattern_ is when instances of apps run on two foundations, but the instances may only be active on one foundation, and the other foundation becomes active only in the event of a failover.
 
@@ -20,7 +20,7 @@ The typical setup for foundation failover requires the GLB be authoritative for 
 
 To configure your GLB:
 
-1. Find and record your wildcard app domain. For <%= vars.app_runtime_abbr %>, your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile. For more information, see [Configure Domains](../customizing/configure-pas.html#domains) in _Configuring <%= vars.app_runtime_abbr %>_ topic.
+1. Find and record your wildcard app domain. For <%= vars.app_runtime_abbr %>, your wildcard app domain is typically the **Apps domain** you configure in the **Domains** pane of the <%= vars.app_runtime_abbr %> tile. For more information, see [Configure Domains](../customizing/configure-pas.html#domains) in _Configuring <%= vars.app_runtime_abbr %>_.
 
 1. Add the domain you recorded to both <%= vars.app_runtime_abbr %> foundations using a shared domain. You can create a shared domain using the Cloud Foundry Command Line Interface (cf CLI). For more information about the cf CLI command to create shared domains, see [create-shared-domain](https://cli.cloudfoundry.org/en-US/cf/create-shared-domain.html) in the Cloud Foundry CLI reference guide.
 
