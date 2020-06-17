@@ -55,7 +55,7 @@ The table below describes the internal component placements shown in the diagram
 
 | Component | Placement and Access Notes |
 | ------------- | ------------------------------ |
-| <%= vars.ops_manager %> | Deployed on one of the three public subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| <%= vars.ops_manager %> VM | Deployed on one of the three public subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
 | BOSH Director | Deployed on the infrastructure subnet. |
 | Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.app_runtime_abbr %> management components such as <%= vars.ops_manager %> and the Cloud Foundry Command Line Interface (cf CLI). |
 | Gorouters (HTTP routers in <%= vars.platform_name %>) | Deployed on all three <%= vars.app_runtime_abbr %> subnets, one per AZ. Accessed through the HTTP, HTTPS, and SSL load balancers. |
@@ -72,7 +72,7 @@ These sections describe <%= vars.app_runtime_abbr %>'s recommendations for defin
 
 <%= vars.app_runtime_abbr %> requires these statically-defined networks to host its main component systems:
 
-* Infrastructure subnet - `/24` segment<br>This subnet contains VMs that require access only for Platform Administrators, such as <%= vars.ops_manager %>, the BOSH Director, and an optional jumpbox.
+* Infrastructure subnet - `/24` segment<br>This subnet contains VMs that require access only for Platform Administrators, such as the <%= vars.ops_manager %> VM, the BOSH Director VM, and an optional jumpbox.
 
 * <%= vars.app_runtime_abbr %> subnet - `/24` segment<br>This subnet contains <%= vars.app_runtime_abbr %> runtime VMs, such as Gorouters, Diego Cells, and Cloud Controllers.
 
@@ -162,7 +162,7 @@ The table below describes the internal component placements shown in the diagram
 
 | Component | Placement and Access Notes |
 | --------- | -------------------------- |
-| <%= vars.ops_manager %> | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| <%= vars.ops_manager %> VM | Deployed on one of the subnets. Accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
 | BOSH Director | Deployed on the infrastructure subnet. |
 | Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.k8s_runtime_abbr %> management components such as <%= vars.ops_manager %> and the `kubectl` command line interface. |
 | <%= vars.k8s_runtime_abbr %> API | Deployed as a service broker VM on the <%= vars.k8s_runtime_abbr %> services subnet. Handles <%= vars.k8s_runtime_abbr %> API and service adapter requests, and manages <%= vars.k8s_runtime_abbr %> clusters. For more information, see [<%= vars.k8s_runtime_abbr %> Architecture](https://docs.pivotal.io/tkgi/control-plane.html). |
@@ -177,7 +177,7 @@ These sections describe <%= vars.company_name %>'s recommendations for defining 
 
 <%= vars.k8s_runtime_abbr %> requires two defined networks to host the main elements that compose it:
 
-* Infrastructure subnet - `/24`<br>This subnet contains VMs that require access only for Platform Administrators, such as <%= vars.ops_manager %>, BOSH Director, and an optional jumpbox.
+* Infrastructure subnet - `/24`<br>This subnet contains VMs that require access only for Platform Administrators, such as the <%= vars.ops_manager %> VM, the BOSH Director VM, and an optional jumpbox.
 
 * <%= vars.k8s_runtime_abbr %> services subnet - `/24`<br>This subnet hosts <%= vars.k8s_runtime_abbr %> API VM and other optional service tiles such as VMware Harbor Registry.
 

@@ -73,7 +73,7 @@ To install <%= vars.platform_name %>, <%= vars.app_runtime_full %> (<%= vars.app
 
 The host project centrally manages these shared VPC network resources:
 
-* Infra subnet (<%= vars.ops_manager_full %> and BOSH Director)
+* Infra subnet (<%= vars.ops_manager %> VM and BOSH Director)
 * <%= vars.app_runtime_abbr %> subnet
 * Services subnet
 * Isolation segments
@@ -87,9 +87,9 @@ The host project centrally manages these shared VPC network resources:
 The service project manages these resources:
 
 * Google Cloud Compute instances (VMs)
-    * BOSH
-    * <%= vars.ops_manager %>
-    * VMs deployed by BOSH, such as <%= vars.platform_name %> and service components
+    * BOSH Director
+    * <%= vars.ops_manager %> VM
+    * VMs deployed by BOSH, such as runtime and service components
 
 * Google Cloud Storage buckets for blobstore
     * BOSH Director
@@ -122,7 +122,7 @@ The table below lists the components that are part of a reference architecture d
 | **Component** | **Reference Architecture Notes** |
 | ------------- | -------------------------------- |
 | **Domains and DNS** | Domain zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for <%= vars.ops_manager %> (required), a route for Doppler (required), a route for Loggregator (required), a route for SSH access to app containers (optional), and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
-| **<%= vars.ops_manager %>** | Deployed on the infrastructure subnet and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| **<%= vars.ops_manager %>** VM | Deployed on the infrastructure subnet and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
 | **BOSH Director** | Deployed on the infrastructure subnet. |
 | **Gorouters** | Accessed through the HTTP and TCP WebSockets load balancers. Deployed on the <%= vars.app_runtime_abbr %> subnet, one job per AZ. |
 | **Diego Brains** | Required. However, the SSH container access functionality is optional and enabled through the SSH Proxy load balancer. Deployed on the <%= vars.app_runtime_abbr %> subnet, one job per AZ. |
@@ -166,11 +166,11 @@ The table below lists the network objects expected for each type of reference ar
 | **External IPs** | For a NAT solution, use global IP address for apps and system access, and <%= vars.ops_manager %> or an optional jumpbox. | 2 | 30+ |
 | **NAT** | One NAT per AZ. | 3 | 0 |
 | **Network** | One per deployment. GCP Network objects allow multiple subnets with multiple CIDRs, so a typical deployment likely only ever requires one GCP Network object. | 1 | 1 |
-| **Subnets** | Separate subnets for infrastructure (<%= vars.ops_manager %>, BOSH Director, jumpbox), <%= vars.app_runtime_abbr %>, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
+| **Subnets** | Separate subnets for infrastructure (<%= vars.ops_manager %> VM, BOSH Director, jumpbox), <%= vars.app_runtime_abbr %>, and services. Using separate subnets allows you to configure different firewall rules due to your needs. | 3 | 3 |
 | **Routes** | Routes are typically created by GCP dynamically when subnets are created, but you may need to create additional routes to force outbound communication to dedicated SNAT nodes. These objects are required to deploy <%= vars.app_runtime_abbr %> without public IP addresses. | 3+ | 3|
 | **Firewall Rules** | GCP firewall rules are bound to a Network object and can be created to use IP ranges, subnets, or instance tags to match for source and destination fields in a rule. The preferred method used in the reference architecture deployment is instance tags. | 6+ | 6+ |
 | **Load balancers** | Used to handle requests to Gorouters and infrastructure components. GCP uses two or more load balancers. The HTTP load balancer and TCP WebSockets load balancer are both required. The TCP router load balancer used for TCP routing and the SSH load balancer that allows SSH access to Diego apps are both optional. The HTTP load balancer provides SSL termination. | 2+ | 2+ |
-| **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to VMware Tanzu Network to download tiles. Using a jumpbox is particularly useful in IaaSes where <%= vars.ops_manager %> does not have a public IP address. In these cases, you can SSH into <%= vars.ops_manager %> or any other component through the jumpbox. | (1) | (1)|
+| **Jumpbox** | Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to VMware Tanzu Network to download tiles. Using a jumpbox is particularly useful in IaaSes where <%= vars.ops_manager %> does not have a public IP address. In these cases, you can SSH into the <%= vars.ops_manager %> VM or any other component through the jumpbox. | (1) | (1)|
 
 
 ## <a id="network_comm"></a> Network Communication in GCP Deployments
