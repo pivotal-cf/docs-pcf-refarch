@@ -3,7 +3,9 @@ title: OpenStack Reference Architecture
 owner: Customer0
 ---
 
-This topic describes a reference architecture for <%= vars.platform_name %> on OpenStack. This architecture is valid for most production-grade <%= vars.platform_name %> deployments in a single project using three availability zones (AZs).
+This topic describes a reference architecture for <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) on OpenStack.
+<%= vars.app_runtime_abbr %> runs on <%= vars.platform_name %>,
+and this architecture is valid for most production-grade <%= vars.platform_name %> deployments in a single project using three availability zones (AZs).
 
 For general requirements for running <%= vars.platform_name %> and specific requirements for running <%= vars.platform_name %> on OpenStack, see [OpenStack on <%= vars.platform_name %> Requirements](../../customizing/openstack.html).
 
@@ -14,7 +16,8 @@ An <%= vars.platform_name %> reference architecture describes a proven approach 
 
 * Secure
 * Publicly-accessible
-* Includes common <%= vars.platform_name %>-managed services such as VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
+* Includes common <%= vars.platform_name %>-managed runtimes and services,
+such as  for <%= vars.app_runtime_abbr %>, VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
 * Can host at least 100 app instances
 
 <%= vars.company_name %> provides reference architectures to help you determine the best configuration for your <%= vars.platform_name %> deployment.
@@ -22,7 +25,7 @@ An <%= vars.platform_name %> reference architecture describes a proven approach 
 
 ## <a id='base'></a> Base OpenStack Reference Architecture
 
-The diagram below illustrates a reference architecture of a deployment of <%= vars.platform_name %> on OpenStack using three AZs.
+The diagram below illustrates a reference architecture of a deployment of <%= vars.app_runtime_abbr %> on OpenStack using three AZs.
 
 <%= image_tag('openstack-overview-arch.png') %>
 
@@ -49,7 +52,7 @@ The table below lists the components that are part of a base reference architect
     </td>
   </tr>
   <tr>
-    <td><strong><%= vars.ops_manager %></strong></td>
+    <td><strong><%= vars.ops_manager %> VM</strong></td>
     <td>Deployed on the infrastructure network and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox.</td>
   </tr>
   <tr>
@@ -163,14 +166,14 @@ The table below lists the network objects in this reference architecture.
     		<td>22</td>
     		<td>0.0.0.0/0</td>
     		<td>TCP</td>
-    		<td><%= vars.ops_manager %> SSH access</td>
+    		<td><%= vars.ops_manager %> VM SSH access</td>
     	</tr>
     	<tr>
     		<td>OpsMgrSG</td>
     		<td>443</td>
     		<td>0.0.0.0/0</td>
     		<td>TCP</td>
-    		<td><%= vars.ops_manager %> HTTP access</td>
+    		<td><%= vars.ops_manager %> VM HTTP access</td>
     	</tr>
     	<tr>
     		<td>VmsSG</td>
@@ -230,7 +233,7 @@ The table below lists the network objects in this reference architecture.
   </tr>
   <tr>
     <td><strong>Jumpbox</strong></td>
-    <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to VMware Tanzu network to download tiles. Using a jumpbox is particularly useful in IaaSes where <%= vars.ops_manager %> does not have a public IP address. In these cases, you can SSH into <%= vars.ops_manager %> or any other component through the jumpbox.
+    <td>Optional. Provides a way of accessing different network components. For example, you can configure it with your own permissions and then set it up to access to VMware Tanzu network to download tiles. Using a jumpbox is particularly useful in IaaSes where the <%= vars.ops_manager %> VM does not have a public IP address. In these cases, you can SSH into the <%= vars.ops_manager %> VM or any other component through the jumpbox.
     </td>
     <td>1</td>
   </tr>

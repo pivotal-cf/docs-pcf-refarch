@@ -44,7 +44,7 @@ This cookbook focuses on a single-site deployment and makes these design assumpt
 *	There are five non-routable networks on the tenant (inside) side of the ESG.
    * The **infra** network is used to deploy <%= vars.ops_manager %> and BOSH Director.
    * The **deployment** network is used exclusively by <%= vars.app_runtime_abbr %> to deploy Diego Cells that host apps and related elements.
-   * The **tiles** network is used for all other deployed tiles in a <%= vars.platform_name %> installation.
+   * The **tiles** network is used for all other deployed tiles in an <%= vars.platform_name %> installation.
    * The **services** network is used by BOSH Director for service tiles.
    * The **container-to-container** network is used for container to container communication in the Diego Cells.
 
@@ -124,11 +124,11 @@ To configure the ESG firewall:
 
     | Name | Source | Destination | Service | Action |
     | ---- | ------ | ----------- | ------- | ------ |
-    | Allow Ingress -> <%= vars.ops_manager %> | Any | OPS-MANAGER-IP | SSH, HTTP, HTTPS | Accept |
+    | Allow Ingress -> <%= vars.ops_manager %> VM | Any | OPS-MANAGER-IP | SSH, HTTP, HTTPS | Accept |
     | Allow Ingress -> <%= vars.app_runtime_abbr %> | Any | NSX-LOAD-BALANCER-IP | HTTP, HTTPS | Accept |
     | Allow Ingress -> SSH for Apps | Any | tcp:DIEGO-BRAIN-IP:2222 | Any | Accept |
     | Allow Ingress -> TCProuter | Any | tcp:NSX-TCP-LOAD-BALANCER-IP:5000 | Any | Accept |
-    | Allow Inside <-> Inside | 192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22 | 192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22 | Any | Accept |
+    | Allow Inside <-> Inside (internal component communications)| 192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22 | 192.168.10.0/26 192.168.20.0/22 192.168.24.0/22 192.168.28.0/22 | Any | Accept |
     | Allow Egress -> IaaS | 192.168.10.0/26 | VCENTER-IP ESXI-SVRS-IPS | HTTP, HTTPS | Accept |
     | Allow Egress -> DNS | 192.168.0.0/16 | DNS-IP | DNS, DNS-UDP | Accept |
     | Allow Egress -> NTP | 192.168.0.0/16 | NTP-IP | NTP | Accept |
@@ -465,7 +465,7 @@ To translate routable IP addresses to non-routable IP addresses, see the table b
 | SNAT | Infra | 192.168.10.OpsMgr | Any | OPS-MANAGER-IP | Any | TCP | OpsMgr Mask for internal use |
 | DNAT | Infra | OPS-MANAGER-IP | Any | 192.168.10.OpsMgr | Any | TCP | OpsMgr Mask for internal use |
 
-<p class="note"><strong>Note:</strong> The NAT/SNAT on the <code>infra</code> network in this table is an example of an optional <strong>Hairpin NAT</strong> rule to allow VMs within the <strong>Infrastructure</strong> network to access the <%= vars.ops_manager %> API. This is because the <%= vars.ops_manager %> hostname and the API HTTPS endpoint are registered to the <%= vars.ops_manager %> external IP address. A pair of Hairpin NAT rules are necessary on <strong>each</strong> internal network interface that requires API access to <%= vars.ops_manager %>. You should create these rules only if the network must access the <%= vars.ops_manager %> API.</p>
+<p class="note"><strong>Note:</strong> The NAT/SNAT on the <code>infra</code> network in this table is an example of an optional <strong>Hairpin NAT</strong> rule to allow VMs within the <strong>Infrastructure</strong> network to access the <%= vars.ops_manager %> API. This is because the <%= vars.ops_manager %> hostname and the API HTTPS endpoint are registered to the <%= vars.ops_manager %> VM external IP address. A pair of Hairpin NAT rules are necessary on <strong>each</strong> internal network interface that requires API access to <%= vars.ops_manager %>. You should create these rules only if the network must access the <%= vars.ops_manager %> API.</p>
 
 NAT/SNAT functionality is not required if routable IP address space is used on the Tenant Side of the ESG. At that point, the ESG simply performs routing between the address segments.
 

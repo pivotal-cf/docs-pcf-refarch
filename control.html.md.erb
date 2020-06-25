@@ -211,9 +211,10 @@ These sections describe some best practices for control plane components that ap
 
 ### <a id="dedicated-director"></a> Dedicated BOSH Director
 
-<%= vars.company_name %> recommends deploying Concourse and other control plane tools on their own dedicated BOSH layer, with their own BOSH Director that runs separately from the <%= vars.platform_name %> foundations that the control plane manages.
-
-<%= vars.company_name %> does _not_ recommend using an existing <%= vars.platform_name %> BOSH Director instance to deploy Concourse and other software such as Minio S3, a private Docker registry, or CredHub. Sharing the same BOSH Director with <%= vars.platform_name %> deployments increases the risk of accidental or undesired updates or deletion of those deployments.
+<%= vars.company_name %> recommends deploying Concourse
+and other control plane tools with their own BOSH Director that runs separately from the <%= vars.platform_name %> foundations that the control plane manages.
+Having tools such as Concourse, Minio S3, a private Docker registry, or CredHub
+on the same BOSH Director with <%= vars.platform_name %> increases the risk of accidental or undesired updates or deletion of those <%= vars.platform_name %> deployments.
 
 Dedicating a BOSH Director to Concourse other control plane tools also provides higher flexibility for <%= vars.platform_name %> foundation upgrades and updates, such as stemcell patches.
 
