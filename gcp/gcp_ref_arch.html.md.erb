@@ -122,7 +122,7 @@ The table below lists the components that are part of a reference architecture d
 | **Component** | **Reference Architecture Notes** |
 | ------------- | -------------------------------- |
 | **Domains and DNS** | Domain zones and routes in use by the reference architecture include: domains for *.apps and *.system (required), a route for <%= vars.ops_manager %> (required), a route for Doppler (required), a route for Loggregator (required), a route for SSH access to app containers (optional), and a route for TCP routing to apps (optional). Reference architecture uses GCP Cloud DNS as the DNS provider. |
-| **<%= vars.ops_manager %>** VM | Deployed on the infrastructure subnet and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
+| **<%= vars.ops_manager %> VM** | Deployed on the infrastructure subnet and accessible by fully-qualified domain name (FQDN) or through an optional jumpbox. |
 | **BOSH Director** | Deployed on the infrastructure subnet. |
 | **Gorouters** | Accessed through the HTTP and TCP WebSockets load balancers. Deployed on the <%= vars.app_runtime_abbr %> subnet, one job per AZ. |
 | **Diego Brains** | Required. However, the SSH container access functionality is optional and enabled through the SSH Proxy load balancer. Deployed on the <%= vars.app_runtime_abbr %> subnet, one job per AZ. |
