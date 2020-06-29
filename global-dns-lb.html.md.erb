@@ -9,7 +9,11 @@ This topic describes global DNS load balancers (GLBs) for multi-foundation envir
 
 ## <a id="multi-foundation"></a> About Multi-Foundation Environments
 
-Multi-foundation environments are multiple instances of <%= vars.ops_manager %> and <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) that can communicate with each other. Each foundation can use different infrastructures to fit your preferences.
+Multi-foundation environments are multiple instances of <%= vars.ops_manager %> and
+runtime products such as <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) or
+<%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>)
+that can communicate with each other in some ways.
+Each foundation can use different infrastructures to fit your preferences.
 
 Multi-foundation environments are commonly deployed in an active-active or active-passive pattern. An _active-active pattern_ is when instances of apps run on two foundations and they are both in use. An _active-passive pattern_ is when instances of apps run on two foundations, but the instances may only be active on one foundation, and the other foundation becomes active only in the event of a failover.
 
@@ -65,7 +69,7 @@ Different GLBs have their own mechanisms to achieve this. See the following tabl
 
 ## <a id="healthchecks"></a> About Health Checks
 
-_Health checks_ determine whether a foundation for an app is healthy or not.
+In <%= vars.app_runtime_abbr %>, _health checks_ determine whether a foundation for an app is healthy or not.
 
 For the levels at which you can check the health of your foundation, see the table below:
 
