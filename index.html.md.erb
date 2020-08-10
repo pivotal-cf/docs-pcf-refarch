@@ -15,14 +15,14 @@ The reference architectures in this section describe a proven approach for deplo
 * Publicly accessible
 * Includes common <%= vars.platform_name %>-managed services such as VMware Tanzu SQL, VMware Tanzu RabbitMQ, and Spring Cloud Services for VMware Tanzu
 * Can host at least 100 app instances
-* Have been deployed and validated by VMware to support <%= vars.ops_manager %>, <%= vars.app_runtime_abbr %>, and <%= vars.k8s_runtime_abbr %>
+* For all infrastructures except OpenStack, are deployed and validated by VMware to support <%= vars.ops_manager_full %>, <%= vars.app_runtime_abbr %>, and <%= vars.k8s_runtime_abbr %>
 
 You can use <%= vars.platform_name %> reference architectures to help plan the best configuration for your <%= vars.platform_name %> deployment on your IaaS.
 
 
 ## <a id="topics"></a> Reference Architecture and Planning Topics
 
-All <%= vars.platform_name %> reference architectures start with the base <%= vars.app_runtime_abbr %> architecture and base <%= vars.k8s_runtime_abbr %> architecture.
+All <%= vars.platform_name %> reference architectures except OpenStack start with the base <%= vars.app_runtime_abbr %> architecture and base <%= vars.k8s_runtime_abbr %> architecture.
 
 These IaaS-specific topics build on these two common base architectures:
 
