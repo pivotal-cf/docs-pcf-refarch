@@ -3,16 +3,18 @@ title: vSphere Reference Architecture
 owner: Customer0
 ---
 
-This topic describes a reference architecture for <%= vars.platform_name %> and any runtime products, including <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>), on vSphere. It builds on the common base architectures described in [Platform Architecture and Planning](../index.html).
+This topic describes a reference architecture for <%= vars.platform_name %> and any runtime products, including <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>), on vSphere.
+It builds on the common base architectures described in [Platform Architecture and Planning](../index.html).
 
 For additional requirements and installation instructions for <%= vars.platform_name %> on vSphere, see [Installing <%= vars.platform_name %> on vSphere](../../customizing/vsphere.html).
 
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for the <%= vars.app_runtime_full %> (<%= vars.app_runtime_abbr %>) and <%= vars.k8s_runtime_full %> (<%= vars.k8s_runtime_abbr %>) runtimes is based on software-defined networking (SDN) infrastructure. vSphere offers NSX-T and NSX-V to support SDN infrastructure.
+The vSphere reference architecture for the <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %> runtimes is based on software-defined networking (SDN) infrastructure.
+vSphere offers NSX-T and NSX-V to support SDN infrastructure.
 
-<%= vars.platform_name %> supports these configurations vSphere deployments:
+<%= vars.platform_name %> supports these configurations for vSphere deployments:
 
 * <%= vars.app_runtime_abbr %> on vSphere with NSX-T. For more information, see [<%= vars.app_runtime_abbr %> on vSphere with NSX-T](#pas-nsx-t).
 
@@ -26,7 +28,9 @@ The vSphere reference architecture for the <%= vars.app_runtime_full %> (<%= var
 
 ## <a id="pas-nsx-t"></a> <%= vars.app_runtime_abbr %> on vSphere with NSX-T
 
-These sections describe the reference architecture for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments. They also provide requirements and recommendations for deploying <%= vars.app_runtime_abbr %> on vSphere with NSX-T, such as network, load balancing, and storage capacity requirements and recommendations.
+These sections describe the reference architecture for <%= vars.ops_manager %> with <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments.
+They also provide requirements and recommendations for deploying <%= vars.ops_manager %> with <%= vars.app_runtime_abbr %> on vSphere with NSX-T,
+such as network, load balancing, and storage capacity requirements and recommendations.
 
 <%= vars.app_runtime_abbr %> on vSphere with NSX-T supports these following SDN features:
 
@@ -58,7 +62,7 @@ Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> 
 
 ### <a id="pas-nsx-t-pas"></a> NSX-T Container Plugin Requirement
 
-<%= vars.app_runtime_abbr %> deployments require the VMware NSX-T Container Plugin for <%= vars.platform_name %> to enable the SDN features available through NSX-T.
+<%= vars.app_runtime_abbr %> deployments require the VMware NSX-T Container Plugin to enable the SDN features available through NSX-T.
 
 The NSX-T Container Plugin enables a container networking stack and integrates with NSX-T.
 
@@ -73,7 +77,7 @@ These sections describe networking requirements and recommendations for <%= vars
 The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. Select a network range for the Tier-0 router with enough space so that the network can be separated into these two jobs:
 
 * Routing incoming and outgoing traffic
-* DNATs and SNATs, load balancer VIPs, and other <%= vars.platform_name %> components
+* DNATs and SNATs, load balancer VIPs, and other platform components
 
 <p class="note"><strong>Note:</strong> Compared to NSX-V, NSX-T consumes much more address space for SNATs.</p>
 
@@ -102,7 +106,7 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
 
 The requirements and recommendations related to networks, subnets, and IP spacing for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments are:
 
-* <%= vars.app_runtime_abbr %> requires statically-defined networks to host <%= vars.app_runtime_abbr %> component VMs.
+* <%= vars.app_runtime_abbr %> requires statically-defined networks to host its component VMs.
 
 * The client side of an NSX-T deployment uses a series of non-routable address blocks when using DNAT/SNAT at the Tier-0 interface.
 
@@ -118,19 +122,21 @@ For information about high availability (HA) requirements and recommendations fo
 
 ### <a id="pas-nsx-t-shared-storage"></a> Shared Storage
 
-<%= vars.platform_name %> requires shared storage. You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical. The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
+<%= vars.app_runtime_abbr %> requires shared storage.
+You can allocate networked storage to the host clusters following one of two common approaches: horizontal or vertical.
+The approach you follow reflects how your data center arranges its storage and host blocks in its physical layout.
 
 #### <a id="horizontal-shared-storage"></a> Horizontal Shared Storage
 
-With the horizontal shared storage approach, you grant all hosts access to all datastores and assign a subset to each <%= vars.platform_name %> installation.
+With the horizontal shared storage approach, you grant all hosts access to all datastores and assign a subset to each <%= vars.app_runtime_abbr %> installation.
 
-For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first <%= vars.platform_name %> installation to use stores `ds01` through `ds03`  and your second <%= vars.platform_name %> installation to use `ds04` through `ds06`.
+For example, with six datastores `ds01` through `ds06`, you grant all nine hosts access to all six datastores. You then provision your first <%= vars.app_runtime_abbr %> installation to use stores `ds01` through `ds03`  and your second <%= vars.app_runtime_abbr %> installation to use `ds04` through `ds06`.
 
 #### <a id="vertical-shared-storage"></a> Vertical Shared Storage
 
 With the vertical shared storage approach, you grant each cluster its own datastores, creating a cluster-aligned storage strategy. vSphere VSAN is an example of this architecture.
 
-For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to a cluster, `ds03` and `ds04` to a second cluster, and `ds05` and `ds06` to a third cluster. You then provision your first <%= vars.platform_name %> installation to use `ds01`, `ds03`, and `ds05`, and your second <%= vars.platform_name %> installation to use `ds02`, `ds04`, and `ds06`.
+For example, with six datastores `ds01` through `ds06`, you assign datastores `ds01` and `ds02` to a cluster, `ds03` and `ds04` to a second cluster, and `ds05` and `ds06` to a third cluster. You then provision your first <%= vars.app_runtime_abbr %> installation to use `ds01`, `ds03`, and `ds05`, and your second <%= vars.app_runtime_abbr %> installation to use `ds02`, `ds04`, and `ds06`.
 
 With this arrangement, all VMs in the same installation and cluster share a dedicated datastore.
 
@@ -142,7 +148,7 @@ With this arrangement, all VMs in the same installation and cluster share a dedi
 
 * **Non-production environments**: Configure 4 to 6&nbsp;TB of data storage.
 
-<p class="note"><strong>Note:</strong> <%= vars.platform_name %> does not support using vSphere Storage Clusters with the latest versions of <%= vars.platform_name %> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+<p class="note"><strong>Note:</strong> The latest versions of <%= vars.platform_name %> validated for the reference architecture do not support using vSphere Storage Clusters. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
 <p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.platform_name %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">Migrating <%= vars.platform_name %> to a New Datastore in vSphere</a>.</p>
 
@@ -247,7 +253,7 @@ For information about horizontal and vertical shared storage, see [Shared Storag
 
 * **Non-production environments**: Configure 4 to 6&nbsp;TB of data storage.
 
-<p class="note"><strong>Note:</strong> <%= vars.platform_name %> does not support using vSphere Storage Clusters with the latest versions of <%= vars.platform_name %> validated for the reference architecture. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
+<p class="note"><strong>Note:</strong> The latest versions of <%= vars.platform_name %> validated for the reference architecture do not support using vSphere Storage Clusters. Datastores should be listed in the vSphere tile by their native name, not the cluster name created by vCenter for the storage cluster.</p>
 
 <p class="note"><strong>Note:</strong> If a datastore is part of a vSphere Storage Cluster using DRS storage (sDRS), you must disable the s-vMotion feature on any datastores used by <%= vars.platform_name %>. Otherwise, s-vMotion activity can rename independent disks and cause BOSH to malfunction. For more information, see <a href="./vsphere_migrate_datastore.html">How to Migrate <%= vars.platform_name %> to a New Datastore in vSphere</a>.</p>
 
@@ -378,12 +384,12 @@ The load balancing requirements and recommendations for <%= vars.k8s_runtime_abb
 
 The routable IP requirements and recommendations for <%= vars.k8s_runtime_abbr %> with NSX-T deployments are:
 
-* **Deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingres:s** <%= vars.company_name %> recommends a `/25` network for deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
+* **Deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress:** <%= vars.company_name %> recommends a `/25` network for deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
 	</br>
 	</br>
 	Select a network range for the Tier-0 router with enough space so that the network can be separated into these two jobs:
     * Routing incoming and outgoing traffic
-    * DNATs and SNATs, load balancer WIPs, and other <%= vars.platform_name %> components
+    * DNATs and SNATs, load balancer WIPs, and other platform components
 	<p class="note"><strong>Note:</strong> Compared to vSphere deployments with NSX-V, <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T consumes much more address space for SNATs.</p>
 
 * **Deployments with several load balancers:** <%= vars.company_name %> recommends a `/23` network for deployments that use several load balancers. Deployments with several load balancers have much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space.
