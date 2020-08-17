@@ -11,7 +11,7 @@ For additional requirements and installation instructions for <%= vars.platform_
 
 ## <a id="overview"></a> Overview
 
-The vSphere reference architecture for the <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %> runtimes is based on software-defined networking (SDN) infrastructure.
+The vSphere reference architecture for the <%= vars.app_runtime_abbr %> and <%= vars.k8s_runtime_abbr %> runtime tiles is based on software-defined networking (SDN) infrastructure.
 vSphere offers NSX-T and NSX-V to support SDN infrastructure.
 
 <%= vars.platform_name %> supports these configurations for vSphere deployments:
@@ -56,7 +56,7 @@ The diagram below illustrates reference architecture for <%= vars.app_runtime_ab
 
 <%= vars.app_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three availability zones (AZs).
 
-An NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router with the edge gateway.
+An NSX-T Tier-0 router is on the front end of the <%= vars.app_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.app_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP address backbone through the Tier-0 router with the edge gateway.
 
 Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> and infrastructure subnets, connect to the Tier-0 router.
 
@@ -66,7 +66,7 @@ Several Tier-1 routers, such as the router for the <%= vars.app_runtime_abbr %> 
 
 The NSX-T Container Plugin enables a container networking stack and integrates with NSX-T.
 
-<p class="note"><strong>Note:</strong> To use NSX-T with <%= vars.app_runtime_abbr %>, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the <%= vars.app_runtime_abbr %> tile. To download the NSX-T Container Plugin, go to the <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in</a> page on VMware Tanzu Network.</p>
+<p class="note"><strong>Note:</strong> To use NSX-T with <%= vars.app_runtime_abbr %>, the NSX-T Container Plugin must be installed, configured, and deployed at the same time as the <%= vars.app_runtime_abbr %> tile. To download the NSX-T Container Plugin, go to the <a href="https://network.pivotal.io/products/vmware-nsx-t">VMware NSX-T Container Plug-in</a> page on <%= vars.product_network %>.</p>
 
 ### <a id="pas-nsx-t-networking"></a> Networking
 
@@ -74,7 +74,7 @@ These sections describe networking requirements and recommendations for <%= vars
 
 #### <a id="pas-nsx-t-routable-ip"></a> Routable IPs
 
-The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. Select a network range for the Tier-0 router with enough space so that the network can be separated into these two jobs:
+The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers. Select a network range for the Tier-0 router with enough space so that you can separate the network into these two jobs:
 
 * Routing incoming and outgoing traffic
 * DNATs and SNATs, load balancer VIPs, and other platform components
@@ -96,15 +96,15 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
   * You must assign either a private or a public IP address assigned to the domains for the <%= vars.app_runtime_abbr %> system and apps.
 
 * <%= vars.company_name %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
-  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> does not recommend this approach, since it adds additional overhead processing.</p>
+  <p class='note'><strong>Note:</strong> You can use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> discourages this approach because it adds additional overhead processing.</p>
 
 * Any TCP Gorouters and SSH Proxies within the platform also require NSX-T load balancers.
 
 * Layer 4 and Layer 7 NSX-T load balancers are created automatically during app deployment.
 
-#### <a id="pas-nsx-t-networking-subnets-ip"></a> Networking, Subnets, and IP Spacing
+#### <a id="pas-nsx-t-networking-subnets-ip"></a> Networking, Subnets, and IP Address Spacing
 
-The requirements and recommendations related to networks, subnets, and IP spacing for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments are:
+The requirements and recommendations related to networks, subnets, and IP address spacing for <%= vars.app_runtime_abbr %> on vSphere with NSX-T deployments are:
 
 * <%= vars.app_runtime_abbr %> requires statically-defined networks to host its component VMs.
 
@@ -144,7 +144,7 @@ With this arrangement, all VMs in the same installation and cluster share a dedi
 
 <%= vars.company_name %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
 
-* **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks.
+* **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments might require significantly more storage to accommodate new code and buildpacks.
 
 * **Non-production environments**: Configure 4 to 6&nbsp;TB of data storage.
 
@@ -223,7 +223,7 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
 * NSX-V includes an Edge router. The Edge router supports ESG. ESG provides load balancing and is configured to route to the <%= vars.app_runtime_abbr %> platform.
 
 * <%= vars.company_name %> recommends that you configure Layer 4 NSX-V load balancers for the Gorouters. With Layer 4 load balancers, traffic passes through the load balancers and SSL is terminated at the Gorouters. This approach reduces overhead processing.
-  <p class='note'><strong>Note:</strong> It is possible to use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> does not recommend this approach, since it adds additional overhead processing.</p>
+  <p class='note'><strong>Note:</strong> You can use Layer 7 load balancers and terminate SSL at the load balancers. However, <%= vars.company_name %> discourages this approach because it adds additional overhead processing.</p>
 
 * The domains for the <%= vars.app_runtime_abbr %> system and apps must resolve to the load balancer. You must assign either a private or a public IP address assigned to the domains for the <%= vars.app_runtime_abbr %> system and apps.
 
@@ -231,9 +231,9 @@ The load balancing requirements and recommendations for <%= vars.app_runtime_abb
 
 * <%= vars.company_name %> recommends that you configure external load balancers in front of the Edge router. For example, you can configure an F5 external load balancer.
 
-#### <a id="pas-nsx-v-ip-spacing"></a> Networks, Subnets, and IP Spacing
+#### <a id="pas-nsx-v-ip-spacing"></a> Networks, Subnets, and IP Address Spacing
 
-For information about network, subnet, and IP space planning requirements and recommendations, see [Required Subnets](../index.html#pas-network) in _Platform Architecture and Planning Overview_.
+For information about network, subnet, and IP address space planning requirements and recommendations, see [Required Subnets](../index.html#pas-network) in _Platform Architecture and Planning Overview_.
 
 ### <a id="pas-nsx-v-ha"></a> High Availability
 
@@ -249,7 +249,7 @@ For information about horizontal and vertical shared storage, see [Shared Storag
 
 <%= vars.company_name %> recommends these storage capacity allocations for production and non-production <%= vars.app_runtime_abbr %> environments:
 
-* **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments may require significantly more storage to accommodate new code and buildpacks.
+* **Production environments**: Configure at least 8&nbsp;TB of data storage. You can configure this as either one 8&nbsp;TB store or a number of smaller volumes that sum to 8&nbsp;TB. Frequently-used developments might require significantly more storage to accommodate new code and buildpacks.
 
 * **Non-production environments**: Configure 4 to 6&nbsp;TB of data storage.
 
@@ -293,13 +293,13 @@ However, it has not been validated for <%= vars.app_runtime_abbr %> <%= vars.v_m
 
 ### <a id="pas-routed-networking"></a> Networking
 
-Without an SDN, IP allocations all come from routed network space. Discussions and planning within your organization are essential to acquiring the necessary amount of IP space for a <%= vars.app_runtime_abbr %> deployment with future growth considerations. This is because routed IP address space is a premium resource, and adding more later is difficult, costly, and time-consuming.
+Without an SDN, IP address allocations all come from routed network space. Discussions and planning within your organization are essential to acquiring the necessary amount of IP address space for a <%= vars.app_runtime_abbr %> deployment with future growth considerations. This is because routed IP address space is a premium resource, and adding more later is difficult, costly, and time-consuming.
 
-Below is a best-guess layout for IP space utilization in a single <%= vars.app_runtime_abbr %> deployment:
+Below is a best-guess layout for IP address space utilization in a single <%= vars.app_runtime_abbr %> deployment:
 
 * Infrastructure - `/28`
 
-* <%= vars.app_runtime_abbr %> deployment - `/23`<br>This size is almost completely dependent on the estimated desired capacity for containers. It can be smaller, but <%= vars.company_name %> does not recommend using a larger size in a single deployment.
+* <%= vars.app_runtime_abbr %> deployment - `/23`<br>This size is almost completely dependent on the estimated desired capacity for containers. It can be smaller, but <%= vars.company_name %> discourages using a larger size in a single deployment.
 
 * Services - `/23`<br>This size is almost completely dependent on the estimated desired capacity for services. Resize as necessary.
 
@@ -321,7 +321,7 @@ The diagram below illustrates the reference architecture for <%= vars.k8s_runtim
 
 <%= vars.k8s_runtime_abbr %> deployments with NSX-T are deployed with three clusters and three AZs.
 
-An NSX-T Tier-0 router is on the front end of the <%= vars.k8s_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.k8s_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP backbone through the Tier-0 router.
+An NSX-T Tier-0 router is on the front end of the <%= vars.k8s_runtime_abbr %> deployment. This router is a central logical router into the <%= vars.k8s_runtime_abbr %> platform. You can configure static or dynamic routing using BGP from the routed IP address backbone through the Tier-0 router.
 
 Several Tier-1 routers, such as the router for the infrastructure subnet, connect to the Tier-0 router. New Tier-1 routers are created on-demand as new clusters and namespaces are added to <%= vars.k8s_runtime_abbr %>.
 
@@ -341,7 +341,7 @@ The load balancing requirements and recommendations for <%= vars.k8s_runtime_abb
 	* Use Layer 7 load balancers for ingress routing.
 	* Use Layer 4 load balancers for `LoadBalancer` services. This allows you to terminate SSL at the load balancers, which reduces overhead processing.
 
-* NSX-T provides ingress routing natively. You can also use a third-party service for ingress routing, such as Istio or Nginx. You run the third-party ingress routing service as a container in the cluster.
+* NSX-T provides ingress routing natively. You can also use a third-party service for ingress routing, such as Istio or NGINX. You run the third-party ingress routing service as a container in the cluster.
 
 * If you use a third-party ingress routing service, you must:
 	* Create wildcard DNS entries to point to the service.
@@ -382,42 +382,42 @@ The load balancing requirements and recommendations for <%= vars.k8s_runtime_abb
 
 #### <a id="pks-nsx-t-external-routing"></a> Routable IPs
 
-The routable IP requirements and recommendations for <%= vars.k8s_runtime_abbr %> with NSX-T deployments are:
+The routable IP address requirements and recommendations for <%= vars.k8s_runtime_abbr %> with NSX-T deployments are:
 
 * **Deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress:** <%= vars.company_name %> recommends a `/25` network for deployments with <%= vars.k8s_runtime_abbr %> NSX-T ingress. The Tier-0 router must have routable external IP address space to advertise on the BGP network with its peers.
 	</br>
 	</br>
-	Select a network range for the Tier-0 router with enough space so that the network can be separated into these two jobs:
+	Select a network range for the Tier-0 router with enough space so that you can separate the network into these two jobs:
     * Routing incoming and outgoing traffic
     * DNATs and SNATs, load balancer WIPs, and other platform components
 	<p class="note"><strong>Note:</strong> Compared to vSphere deployments with NSX-V, <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T consumes much more address space for SNATs.</p>
 
 * **Deployments with several load balancers:** <%= vars.company_name %> recommends a `/23` network for deployments that use several load balancers. Deployments with several load balancers have much higher address space consumption for load balancer WIPs. This is because Kubernetes service types allocate IP addresses very frequently. To accommodate the higher address space, allow for four times the address space.
 
-#### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Spacing
+#### <a id="pks-nsx-t-ip-spacing"></a> Networks, Subnets, and IP Address Spacing
 
-These considerations and recommendations apply to networks, subnets, and IP spacing for <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments:
+These considerations and recommendations apply to networks, subnets, and IP address spacing for <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments:
 
-* Allocate a large network block for <%= vars.k8s_runtime_abbr %> clusters and pods:
+* Allocate a large network block for <%= vars.k8s_runtime_abbr %> clusters and Pods:
 	* **<%= vars.k8s_runtime_abbr %> clusters:** Configure a `172.24.0.0/14` network block.
 	* **<%= vars.k8s_runtime_abbr %> pods:** Configure a `172.28.0.0/14` network block.
   <br>
   <br>
-	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or pod is created. You can configure this CIDR range for <%= vars.k8s_runtime_abbr %> in <%= vars.ops_manager %>.
+	NSX-T creates IP address blocks of `/24` from these `/14` networks by default each time a new cluster or Pod is created. You can configure this CIDR range for <%= vars.k8s_runtime_abbr %> in <%= vars.ops_manager %>.
 
 * When deploying <%= vars.k8s_runtime_abbr %> with <%= vars.ops_manager %>, you must allow for a block of address space for dynamic networks that <%= vars.k8s_runtime_abbr %> deploys for each namespace. The recommended address space allows you to view a queue of which jobs relate to each service.
 
 * When a new <%= vars.k8s_runtime_abbr %> cluster is created, <%= vars.k8s_runtime_abbr %> creates a new `/24` network from <%= vars.k8s_runtime_abbr %> cluster address space.
 
-* When a new app is deployed, new NSX-T Tier-1 routers are generated and <%= vars.k8s_runtime_abbr %> creates a `/24` network from the <%= vars.k8s_runtime_abbr %> pods network.
+* When a new app is deployed, new NSX-T Tier-1 routers are generated and <%= vars.k8s_runtime_abbr %> creates a `/24` network from the <%= vars.k8s_runtime_abbr %> Pods network.
 
-* Allocate a large IP block in NSX-T for Kubernetes pods. For example, a `/14` network. NSX-T creates address blocks of `/24` by default. This CIDR range for Kubernetes services network ranges is configurable in <%= vars.ops_manager %>.
+* Allocate a large IP address block in NSX-T for Kubernetes Pods. For example, a `/14` network. NSX-T creates address blocks of `/24` by default. This CIDR range for Kubernetes services network ranges is configurable in <%= vars.ops_manager %>.
 
 For more information, see [Networks](../index.html#pks-network) in _Platform Architecture and Planning Overview_.
 
 ### <a id="pks-nsx-t-multitenancy"></a> Multi-Tenancy
 
-For <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments, networks are created dynamically for both <%= vars.k8s_runtime_abbr %> clusters and pods.
+For <%= vars.k8s_runtime_abbr %> on vSphere with NSX-T deployments, networks are created dynamically for both <%= vars.k8s_runtime_abbr %> clusters and Pods.
 
 To accommodate these dynamically-created networks, <%= vars.company_name %> recommends that you use multiple clusters, rather than a single cluster with multiple namespaces.
 
@@ -450,7 +450,7 @@ For information about security requirements and recommendations, see [Security](
 ## <a id="pks-without-nsx-t"></a> <%= vars.k8s_runtime_abbr %> on vSphere without NSX-T
 
 You can deploy <%= vars.k8s_runtime_abbr %> without NSX-T.
-If you want to deploy <%= vars.k8s_runtime_abbr %> without NSX-T, select
+To deploy <%= vars.k8s_runtime_abbr %> without NSX-T, select
 **Flannel** as your container network interface in the **Networking** pane of
 the <%= vars.k8s_runtime_abbr %> tile.
 
