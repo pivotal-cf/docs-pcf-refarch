@@ -87,7 +87,7 @@ You do not need to make any configuration changes in <%= vars.platform_name %> t
 Use Standard Azure Load Balancers (ALBs). To allow Internet ingress, you must create the ALBs with elastic IP addresses.
 
 During installation, you configure ALBs for <%= vars.app_runtime_abbr %> Gorouters. For more information, see
-[Create Load Balancers](/ops-manager/<%= vars.current_major_version.sub('.', '-')  %>/azure/deploy-manual.html#lb)
+[Create Load Balancers](/platform/ops-manager/<%= vars.current_major_version.sub('.', '-')  %>/azure/deploy-manual.html#lb)
 in _Deploying <%= vars.ops_manager %> on Azure Manually_. When applicable, TCP routers and SSH Proxies also require load balancers.
 
 The <%= vars.app_runtime_abbr %> system and app domains must resolve to your ALBs and have either a private or a public
