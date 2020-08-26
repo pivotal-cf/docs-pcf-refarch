@@ -101,11 +101,3 @@ To migrate your <%= vars.platform_name %> deployment to a new datastore:
 1. Click **Review Pending Changes**, then **Apply Changes**.
 
 
-## <a id="after"></a> After the Migration
-
-When BOSH moves disks, it waits for up to 60 minutes for the operation to complete. If the operation does not complete in time, BOSH can enter a state where it claims that the disks are `out of sync`. These sections describe how to resolve and prevent out-of-sync errors.
-
-### <a id="fix_sync_error"></a> Fix Failed BOSH Deployment with Out-of-Sync Error
-
-If your <%= vars.platform_name %> deployment gets into this state, follow the procedure in [How to Recover the out of Sync VMs on vSphere from a Failed BOSH Deployment](https://community.pivotal.io/s/article/How-to-Recover-the-out-of-Sync-VMs-on-vSphere-from-a-Failed-Bosh-Deployment) in the Knowledge Base.
-
