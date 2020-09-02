@@ -108,7 +108,9 @@ For more information, see [Global DNS Load Balancers for Multi-Foundation Enviro
 
 <%= vars.app_runtime_abbr %> is not considered high availability (HA) until it runs across at least two AZs. <%= vars.company_name %> recommends defining three AZs.
 
-On IaaSes with their own HA capabilities, using the IaaS HA in conjunction with a <%= vars.app_runtime_abbr %> HA topology provides the best of both worlds. Multiple AZs give <%= vars.app_runtime_abbr %> redundancy, so that losing an AZ is not catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
+On an IaaS with its own HA capabilities, using the IaaS HA in conjunction with a <%= vars.app_runtime_abbr %> HA
+topology provides two benefits. Multiple AZs give <%= vars.app_runtime_abbr %> redundancy, so that losing an AZ is not
+catastrophic. The BOSH Resurrector can then replace lost VMs as needed to repair a foundation.
 
 To back up and restore a foundation externally, use BOSH Backup and Restore (BBR). For more information, see the [BOSH Backup and Restore](https://docs.cloudfoundry.org/bbr/) documentation.
 
@@ -122,13 +124,13 @@ The platform also requires you to configure file storage for large shared object
 
 For information about how <%= vars.app_runtime_abbr %> implements security, see:
 
-* [<%= vars.platform_name %> Infrastructure Security](../security/pcf-infrastructure/index.html)
+* [<%= vars.platform_name %> Infrastructure Security](https://docs.pivotal.io/ops-manager/<%= product_info['local_product_version'].to_s.sub('.','-') %>/security/pcf-infrastructure/index.html)
 
-* [Security Concepts](../security/concepts/)
+* [Security Concepts](https://docs.pivotal.io/ops-manager/<%= product_info['local_product_version'].to_s.sub('.','-') %>/security/concepts/index.html)
 
-* [Certificates and TLS in <%= vars.platform_name %>](../security/pcf-infrastructure/certificates-index.html)
+* [Certificates and TLS in <%= vars.platform_name %>](https://docs.pivotal.io/ops-manager/<%= product_info['local_product_version'].to_s.sub('.','-') %>/security/pcf-infrastructure/certificates-index.html)
 
-* [Network Communication Paths in <%= vars.platform_name %>](../security/networking/#net_commpaths) in _Network Security_
+* [Network Communication Paths in <%= vars.platform_name %>](https://docs.pivotal.io/ops-manager/<%= product_info['local_product_version'].to_s.sub('.','-') %>/security/networking/#net_commpaths) in _Network Security_
 
 ### <a id="pas-domains"></a> Domain Names
 
@@ -169,7 +171,7 @@ The table below describes the internal component placements shown in the diagram
 | Jumpbox | Optional. Deployed on the infrastructure subnet for accessing <%= vars.k8s_runtime_abbr %> management components such as <%= vars.ops_manager %> and the `kubectl` command line interface. |
 | <%= vars.k8s_runtime_abbr %> API | Deployed as a service broker VM on the <%= vars.k8s_runtime_abbr %> services subnet. Handles <%= vars.k8s_runtime_abbr %> API and service adapter requests, and manages <%= vars.k8s_runtime_abbr %> clusters. For more information, see [<%= vars.k8s_runtime_abbr %> Architecture](https://docs.pivotal.io/tkgi/control-plane.html). |
 | Harbor tile | Optional container images registry, typically deployed to the services subnet. |
-| <%= vars.k8s_runtime_abbr %> Cluster** | Deployed to a dynamically-created, dedicated <%= vars.k8s_runtime_abbr %> cluster subnet. Each cluster consists of worker nodes that run the workloads, or apps, and one or more master nodes. |
+| <%= vars.k8s_runtime_abbr %> Cluster | Deployed to a dynamically-created, dedicated <%= vars.k8s_runtime_abbr %> cluster subnet. Each cluster consists of worker nodes that run the workloads, or apps, and one or more master nodes. |
 
 ### <a id="pks-network"></a> Networks
 
