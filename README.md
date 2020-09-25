@@ -1,4 +1,3 @@
-# docs-pcf-refarch
+## Content Moved
 
-This content is published from the docs-book-pivotalcf book.
-For example, https://concourse.run.pivotal.io/teams/cf-docs/pipelines/cf-current?group=pcf-2-9 on Concourse.
+The contents of docs-pcf-refarch for Ops Manager v2.7 and later have moved to the `refarch` subfolder of https://github.com/pivotal-cf/docs-ops-manager.
