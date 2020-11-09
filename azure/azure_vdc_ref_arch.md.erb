@@ -1,0 +1,144 @@
+---
+title: Pivotal Cloud Foundry on Azure for Enterprises
+owner: MicrosoftAlliances
+---
+
+<strong><%= modified_date %></strong>
+
+This guide is designed to provide a baseline reference for architecting Pivotal Cloud Foundry deployments to Azure within a greater enterprise architecture. This architecture pattern is designed to be very portable while pluggable as it is a hub-and-spoke model.
+
+## Pivotal Cloud Foundry on Azure for Enterprises
+
+The requirements driving this architecture pattern:
+
+* Secure
+* Privately accessible
+* Migrate workloads from an on-premises environment to Azure
+* Implement shared or centralized security and access requirements across workloads
+* Mix Pivotal Cloud Foundry and centralized IT appropriately for a large enterprise
+
+## Azure Virtual Datacenter
+
+### What is the Azure Virtual Datacenter?
+
+Deploying workloads to the cloud introduces the need to develop and maintain trust in the cloud to the same degree you trust your existing datacenters. The first model of the Azure Virtual Datacenter guidance is designed to bridge that need through a locked-down approach to virtual infrastructures. This approach isn’t for everyone. It’s specifically designed to guide enterprise IT groups in extending their on-premises infrastructure to the Azure public cloud. We call this approach the trusted datacenter extension model. Over time, several other models will be offered, including those that allow secure Internet access directly from a virtual datacenter.
+
+These four components make the Azure Virtual Datacenter possible: identity, encryption, software-defined networking, and compliance (including logs and reporting):
+
+<%= image_tag('azure-vdc-components.svg') %>
+
+In the Azure Virtual Datacenter model, you can apply isolation policies, make the cloud more like the physical datacenters you know, and achieve the levels of security and trust you need. Four components any enterprise IT team would recognize make it possible: software-defined networking, encryption, identity management, and the Azure platform's underlying compliance standards and certifications. These four are key to making a virtual datacenter a trusted extension of your existing infrastructure investment.
+
+It's important to understand that the Azure Virtual Datacenter (VDC) is **NOT** a discrete Azure product, but the combination of various features and capabilities to meet your requirements. The VDC is a way of thinking about your workloads and how to leverage Azure services to maximize your resources and abilities in the cloud. It's a modular approach to building up IT services in Azure while respecting the enterprise's organizational roles and responsibilities.
+
+More information on the Azure Virtual Datacenter can be found in the [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/vdc/).
+
+### Azure Virtual Datacenter Terminology
+
+Here are some definitions which can assist with consuming these architecture patterns.
+
+* VDC: Azure Virtual Datacenter
+* UDR: User-Defined Routing
+* Hub: A hub is the central network zone that controls and inspects ingress or egress traffic between different zones: internet, on-premises, and the spokes. The hub and spoke topology gives the IT department an effective way to enforce security policies in a central location. It also reduces the potential for misconfiguration and exposure.
+* Spoke: Highly interconnected node of a Hub where workloads are run.
+* Foundation: One deployment of Pivotal Cloud Foundry and it's associated tiles.
+
+### Azure Virtual Datacenter Networking
+
+Some of the core networking components of the Azure Virtual Datacenter:
+
+* Azure Virtual Network
+* Network security groups
+* Virtual network peering
+* User-Defined Routes (UDR)
+* Azure Identity with Role-Based Access Control (RBAC)
+
+There are also some optional components that can assist with shared service and external network services:
+
+* Azure Firewall
+* Azure DNS
+* Azure Front Door 
+* Azure Virtual WAN
+
+As the Azure VDC is deployed in a hub-and-spoke model, there are some separation of responsibilities for each aspect.
+
+The hub contains the common service components consumed by the spokes. The following examples are common central services:
+
+* A DNS service to resolve naming for the workload in the spokes, to access resources on-premises and on the internet if Azure DNS isn't used.
+* A public key infrastructure (PKI), to implement single sign-on on workloads.
+* Flow control of TCP and UDP traffic between the spoke network zones and the internet.
+* Flow control between the spokes and on-premises.
+* If needed, flow control between one spoke and another.
+* The VDC reduces overall cost by using the shared hub infrastructure between multiple spokes.
+
+Spokes can also be interconnected to a spoke that acts as a hub. This approach creates a two-level hierarchy: the spoke in the higher level (level 0) become the hub of lower spokes (level 1) of the hierarchy. The spokes of a VDC implementation are required to forward the traffic to the central hub so that the traffic can transit to its destination in either the on-premises network or public internet. An architecture with two levels of hub introduces complex routing that removes the benefits of a simple hub-spoke relationship.
+
+You can find a deep dive on some of the interconnectivity for networking patterns on the [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/vdc/networking-virtual-datacenter).
+
+### Azure Virtual Datacenter Roles
+
+As good practice in general, access rights and privileges should be group-based. Dealing with groups rather than individual users eases maintenance of access policies by providing a consistent way to manage it across teams. and aids in minimizing configuration errors. Assigning and removing users to and from appropriate groups helps keeping the privileges of a specific user up-to-date.
+
+* The central IT group, **Corp**, has the ownership rights to control infrastructure components. Examples are networking and security. The group needs to have the role of contributor on the subscription, control of the hub, and network contributor rights in the spokes. Large organizations frequently split up these management responsibilities between multiple teams. Examples are a network operations **CorpNetOps** group with exclusive focus on networking and a security operations **CorpSecOps** group responsible for the firewall and security policy. In this specific case, two different groups need to be created for assignment of these custom roles.
+* The dev-test group, **AppDevOps**, has the responsibility to deploy app or service workloads. This group takes the role of virtual machine contributor for IaaS deployments or one or more PaaS contributor’s roles. See Built-in roles for Azure resources. Optionally, the dev-test team might need visibility on security policies, NSGs, and routing policies, UDRs, inside the hub or a specific spoke. In addition to the role of contributor for workloads, this group would also need the role of network reader.
+The operation and maintenance group, **CorpInfraOps** or **AppInfraOps**, has the responsibility of managing workloads in production. This group needs to be a subscription contributor on workloads in any production subscriptions. Some organizations might also evaluate if they need an additional escalation support team group with the role of subscription contributor in production and the central hub subscription. The additional group fixes potential configuration issues in the production environment.
+
+## Pivotal Cloud Foundry in the Azure Virtual Datacenter
+
+### Pivotal Cloud Foundry Roles with Azure VDC Roles
+
+As Pivotal Cloud Foundry is a Platform-as-a-Service, it has higher-order roles and controls, which are defined in two ways:
+
+* **Operators**: IT groups and teams responsible for core IaaS configurations, security, and Foundation deployments.
+* **Developers/AppDevs**: Generally application developers responsible for designing and deploying applications onto Pivotal Cloud Foundry.
+
+Mapping the PCF roles with the Azure VDC roles isn't inherently a 1:1 relationship as PCF does automate and control certains aspects of it's underlying Azure configurations, but there is overlap.
+
+| PCF Role | Azure VDC Role |
+| --- | --- |
+| **Operators** | Corp<br>CorpNetOps<br>CorpSecOps<br>CorpInfraOps |
+| **Developers/AppDevs** | AppDevOps<br>AppInfraOps |
+
+With this overlap comes a much higher level of simplicity for most Operators and ease of consumption for Developers.
+
+### Identity and Directory Services
+
+Access to every resource type in Azure is controlled by an identity stored in a directory service. The directory service stores not only the list of users, but also the access rights to resources in a specific Azure subscription. These services can exist cloud-only, or they can be synchronized with on-premises identity stored in Active Directory.
+
+### Virtual Networks
+
+Virtual Networks are one of main components of the VDC, and enable you to create a traffic isolation boundary between one or more Foundations. VMs (and PaaS services) in one virtual network cannot communicate directly to VMs (and PaaS services) in a different virtual network, even if both virtual networks are created by the same customer, under the same subscription. Isolation is a critical property that ensures customer VMs and communication remains private within a virtual network. In this model, each Foundation deployed to an Azure VDC Spoke will leverage it's own Virtual Network and be completely isolated from other Foundations. Through Virtual Network isolation practices, it's very easy to have a private-only Foundation with no Public IPs.
+
+### User-Defined Routing
+
+Traffic in a Virtual Network is routed by default based on the system routing table. A User Defined Route is a custom routing table that network administrators can associate to one or more subnets to overwrite the behavior of the system routing table and define a communication path within a virtual network. The presence of UDRs guarantees that egress traffic from the spoke transit through the Foundation and load balancers present in the hub and in the spokes. The output of this is all Foundation components and tiles route their traffic directly to the Hub, and then out to other Spokes instead of going directly from Spoke to Spoke. This allows network administrators to have more fine controls over which Foundations are allowed to talk to specific internal services.
+
+#picture
+
+### Network Security Groups
+
+A Network Security Group is a list of security rules that act as traffic filtering on IP Sources, IP Destination, Protocols, IP Source Ports, and IP Destination ports. The NSGs are essential to implement a correct flow control in the hub and in the spokes. In the VDC model, Foundations leverage an "internal-only" traffic policy - e.g. any traffic on the local Virtual Network or coming from the Intermediate Load Balancer is considered safe. PCF leverages hairpinning for a lot of it's internal traffic between various components, but not for all components, so it's much easier to allow all local traffic to allow for any platform changes as the Virtual Network is an entirely private IP space that can be hidden away from other Spokes through firewalls and NSGs.
+
+### Domain Name Services
+
+The name resolution of resources in the Virtual Networks of a VDC implementation is provided through DNS. Azure provides DNS services for both Public and Private name resolution. Private zones provide name resolution both within a virtual network and across virtual networks. You can have private zones not only span across virtual networks in the same region, but also across regions and subscriptions. For public resolution, Azure DNS provides a hosting service for DNS domains, providing name resolution using Microsoft Azure infrastructure. By hosting your domains in Azure, you can manage your DNS records using the same credentials, APIs, tools, and billing as your other Azure services.
+
+### Subscription and Resource Group Management
+
+A subscription defines a natural boundary to create multiple groups of resources in Azure. Resources in a subscription are assembled together in logical containers named Resource Groups. The Resource Group represents a logical group to organize the resources of a VDC implementation. PCF is capable of leveraging multiple Resource Groups for a single Foundation.
+
+#picture
+
+Pivotal and Microsoft recommend splitting a single Foundation into two fundamental Resource Groups: Networking and Compute. The Networking Resource Group shoudl contain the Virtual Network, UDR, and the NSGs. In the Compute Resource Group, you should deploy Ops Mananger, Pivotal Application Service, and other products and tiles. This allows Network Administrators to have separate access control rights without having to grant them access to the Compute Resource Group.
+
+### Role-Base Access Control
+
+Through RBAC, it is possible to map organizational role along with rights to access specific Azure resources, allowing you to restrict users to only a certain subset of actions. With RBAC, you can grant access by assigning the appropriate role to users, groups, and applications within the relevant scope. The scope of a role assignment can be an Azure subscription, a resource group, or a single resource. RBAC allows inheritance of permissions. A role assigned at a parent scope also grants access to the children contained within it. Using RBAC, you can segregate duties and grant only the amount of access to users that they need to perform their jobs. PCF leverages Service Principals which have RBAC roles. This Service Principal can be locked down extensively, but will need these minimum access rights:
+
+```bash
+todo
+```
+
+### Virtual Network Peering
+
+The fundamental feature used to create the infrastructure of the VDC is VNet Peering, a mechanism that connects two Virtual Networks in the same region through the Azure datacenter network, or using the Azure world-wide backbone across regions. Virtual Network Peering allows multiple disparate Virtual Networks to form one congruent network layer so traffic is easily routable and controllable.
